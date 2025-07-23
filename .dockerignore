@@ -1,0 +1,38 @@
+# Node modules and build output
+node_modules
+dist
+
+# Environment files
+.env
+.env.*
+docker.env
+docker.env.*
+
+# Git and config
+.git
+.gitignore
+docker-compose.yaml
+Dockerfile
+
+# IDE and editor settings
+.vscode
+*.log
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Package manager lock files (optional, only ignore if you're not copying them)
+# yarn.lock
+# pnpm-lock.yaml
+
+# Test and config files you don't need in production image
+jest.config.*
+commitlint.config.*
+lefthook.yml
+.prettierrc
+.eslintrc.*
+*.md
+
+# Misc
+*.tsbuildinfo
