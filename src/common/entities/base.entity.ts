@@ -8,9 +8,9 @@ export abstract class BaseEntity extends MikroOrmBase {
   @PrimaryKey()
   id!: number;
 
-  @Property({ name: 'created_at', onCreate: () => new Date() })
+  @Property()
   createdAt = new Date();
 
-  @Property({ name: 'updated_at', onUpdate: () => new Date() })
-  updatedAt = new Date();
+  @Property({ nullable: true, onUpdate: () => new Date() })
+  updatedAt?: Date;
 }
