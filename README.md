@@ -91,7 +91,7 @@ Visit [Schedly DB Diagram](https://dbdiagram.io/d/Schedly-demo-01-686e3a7df413ba
 ## Folder Structure
 
 ```sh
-nextjs-app-template/
+schedly-demo-01-be/
 │
 ├── .github/                  # GitHub configuration files
 ├── .vscode/                  # VS Code config
