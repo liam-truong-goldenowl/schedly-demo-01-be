@@ -1,21 +1,15 @@
 import { hash, genSalt } from 'bcrypt';
 
-type IBcryptParams = {
+type GenerateHashParams = {
   salt?: string | number;
   source: string;
 };
 
-function generateSalt(characterNumber = 10): Promise<string> {
-  return genSalt(characterNumber);
-}
-
-async function generateWithBcrypt({
+export async function generateHash({
   salt,
   source,
-}: IBcryptParams): Promise<string> {
-  salt = salt || (await generateSalt());
+}: GenerateHashParams): Promise<string> {
+  salt = salt || (await genSalt(10));
 
   return hash(source, salt);
 }
-
-export default { generateWithBcrypt };
