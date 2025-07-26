@@ -8,6 +8,7 @@ import { isDevelopmentEnv } from '@/utils/helpers/envs';
 import { AppModule } from './app.module';
 import { genAPIDocument } from './app.document';
 import { loadMiddlewares } from './app.middleware';
+import { loadErrorHandling } from './app.exception';
 
 export const initApplication = async (): Promise<INestApplication> => {
   const isDevEnv = isDevelopmentEnv();
@@ -24,17 +25,18 @@ export const initApplication = async (): Promise<INestApplication> => {
     exclude: [{ path: 'health', method: RequestMethod.GET }],
   });
 
-  if (isDevEnv) {
-    genAPIDocument(app);
-  }
-
   /**
    * Enables graceful shutdown for the application to let Mikro ORM perform cleanup.
    * See: https://mikro-orm.io/docs/usage-with-nestjs#app-shutdown-and-cleanup
    */
   app.enableShutdownHooks();
 
+  if (isDevEnv) {
+    genAPIDocument(app);
+  }
+
   loadMiddlewares(app);
+  loadErrorHandling(app);
 
   return app;
 };

@@ -1,6 +1,0 @@
-export const INTERNAL_ERROR_CODE = 10_000;
-export const UNAUTHORIZED_CODE = 10_001;
-export const FORBIDDEN_CODE = 10_002;
-export const UNPROCESSABLE_ENTITY_CODE = 10_003;
-export const BAD_REQUEST_CODE = 10_004;
-export const NOT_FOUND_CODE = 10_005;

@@ -1,16 +1,19 @@
 import {
   Property,
   PrimaryKey,
+  OptionalProps,
   BaseEntity as MikroOrmBase,
 } from '@mikro-orm/core';
 
-export abstract class BaseEntity extends MikroOrmBase {
+export abstract class BaseEntity<Optional = never> extends MikroOrmBase {
+  [OptionalProps]?: 'createdAt' | 'updatedAt' | Optional;
+
   @PrimaryKey()
-  id!: number;
+  id: number;
 
-  @Property({ name: 'created_at', onCreate: () => new Date() })
-  createdAt = new Date();
+  @Property({ onCreate: () => new Date() })
+  createdAt: Date;
 
-  @Property({ name: 'updated_at', onUpdate: () => new Date() })
-  updatedAt = new Date();
+  @Property({ nullable: true, onUpdate: () => new Date() })
+  updatedAt?: Date;
 }
