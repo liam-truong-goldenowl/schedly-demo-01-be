@@ -3,9 +3,8 @@ import { Strategy } from 'passport-local';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 
-import { User } from '@/modules/user/entities/user.entity';
-
 import { AuthService } from '../auth.service';
+import { ILocalStrategy } from '../auth.interface';
 
 @Injectable()
 export class LocalStrategy extends PassportStrategy(Strategy) {
@@ -17,13 +16,16 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(req: Request): Promise<User> {
+  async validate(req: Request): Promise<ILocalStrategy> {
     const user = await this.authService.validateUser(req.body);
 
     if (!user) {
       throw new UnauthorizedException();
     }
 
-    return user;
+    return {
+      email: user.email,
+      publicSlug: user.publicSlug,
+    };
   }
 }
