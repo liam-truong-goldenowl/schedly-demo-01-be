@@ -2,7 +2,7 @@ import { Enum, Entity, Property, OneToOne } from '@mikro-orm/core';
 
 import { Language } from '@/common/enums';
 import { BaseEntity } from '@/common/entities/base.entity';
-import { User } from '@/modules/users/entities/user.entity';
+import { User } from '@/modules/user/entities/user.entity';
 
 @Entity()
 export class UserSetting extends BaseEntity {

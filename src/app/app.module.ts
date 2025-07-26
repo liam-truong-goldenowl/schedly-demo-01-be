@@ -7,8 +7,8 @@ import { MikroOrm } from '@/config/mikro-orm';
 import { EnvSchema } from '@/config/env.schema';
 import { swaggerConfig } from '@/config/swagger';
 import { AuthModule } from '@/modules/auth/auth.module';
-// import { DatabaseModule } from '@/database/database.module';
-import { UsersModule } from '@/modules/users/users.module';
+import { UserModule } from '@/modules/user/user.module';
+import { DatabaseModule } from '@/database/database.module';
 
 import { AppController } from './app.controller';
 
@@ -19,9 +19,9 @@ import { AppController } from './app.controller';
       validationSchema: EnvSchema,
       isGlobal: true,
     }),
-    // DatabaseModule,
+    DatabaseModule,
     AuthModule,
-    UsersModule,
+    UserModule,
   ],
   controllers: [AppController],
   providers: [],

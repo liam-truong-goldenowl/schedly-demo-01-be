@@ -1,8 +1,11 @@
-import { Get, Post, Request, UseGuards, Controller } from '@nestjs/common';
+import { Body, Post, UseGuards, Controller } from '@nestjs/common';
 
+import { LoginDto } from './dto/login.dto';
 import { AuthService } from './auth.service';
-import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { SignUpDto } from './dto/signup.dto';
 import { LocalAuthGuard } from './guards/local-auth.guard';
+import { LoginResponseDto } from './dto/login-response.dto';
+import { SignUpResponseDto } from './dto/signup-response.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -10,19 +13,12 @@ export class AuthController {
 
   @UseGuards(LocalAuthGuard)
   @Post('login')
-  async login(@Request() req) {
-    return this.authService.login(req.user);
+  async login(@Body() loginDto: LoginDto): Promise<LoginResponseDto> {
+    return this.authService.login(loginDto);
   }
 
-  @UseGuards(LocalAuthGuard)
-  @Post('logout')
-  async logout(@Request() req) {
-    return req.logout();
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Get('me')
-  async getProfile(@Request() req) {
-    return req.user;
+  @Post('sign-up')
+  async signUp(@Body() signUpDto: SignUpDto): Promise<SignUpResponseDto> {
+    return this.authService.signUp(signUpDto);
   }
 }
