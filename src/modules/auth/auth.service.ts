@@ -1,5 +1,6 @@
 import { JwtService } from '@nestjs/jwt';
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { EntityManager } from '@mikro-orm/postgresql';
 
 import { UserService } from '../user/user.service';
@@ -11,36 +12,99 @@ import { SignUpResponseDto } from './dto/signup-response.dto';
 import { WrongCredentialsException } from './exceptions/wrong-credentials';
 
 import type { SignUpDto } from './dto/signup.dto';
-import type { ILocalStrategy } from './auth.interface';
 import type { LoginResponseDto } from './dto/login-response.dto';
+import type { ITokenPayload, ILocalStrategy } from './auth.interface';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private userService: UserService,
-    private jwtService: JwtService,
-    private accountRepository: AccountRepository,
     private em: EntityManager,
+    private jwtService: JwtService,
+    private userService: UserService,
+    private confService: ConfigService,
+    private accountRepository: AccountRepository,
   ) {}
+  private async generateTokens(payload: ITokenPayload) {
+    const {
+      secret: accessTokenSecret,
+      expiresIn: accessTokenExpiresIn,
+      refreshSecret: refreshTokenSecret,
+      refreshExpiresIn: refreshTokenExpiresIn,
+    } = this.confService.getOrThrow<{
+      secret: string;
+      expiresIn: string;
+      refreshSecret: string;
+      refreshExpiresIn: string;
+    }>('jwt');
 
-  public async login({
-    email,
-    publicSlug,
-  }: ILocalStrategy): Promise<LoginResponseDto> {
-    const payload = { email, publicSlug };
-
-    const accessToken = this.jwtService.sign(payload);
-    const refreshToken = this.jwtService.sign(payload, { expiresIn: '7d' });
+    const [accessToken, refreshToken] = await Promise.all([
+      this.jwtService.signAsync(payload, {
+        secret: accessTokenSecret,
+        expiresIn: accessTokenExpiresIn,
+      }),
+      this.jwtService.signAsync(payload, {
+        secret: refreshTokenSecret,
+        expiresIn: refreshTokenExpiresIn,
+      }),
+    ]);
 
     return { accessToken, refreshToken };
   }
 
+  public async login({
+    id,
+    email,
+    publicSlug,
+  }: ILocalStrategy): Promise<LoginResponseDto> {
+    const payload: ITokenPayload = { email, publicSlug, id };
+
+    const tokens = await this.generateTokens(payload);
+
+    await this.updateAccountRefreshToken({
+      userId: id,
+      refreshToken: tokens.refreshToken,
+    });
+
+    return tokens;
+  }
+
   public async signUp(userInfo: SignUpDto): Promise<SignUpResponseDto> {
     const user = await this.userService.create(userInfo);
-
     await this.createAccount({ userId: user.id, password: userInfo.password });
-
     return new SignUpResponseDto(user);
+  }
+
+  public async refreshTokens({
+    userId,
+    refreshToken,
+  }: {
+    userId: number;
+    refreshToken: string;
+  }) {
+    const [user, account] = await Promise.all([
+      this.userService.findOneById(userId),
+      this.accountRepository.findOne({ user: { id: userId } }),
+    ]);
+
+    const isValidRefreshToken = await account?.verifyRefreshToken(refreshToken);
+
+    if (!user || !isValidRefreshToken) {
+      throw new WrongCredentialsException();
+    }
+
+    const payload: ITokenPayload = {
+      id: user.id,
+      email: user.email,
+      publicSlug: user.publicSlug,
+    };
+    const tokens = await this.generateTokens(payload);
+
+    await this.updateAccountRefreshToken({
+      userId: user.id,
+      refreshToken: tokens.refreshToken,
+    });
+
+    return tokens;
   }
 
   public async validateUser(credentials: {
@@ -53,13 +117,48 @@ export class AuthService {
       throw new WrongCredentialsException();
     }
 
-    const account = await this.findAccountByUserId(user.id);
-
+    const account = await this.accountRepository.findOne({
+      user: { id: user.id },
+    });
     const isCorrectPassword = await account?.verifyPassword(
       credentials.password,
     );
 
     if (!isCorrectPassword) {
+      throw new WrongCredentialsException();
+    }
+
+    return user;
+  }
+
+  public async validateJwtUser(credentials: { email: string }): Promise<User> {
+    const user = await this.userService.findOneByEmail(credentials.email);
+
+    if (!user) {
+      throw new WrongCredentialsException();
+    }
+
+    return user;
+  }
+
+  public async validateJwtRefreshUser(credentials: {
+    userId: number;
+    refreshToken: string;
+  }): Promise<User> {
+    const user = await this.userService.findOneById(credentials.userId);
+
+    if (!user) {
+      throw new WrongCredentialsException();
+    }
+
+    const account = await this.accountRepository.findOne({
+      user: { id: user.id },
+    });
+    const refreshTokenMatches = await account?.verifyRefreshToken(
+      credentials.refreshToken,
+    );
+
+    if (!refreshTokenMatches) {
       throw new WrongCredentialsException();
     }
 
@@ -77,7 +176,19 @@ export class AuthService {
     await this.em.flush();
   }
 
-  private async findAccountByUserId(userId: number) {
-    return this.accountRepository.findOne({ user: { id: userId } });
+  private async updateAccountRefreshToken({
+    userId,
+    refreshToken,
+  }: {
+    userId: User['id'];
+    refreshToken: Account['refreshToken'];
+  }): Promise<void> {
+    const account = await this.accountRepository.findOne({
+      user: { id: userId },
+    });
+
+    account?.setRefreshToken(refreshToken);
+    await account?.hashRefreshToken();
+    await this.em.flush();
   }
 }
