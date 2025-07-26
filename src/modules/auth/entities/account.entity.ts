@@ -20,6 +20,9 @@ export class Account extends BaseEntity {
   @Property()
   private passwordHash: string;
 
+  @Property({ nullable: true })
+  private refreshTokenHash?: string;
+
   @OneToOne(() => User)
   user: User;
 
@@ -27,6 +30,7 @@ export class Account extends BaseEntity {
    * The raw password provided by the user.
    */
   private password: string;
+
   /**
    * Indicates if the password has been modified since the last hash.
    */
@@ -50,5 +54,33 @@ export class Account extends BaseEntity {
 
   async verifyPassword(raw: string): Promise<boolean> {
     return verifyHash({ source: raw, hash: this.passwordHash });
+  }
+
+  /**
+   * The refresh token used for JWT refresh.
+   */
+  private refreshToken: string;
+
+  /**
+   * Indicates if the refresh token has been modified since the last hash.
+   */
+  private refreshTokenDirty = false;
+
+  setRefreshToken(raw: string) {
+    this.refreshToken = raw;
+    this.refreshTokenDirty = true;
+  }
+
+  async hashRefreshToken() {
+    if (!this.refreshTokenDirty) {
+      return;
+    }
+
+    this.refreshTokenHash = await generateHash({ source: this.refreshToken });
+    this.refreshTokenDirty = false;
+  }
+
+  async verifyRefreshToken(raw: string): Promise<boolean> {
+    return verifyHash({ source: raw, hash: this.refreshTokenHash || '' });
   }
 }
