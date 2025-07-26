@@ -17,6 +17,7 @@ interface VerifyHashParams {
   source: string;
   hash: string;
 }
+
 export async function verifyHash({
   source,
   hash,
