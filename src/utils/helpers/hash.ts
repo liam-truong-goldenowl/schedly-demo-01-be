@@ -1,15 +1,25 @@
-import { hash, genSalt } from 'bcrypt';
+import { hash, genSalt, compare } from 'bcrypt';
 
-type GenerateHashParams = {
-  salt?: string | number;
+interface GenerateHashParams {
   source: string;
-};
+}
 
 export async function generateHash({
-  salt,
   source,
 }: GenerateHashParams): Promise<string> {
-  salt = salt || (await genSalt(10));
+  const saltRounds = 10;
+  const salt = await genSalt(saltRounds);
 
   return hash(source, salt);
+}
+
+interface VerifyHashParams {
+  source: string;
+  hash: string;
+}
+export async function verifyHash({
+  source,
+  hash,
+}: VerifyHashParams): Promise<boolean> {
+  return compare(source, hash);
 }

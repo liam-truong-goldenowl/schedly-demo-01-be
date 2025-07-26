@@ -9,4 +9,10 @@ export class SignUpResponseDto {
 
   @ApiProperty({ example: 'john_doe' })
   publicSlug: string;
+
+  constructor(dto: { email: string; name: string; publicSlug: string }) {
+    this.email = dto.email;
+    this.name = dto.name;
+    this.publicSlug = dto.publicSlug;
+  }
 }

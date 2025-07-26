@@ -2,19 +2,17 @@ import { JwtService } from '@nestjs/jwt';
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 
-import { createPublicSlug } from '@/utils/helpers/strings';
-
 import { UserService } from '../user/user.service';
 import { User } from '../user/entities/user.entity';
 
 import { Account } from './entities/account.entity';
 import { AccountRepository } from './account.repository';
+import { SignUpResponseDto } from './dto/signup-response.dto';
 import { WrongCredentialsException } from './exceptions/wrong-credentials';
 
 import type { LoginDto } from './dto/login.dto';
 import type { SignUpDto } from './dto/signup.dto';
 import type { LoginResponseDto } from './dto/login-response.dto';
-import type { SignUpResponseDto } from './dto/signup-response.dto';
 
 @Injectable()
 export class AuthService {
@@ -34,15 +32,11 @@ export class AuthService {
   }
 
   public async signUp(userInfo: SignUpDto): Promise<SignUpResponseDto> {
-    const { email, name, password } = userInfo;
-
-    const publicSlug = createPublicSlug(name);
-
     const user = await this.userService.create(userInfo);
 
-    await this.createAccount({ userId: user.id, password });
+    await this.createAccount({ userId: user.id, password: userInfo.password });
 
-    return { email, name, publicSlug };
+    return new SignUpResponseDto(user);
   }
 
   public async validateUser(credentials: {
@@ -57,7 +51,13 @@ export class AuthService {
 
     const account = await this.findAccountByUserId(user.id);
 
-    console.log(account);
+    const isCorrectPassword = await account?.verifyPassword(
+      credentials.password,
+    );
+
+    if (!isCorrectPassword) {
+      throw new WrongCredentialsException();
+    }
 
     return user;
   }
@@ -67,13 +67,9 @@ export class AuthService {
     password: string;
   }): Promise<void> {
     const { userId, password } = dto;
-    const passwordHash = password; // TODO: Implement password hashing
 
-    this.em.create(Account, {
-      user: userId,
-      passwordHash,
-    });
-
+    const account = this.em.create(Account, { user: userId });
+    account.setPassword(password);
     await this.em.flush();
   }
 
