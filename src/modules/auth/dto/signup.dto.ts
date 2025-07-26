@@ -5,18 +5,23 @@ import {
   MaxLength,
   MinLength,
   IsNotEmpty,
+  IsStrongPassword,
 } from 'class-validator';
 
 export class SignUpDto {
   @IsEmail()
   @IsNotEmpty()
-  @ApiProperty({ format: 'email' })
+  @ApiProperty({ format: 'email', example: 'johndoe@goldenowl.com' })
   email: string;
 
-  @IsString()
-  @IsNotEmpty()
-  @MinLength(8)
-  @ApiProperty({ format: 'password' })
+  @IsStrongPassword({
+    minLength: 8,
+    minLowercase: 1,
+    minUppercase: 1,
+    minNumbers: 1,
+    minSymbols: 1,
+  })
+  @ApiProperty({ format: 'password', example: 'StrongP@ssw0rd!' })
   password: string;
 
   @IsString()
