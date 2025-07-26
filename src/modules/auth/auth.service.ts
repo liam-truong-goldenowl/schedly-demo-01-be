@@ -10,8 +10,8 @@ import { AccountRepository } from './account.repository';
 import { SignUpResponseDto } from './dto/signup-response.dto';
 import { WrongCredentialsException } from './exceptions/wrong-credentials';
 
-import type { LoginDto } from './dto/login.dto';
 import type { SignUpDto } from './dto/signup.dto';
+import type { ILocalStrategy } from './auth.interface';
 import type { LoginResponseDto } from './dto/login-response.dto';
 
 @Injectable()
@@ -23,12 +23,16 @@ export class AuthService {
     private em: EntityManager,
   ) {}
 
-  public async login(userInfo: LoginDto): Promise<LoginResponseDto> {
-    const payload = { username: userInfo.email, sub: userInfo.password };
-    return {
-      accessToken: this.jwtService.sign(payload),
-      refreshToken: this.jwtService.sign(payload, { expiresIn: '7d' }),
-    };
+  public async login({
+    email,
+    publicSlug,
+  }: ILocalStrategy): Promise<LoginResponseDto> {
+    const payload = { email, publicSlug };
+
+    const accessToken = this.jwtService.sign(payload);
+    const refreshToken = this.jwtService.sign(payload, { expiresIn: '7d' });
+
+    return { accessToken, refreshToken };
   }
 
   public async signUp(userInfo: SignUpDto): Promise<SignUpResponseDto> {
