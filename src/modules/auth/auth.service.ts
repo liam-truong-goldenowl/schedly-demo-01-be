@@ -8,12 +8,13 @@ import { User } from '../user/entities/user.entity';
 
 import { Account } from './entities/account.entity';
 import { AccountRepository } from './account.repository';
+import { TokenResponseDto } from './dto/token-response.dto';
 import { SignUpResponseDto } from './dto/signup-response.dto';
 import { WrongCredentialsException } from './exceptions/wrong-credentials';
 
 import type { SignUpDto } from './dto/signup.dto';
 import type { LoginResponseDto } from './dto/login-response.dto';
-import type { ITokenPayload, ILocalStrategy } from './auth.interface';
+import type { TokenPayload, LocalStrategy } from './auth.interface';
 
 @Injectable()
 export class AuthService {
@@ -24,40 +25,9 @@ export class AuthService {
     private confService: ConfigService,
     private accountRepository: AccountRepository,
   ) {}
-  private async generateTokens(payload: ITokenPayload) {
-    const {
-      secret: accessTokenSecret,
-      expiresIn: accessTokenExpiresIn,
-      refreshSecret: refreshTokenSecret,
-      refreshExpiresIn: refreshTokenExpiresIn,
-    } = this.confService.getOrThrow<{
-      secret: string;
-      expiresIn: string;
-      refreshSecret: string;
-      refreshExpiresIn: string;
-    }>('jwt');
 
-    const [accessToken, refreshToken] = await Promise.all([
-      this.jwtService.signAsync(payload, {
-        secret: accessTokenSecret,
-        expiresIn: accessTokenExpiresIn,
-      }),
-      this.jwtService.signAsync(payload, {
-        secret: refreshTokenSecret,
-        expiresIn: refreshTokenExpiresIn,
-      }),
-    ]);
-
-    return { accessToken, refreshToken };
-  }
-
-  public async login({
-    id,
-    email,
-    publicSlug,
-  }: ILocalStrategy): Promise<LoginResponseDto> {
-    const payload: ITokenPayload = { email, publicSlug, id };
-
+  public async login({ id, email }: LocalStrategy): Promise<LoginResponseDto> {
+    const payload: TokenPayload = { id, email };
     const tokens = await this.generateTokens(payload);
 
     await this.updateAccountRefreshToken({
@@ -93,7 +63,7 @@ export class AuthService {
   }: {
     userId: number;
     refreshToken: string;
-  }) {
+  }): Promise<TokenResponseDto> {
     const [user, account] = await Promise.all([
       this.userService.findOneById(userId),
       this.accountRepository.findOne({ user: { id: userId } }),
@@ -105,11 +75,7 @@ export class AuthService {
       throw new WrongCredentialsException();
     }
 
-    const payload: ITokenPayload = {
-      id: user.id,
-      email: user.email,
-      publicSlug: user.publicSlug,
-    };
+    const payload: TokenPayload = { id: user.id, email: user.email };
     const tokens = await this.generateTokens(payload);
 
     await this.updateAccountRefreshToken({
@@ -155,7 +121,7 @@ export class AuthService {
   }
 
   public async validateJwtRefreshUser(credentials: {
-    userId: number;
+    userId: User['id'];
     refreshToken: string;
   }): Promise<User> {
     const user = await this.userService.findOneById(credentials.userId);
@@ -178,12 +144,40 @@ export class AuthService {
     return user;
   }
 
-  public async createAccount(dto: {
-    userId: number;
+  private async generateTokens(payload: TokenPayload) {
+    const {
+      secret: accessTokenSecret,
+      expiresIn: accessTokenExpiresIn,
+      refreshSecret: refreshTokenSecret,
+      refreshExpiresIn: refreshTokenExpiresIn,
+    } = this.confService.getOrThrow<{
+      secret: string;
+      expiresIn: string;
+      refreshSecret: string;
+      refreshExpiresIn: string;
+    }>('jwt');
+
+    const [accessToken, refreshToken] = await Promise.all([
+      this.jwtService.signAsync(payload, {
+        secret: accessTokenSecret,
+        expiresIn: accessTokenExpiresIn,
+      }),
+      this.jwtService.signAsync(payload, {
+        secret: refreshTokenSecret,
+        expiresIn: refreshTokenExpiresIn,
+      }),
+    ]);
+
+    return { accessToken, refreshToken };
+  }
+
+  public async createAccount({
+    userId,
+    password,
+  }: {
+    userId: User['id'];
     password: string;
   }): Promise<void> {
-    const { userId, password } = dto;
-
     const account = this.em.create(Account, { user: userId });
     account.setPassword(password);
     await this.em.flush();

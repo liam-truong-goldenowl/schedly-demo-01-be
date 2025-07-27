@@ -4,8 +4,11 @@ import { Strategy, ExtractJwt } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import { ConfigService as ConfService } from '@nestjs/config';
 
+import { REFRESH_TOKEN_KEY } from '@/utils/constants/cookies';
+import { ReqUser } from '@/common/interfaces/req-user.interface';
+
 import { AuthService } from '../auth.service';
-import { IJwtStrategy, ITokenPayload } from '../auth.interface';
+import { TokenPayload } from '../auth.interface';
 
 @Injectable()
 export class JwtRefreshStrategy extends PassportStrategy(
@@ -13,37 +16,27 @@ export class JwtRefreshStrategy extends PassportStrategy(
   'jwt-refresh',
 ) {
   constructor(
-    private confService: ConfService,
+    confService: ConfService,
     private authService: AuthService,
   ) {
     super({
+      passReqToCallback: true,
       jwtFromRequest: ExtractJwt.fromExtractors([
-        (req: Request) =>
-          req.cookies?.[
-            confService.getOrThrow<string>('jwt.refreshTokenCookieName')
-          ],
+        (req: Request) => req.cookies?.[REFRESH_TOKEN_KEY],
       ]),
       secretOrKey: confService.getOrThrow<string>('jwt.refreshSecret'),
-      passReqToCallback: true,
     });
   }
 
-  async validate(req: Request, payload: ITokenPayload): Promise<IJwtStrategy> {
+  async validate(req: Request, payload: TokenPayload): Promise<ReqUser> {
     const userId = payload.id;
-    const refreshToken =
-      req.cookies?.[
-        this.confService.getOrThrow<string>('jwt.refreshTokenCookieName')
-      ];
+    const refreshToken = req.cookies?.[REFRESH_TOKEN_KEY];
 
     const user = await this.authService.validateJwtRefreshUser({
       userId,
       refreshToken,
     });
 
-    return {
-      id: user.id,
-      email: user.email,
-      publicSlug: user.publicSlug,
-    };
+    return { id: user.id, email: user.email };
   }
 }
