@@ -74,6 +74,19 @@ export class AuthService {
     return new SignUpResponseDto(user);
   }
 
+  public async logout(userId: number): Promise<void> {
+    const account = await this.accountRepository.findOne({
+      user: { id: userId },
+    });
+
+    if (!account) {
+      throw new WrongCredentialsException();
+    }
+
+    await account.revokeRefreshToken();
+    await this.em.flush();
+  }
+
   public async refreshTokens({
     userId,
     refreshToken,
@@ -181,14 +194,13 @@ export class AuthService {
     refreshToken,
   }: {
     userId: User['id'];
-    refreshToken: Account['refreshToken'];
+    refreshToken: string;
   }): Promise<void> {
     const account = await this.accountRepository.findOne({
       user: { id: userId },
     });
 
-    account?.setRefreshToken(refreshToken);
-    await account?.hashRefreshToken();
+    await account?.setRefreshToken(refreshToken);
     await this.em.flush();
   }
 }

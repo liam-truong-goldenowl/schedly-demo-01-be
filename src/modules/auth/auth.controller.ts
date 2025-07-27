@@ -1,5 +1,13 @@
 import { ApiBody } from '@nestjs/swagger';
-import { Res, Body, Post, UseGuards, Controller } from '@nestjs/common';
+import {
+  Res,
+  Body,
+  Post,
+  HttpCode,
+  UseGuards,
+  Controller,
+  HttpStatus,
+} from '@nestjs/common';
 
 import type { Response } from 'express';
 
@@ -9,6 +17,7 @@ import { CurrentUser } from '@/common/decorators/auth/req-user.decorator';
 import { LoginDto } from './dto/login.dto';
 import { AuthService } from './auth.service';
 import { SignUpDto } from './dto/signup.dto';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { JwtRefreshAuthGuard } from './guards/jwt-refresh-auth.guard';
 
@@ -23,6 +32,7 @@ export class AuthController {
   @UseGuards(LocalAuthGuard)
   @Post('login')
   @ApiBody({ type: LoginDto })
+  @HttpCode(HttpStatus.OK)
   async login(
     @CurrentUser() user: ILocalStrategy,
     @Res({ passthrough: true }) res: Response,
@@ -39,12 +49,26 @@ export class AuthController {
   }
 
   @Post('sign-up')
+  @HttpCode(HttpStatus.CREATED)
   async signUp(@Body() signUpDto: SignUpDto): Promise<SignUpResponseDto> {
     return this.authService.signUp(signUpDto);
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Post('logout')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async logout(
+    @Res({ passthrough: true }) res: Response,
+    @CurrentUser() user: ILocalStrategy,
+  ): Promise<void> {
+    await this.clearTokensInCookies(res);
+    await this.authService.logout(user.id);
+    return;
+  }
+
   @UseGuards(JwtRefreshAuthGuard)
   @Post('refresh')
+  @HttpCode(HttpStatus.OK)
   async refreshTokens(
     @CurrentUser() user: ILocalStrategy,
     @Cookies('refreshToken') refreshToken: string,
@@ -87,5 +111,10 @@ export class AuthController {
       secure: process.env.NODE_ENV === 'production',
       expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
     });
+  }
+
+  private async clearTokensInCookies(res: Response) {
+    res.clearCookie('accessToken');
+    res.clearCookie('refreshToken');
   }
 }

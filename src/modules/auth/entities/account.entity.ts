@@ -56,28 +56,12 @@ export class Account extends BaseEntity {
     return verifyHash({ source: raw, hash: this.passwordHash });
   }
 
-  /**
-   * The refresh token used for JWT refresh.
-   */
-  private refreshToken: string;
-
-  /**
-   * Indicates if the refresh token has been modified since the last hash.
-   */
-  private refreshTokenDirty = false;
-
-  setRefreshToken(raw: string) {
-    this.refreshToken = raw;
-    this.refreshTokenDirty = true;
+  async setRefreshToken(raw: string) {
+    this.refreshTokenHash = await generateHash({ source: raw });
   }
 
-  async hashRefreshToken() {
-    if (!this.refreshTokenDirty) {
-      return;
-    }
-
-    this.refreshTokenHash = await generateHash({ source: this.refreshToken });
-    this.refreshTokenDirty = false;
+  async revokeRefreshToken() {
+    this.refreshTokenHash = undefined;
   }
 
   async verifyRefreshToken(raw: string): Promise<boolean> {
