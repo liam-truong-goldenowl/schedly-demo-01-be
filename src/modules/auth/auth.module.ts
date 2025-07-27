@@ -15,12 +15,12 @@ import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
 @Module({
   exports: [AuthService],
   controllers: [AuthController],
+  providers: [AuthService, LocalStrategy, JwtStrategy, JwtRefreshStrategy],
   imports: [
     JwtModule,
     UserModule,
     PassportModule,
     MikroOrmModule.forFeature([Account]),
   ],
-  providers: [AuthService, LocalStrategy, JwtStrategy, JwtRefreshStrategy],
 })
 export class AuthModule {}

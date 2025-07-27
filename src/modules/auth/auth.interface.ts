@@ -1,17 +1,7 @@
-export interface ILocalStrategy {
-  id: number;
-  email: string;
-  publicSlug: string;
-}
+import { ReqUser } from '@/common/interfaces/req-user.interface';
 
-export interface IJwtStrategy {
-  id: number;
-  email: string;
-  publicSlug: string;
-}
+export type LocalStrategy = ReqUser;
 
-export interface ITokenPayload {
-  id: number;
-  email: string;
-  publicSlug: string;
-}
+export type JwtStrategy = ReqUser;
+
+export type TokenPayload = ReqUser;

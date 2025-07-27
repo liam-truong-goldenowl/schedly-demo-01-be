@@ -7,6 +7,8 @@ import { createPublicSlug } from '@/utils/helpers/strings';
 import { User } from './entities/user.entity';
 import { UserRepository } from './user.repository';
 import { CreateUserDto } from './dto/create-user.dto';
+import { UserResponseDto } from './dto/user-response.dto';
+import { UserNotFoundException } from './exceptions/user-not-found';
 import { CreateUserResponseDto } from './dto/create-user-response.dto';
 import { UserAlreadyExistsException } from './exceptions/user-already-exists';
 
@@ -23,6 +25,16 @@ export class UserService {
 
   public async findOneById(id: number): Promise<User | null> {
     return await this.userRepository.findOne({ id });
+  }
+
+  public async getUserProfile(id: User['id']): Promise<UserResponseDto> {
+    const user = await this.userRepository.findOne({ id });
+
+    if (!user) {
+      throw new UserNotFoundException();
+    }
+
+    return new UserResponseDto(user);
   }
 
   public async create(dto: CreateUserDto): Promise<CreateUserResponseDto> {

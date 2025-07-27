@@ -8,11 +8,11 @@ import {
 
 import type { INestApplication } from '@nestjs/common';
 
-import type { TSwaggerConfig } from '@/config/swagger';
+import type { SwaggerConfig } from '@/config/swagger';
 
 export const genAPIDocument = (app: INestApplication) => {
   const configService = app.get(ConfigService);
-  const config = configService.get<TSwaggerConfig>('swagger')!;
+  const config = configService.get<SwaggerConfig>('swagger')!;
 
   const documentConfig = new DocumentBuilder()
     .setTitle(config.title)
