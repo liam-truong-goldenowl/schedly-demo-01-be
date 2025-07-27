@@ -44,7 +44,7 @@ export class AuthController {
   }
 
   @UseGuards(JwtRefreshAuthGuard)
-  @Post('refresh-tokens')
+  @Post('refresh')
   async refreshTokens(
     @CurrentUser() user: ILocalStrategy,
     @Cookies('refreshToken') refreshToken: string,
