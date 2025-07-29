@@ -19,7 +19,7 @@ export class SignUpDto {
     minLowercase: 1,
     minUppercase: 1,
     minNumbers: 1,
-    minSymbols: 1,
+    minSymbols: 0,
   })
   @ApiProperty({ format: 'password', example: 'StrongP@ssw0rd!' })
   password: string;
