@@ -2,7 +2,7 @@ import { Type, Expose, plainToInstance } from 'class-transformer';
 
 import { Schedule } from '../entities/schedule.entity';
 
-import { ScheduleWeeklyHourDto } from './schedule-weekly-hour.dto';
+import { ScheduleWeeklyHourResponseDto } from './schedule-weekly-hour-response.dto';
 
 export class ScheduleResponseDto {
   @Expose()
@@ -18,8 +18,8 @@ export class ScheduleResponseDto {
   isDefault: boolean;
 
   @Expose()
-  @Type(() => ScheduleWeeklyHourDto)
-  weeklyHours: ScheduleWeeklyHourDto[];
+  @Type(() => ScheduleWeeklyHourResponseDto)
+  weeklyHours: ScheduleWeeklyHourResponseDto[];
 
   static fromEntity(schedule: Schedule): ScheduleResponseDto {
     return plainToInstance(
