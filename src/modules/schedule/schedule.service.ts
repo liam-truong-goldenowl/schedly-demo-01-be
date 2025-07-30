@@ -6,8 +6,10 @@ import { User } from '../user/entities/user.entity';
 
 import { Schedule } from './entities/schedule.entity';
 import { CreateScheduleDto } from './dto/create-schedule.dto';
+import { UpdateScheduleDto } from './dto/update-schedule.dto';
 import { ScheduleResponseDto } from './dto/schedule-response.dto';
 import { ScheduleCreatedEvent } from './events/schedule-created.event';
+import { ScheduleNotFoundException } from './exceptions/schedule-not-found.exception';
 
 @Injectable()
 export class ScheduleService {
@@ -42,6 +44,29 @@ export class ScheduleService {
       'schedule.created',
       new ScheduleCreatedEvent({ id: schedule.id }),
     );
+
+    return ScheduleResponseDto.fromEntity(schedule);
+  }
+
+  async updateForUser(dto: {
+    userId: number;
+    scheduleId: number;
+    scheduleData: UpdateScheduleDto;
+  }) {
+    const schedule = await this.em.findOne(Schedule, {
+      id: dto.scheduleId,
+      user: { id: dto.userId },
+    });
+
+    if (!schedule) {
+      throw new ScheduleNotFoundException(dto.scheduleId);
+    }
+
+    schedule.assign(dto.scheduleData);
+
+    await this.em.flush();
+
+    await schedule.populate(['weeklyHours']);
 
     return ScheduleResponseDto.fromEntity(schedule);
   }
