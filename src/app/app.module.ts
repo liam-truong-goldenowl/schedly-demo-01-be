@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ConfigModule, ConfigFactory } from '@nestjs/config';
 
 import { appConfig } from '@/config/app';
@@ -27,6 +28,7 @@ const confLoaders: ConfigFactory[] = [
     UserModule,
     DatabaseModule,
     ScheduleModule,
+    EventEmitterModule.forRoot(),
     ConfigModule.forRoot({ isGlobal: true, load: confLoaders }),
   ],
 })
