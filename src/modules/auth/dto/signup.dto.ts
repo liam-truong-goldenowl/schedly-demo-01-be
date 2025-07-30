@@ -5,6 +5,7 @@ import {
   MaxLength,
   MinLength,
   IsNotEmpty,
+  IsTimeZone,
   IsStrongPassword,
 } from 'class-validator';
 
@@ -30,4 +31,9 @@ export class SignUpDto {
   @MaxLength(50)
   @ApiProperty({ example: 'John Doe' })
   name: string;
+
+  @IsTimeZone({
+    message: 'Timezone must be a valid IANA timezone.',
+  })
+  timezone: string;
 }

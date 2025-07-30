@@ -17,11 +17,10 @@ export class UserCreatedListener {
 
   @OnEvent('user.created')
   async handleUserCreatedEvent(event: UserCreatedEvent) {
-    // TODO: handle default name and timezone
     const schedule = this.em.create(Schedule, {
       isDefault: true,
       name: 'Working hours',
-      timezone: 'Asia/SaiGon',
+      timezone: event.user.timezone,
       user: this.em.getReference(User, event.user.id),
     });
 
