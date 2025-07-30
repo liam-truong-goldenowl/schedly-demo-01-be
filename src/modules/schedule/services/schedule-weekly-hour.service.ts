@@ -7,10 +7,12 @@ import {
 
 import { Schedule } from '../entities/schedule.entity';
 import { CreateWeeklyHourDto } from '../dto/create-weekly-hour.dto';
+import { UpdateWeeklyHourDto } from '../dto/update-weekly-hour.dto';
 import { ScheduleWeeklyHour } from '../entities/schedule-weekly-hour.entity';
 import { OverlappingHoursException } from '../exceptions/overlapping-hours.exception';
 import { ScheduleNotFoundException } from '../exceptions/schedule-not-found.exception';
 import { ScheduleWeeklyHourResponseDto } from '../dto/schedule-weekly-hour-response.dto';
+import { WeeklyHourNotFoundException } from '../exceptions/weekly-hour-not-found.exception';
 
 @Injectable()
 export class ScheduleWeeklyHourService {
@@ -69,6 +71,31 @@ export class ScheduleWeeklyHourService {
     } catch (error) {
       if (error instanceof NotFoundError) {
         throw new ScheduleNotFoundException(dto.weeklyHourId);
+      }
+    }
+  }
+
+  async update(dto: {
+    scheduleId: number;
+    weeklyHourId: number;
+    weeklyHourData: UpdateWeeklyHourDto;
+  }) {
+    try {
+      const weeklyHour = await this.em.findOneOrFail(ScheduleWeeklyHour, {
+        id: dto.weeklyHourId,
+        schedule: { id: dto.scheduleId },
+      });
+
+      weeklyHour.assign(dto.weeklyHourData);
+
+      await this.em.flush();
+
+      return ScheduleWeeklyHourResponseDto.fromEntity(weeklyHour);
+    } catch (error) {
+      if (error instanceof ForeignKeyConstraintViolationException) {
+        throw new ScheduleNotFoundException(dto.scheduleId);
+      } else if (error instanceof NotFoundError) {
+        throw new WeeklyHourNotFoundException(dto.weeklyHourId);
       }
     }
   }
