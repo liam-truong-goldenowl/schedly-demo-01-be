@@ -1,16 +1,22 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
-import type { User } from '../user/entities/user.entity';
+import { User } from '../user/entities/user.entity';
 
 import { Schedule } from './entities/schedule.entity';
+import { CreateScheduleDto } from './dto/create-schedule.dto';
 import { ScheduleResponseDto } from './dto/schedule-response.dto';
+import { ScheduleCreatedEvent } from './events/schedule-created.event';
 
 @Injectable()
 export class ScheduleService {
-  constructor(private em: EntityManager) {}
+  constructor(
+    private em: EntityManager,
+    private eventEmitter: EventEmitter2,
+  ) {}
 
-  async findAllForUser({ userId }: { userId: User['id'] }) {
+  async findAllForUser({ userId }: { userId: number }) {
     const schedules = await this.em.findAll(Schedule, {
       filters: { ownBy: { id: userId } },
       populate: ['weeklyHours'],
@@ -18,5 +24,25 @@ export class ScheduleService {
     return schedules.map((schedule) =>
       ScheduleResponseDto.fromEntity(schedule),
     );
+  }
+
+  async createForUser(dto: {
+    scheduleData: CreateScheduleDto;
+    userId: number;
+  }) {
+    const schedule = this.em.create(Schedule, {
+      name: dto.scheduleData.name,
+      timezone: dto.scheduleData.timezone,
+      user: this.em.getReference(User, dto.userId),
+    });
+
+    await this.em.flush();
+
+    await this.eventEmitter.emitAsync(
+      'schedule.created',
+      new ScheduleCreatedEvent({ id: schedule.id }),
+    );
+
+    return ScheduleResponseDto.fromEntity(schedule);
   }
 }

@@ -1,4 +1,5 @@
 import {
+  Opt,
   Entity,
   Filter,
   Property,
@@ -24,8 +25,8 @@ export class Schedule extends BaseEntity {
   @Property()
   timezone: string;
 
-  @Property()
-  isDefault = true;
+  @Property({ default: false })
+  isDefault?: boolean & Opt;
 
   @OneToMany(() => ScheduleWeeklyHour, (weeklyHour) => weeklyHour.schedule)
   weeklyHours = new Collection<ScheduleWeeklyHour>(this);

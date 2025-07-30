@@ -192,7 +192,7 @@
           "autoincrement": false,
           "primary": false,
           "nullable": false,
-          "default": "true",
+          "default": "false",
           "mappedType": "boolean"
         }
       },
