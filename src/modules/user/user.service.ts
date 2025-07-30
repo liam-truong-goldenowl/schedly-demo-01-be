@@ -56,7 +56,11 @@ export class UserService {
 
     await this.eventEmitter.emitAsync(
       'user.created',
-      new UserCreatedEvent({ id: user.id, timezone: dto.timezone }),
+      new UserCreatedEvent({
+        id: user.id,
+        timezone: dto.timezone,
+        password: dto.password,
+      }),
     );
 
     return new CreateUserResponseDto(user);

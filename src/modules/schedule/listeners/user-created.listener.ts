@@ -20,8 +20,8 @@ export class UserCreatedListener {
     const schedule = this.em.create(Schedule, {
       isDefault: true,
       name: 'Working hours',
-      timezone: event.user.timezone,
-      user: this.em.getReference(User, event.user.id),
+      timezone: event.payload.timezone,
+      user: this.em.getReference(User, event.payload.id),
     });
 
     /**
