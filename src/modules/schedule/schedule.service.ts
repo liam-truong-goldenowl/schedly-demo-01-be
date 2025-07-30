@@ -10,6 +10,7 @@ import { UpdateScheduleDto } from './dto/update-schedule.dto';
 import { ScheduleResponseDto } from './dto/schedule-response.dto';
 import { ScheduleCreatedEvent } from './events/schedule-created.event';
 import { ScheduleNotFoundException } from './exceptions/schedule-not-found.exception';
+import { AtLeastOneScheduleException } from './exceptions/at-least-one-schedule.exception';
 
 @Injectable()
 export class ScheduleService {
@@ -69,5 +70,32 @@ export class ScheduleService {
     await schedule.populate(['weeklyHours']);
 
     return ScheduleResponseDto.fromEntity(schedule);
+  }
+
+  async deleteFromUser(dto: { userId: number; scheduleId: number }) {
+    const schedule = await this.em.findOne(Schedule, {
+      id: dto.scheduleId,
+      user: { id: dto.userId },
+    });
+
+    if (!schedule) {
+      throw new ScheduleNotFoundException(dto.scheduleId);
+    }
+
+    if (schedule.isDefault) {
+      const anotherSchedule = await this.em.findOne(Schedule, {
+        user: { id: dto.userId },
+        isDefault: false,
+      });
+
+      if (!anotherSchedule) {
+        throw new AtLeastOneScheduleException();
+      }
+
+      anotherSchedule.isDefault = true;
+      await this.em.flush();
+    }
+
+    await this.em.removeAndFlush(schedule);
   }
 }

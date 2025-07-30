@@ -4,6 +4,7 @@ import {
   Body,
   Param,
   Patch,
+  Delete,
   UseGuards,
   Controller,
   ParseIntPipe,
@@ -46,5 +47,13 @@ export class ScheduleController {
       scheduleId: id,
       scheduleData: body,
     });
+  }
+
+  @Delete(':id')
+  delete(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Param('id', ParseIntPipe) id: number,
+  ) {
+    return this.scheduleService.deleteFromUser({ userId, scheduleId: id });
   }
 }

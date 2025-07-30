@@ -1,4 +1,4 @@
-import { Enum, Entity, Property, ManyToOne } from '@mikro-orm/core';
+import { Enum, Entity, Cascade, Property, ManyToOne } from '@mikro-orm/core';
 
 import { Weekday } from '@/common/enums';
 import { BaseEntity } from '@/common/entities/base.entity';
@@ -16,6 +16,10 @@ export class ScheduleWeeklyHour extends BaseEntity {
   @Property({ type: 'time' })
   endTime: string; // e.g., '17:00'
 
-  @ManyToOne({ entity: () => Schedule, serializedName: 'scheduleId' })
+  @ManyToOne({
+    entity: () => Schedule,
+    serializedName: 'scheduleId',
+    cascade: [Cascade.REMOVE],
+  })
   schedule: Schedule;
 }
