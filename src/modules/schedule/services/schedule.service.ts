@@ -2,15 +2,15 @@ import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
-import { User } from '../user/entities/user.entity';
+import { User } from '@/modules/user/entities/user.entity';
 
-import { Schedule } from './entities/schedule.entity';
-import { CreateScheduleDto } from './dto/create-schedule.dto';
-import { UpdateScheduleDto } from './dto/update-schedule.dto';
-import { ScheduleResponseDto } from './dto/schedule-response.dto';
-import { ScheduleCreatedEvent } from './events/schedule-created.event';
-import { ScheduleNotFoundException } from './exceptions/schedule-not-found.exception';
-import { AtLeastOneScheduleException } from './exceptions/at-least-one-schedule.exception';
+import { Schedule } from '../entities/schedule.entity';
+import { CreateScheduleDto } from '../dto/create-schedule.dto';
+import { UpdateScheduleDto } from '../dto/update-schedule.dto';
+import { ScheduleResponseDto } from '../dto/schedule-response.dto';
+import { ScheduleCreatedEvent } from '../events/schedule-created.event';
+import { ScheduleNotFoundException } from '../exceptions/schedule-not-found.exception';
+import { AtLeastOneScheduleException } from '../exceptions/at-least-one-schedule.exception';
 
 @Injectable()
 export class ScheduleService {

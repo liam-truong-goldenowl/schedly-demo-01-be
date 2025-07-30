@@ -10,13 +10,12 @@ import {
   ParseIntPipe,
 } from '@nestjs/common';
 
+import { JwtAuthGuard } from '@/modules/auth/guards/jwt-auth.guard';
 import { UserOwnsResourceGuard } from '@/common/guards/user-owns-resource.guard';
 
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-
-import { ScheduleService } from './schedule.service';
-import { CreateScheduleDto } from './dto/create-schedule.dto';
-import { UpdateScheduleDto } from './dto/update-schedule.dto';
+import { CreateScheduleDto } from '../dto/create-schedule.dto';
+import { UpdateScheduleDto } from '../dto/update-schedule.dto';
+import { ScheduleService } from '../services/schedule.service';
 
 @Controller('users/:userId/schedules')
 @UseGuards(JwtAuthGuard, UserOwnsResourceGuard)

@@ -2,9 +2,9 @@ import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { EntityRepository } from '@mikro-orm/postgresql';
 
-import { ScheduleService } from './schedule.service';
 import { Schedule } from './entities/schedule.entity';
-import { ScheduleController } from './schedule.controller';
+import { ScheduleService } from './services/schedule.service';
+import { ScheduleController } from './controllers/schedule.controller';
 import { UserCreatedListener } from './listeners/user-created.listener';
 import { ScheduleWeeklyHour } from './entities/schedule-weekly-hour.entity';
 import { ScheduleDateOverride } from './entities/schedule-date-override.entity';
