@@ -22,7 +22,7 @@ export class ScheduleService {
   async findAllForUser({ userId }: { userId: number }) {
     const schedules = await this.em.findAll(Schedule, {
       filters: { ownBy: { id: userId } },
-      populate: ['weeklyHours'],
+      populate: ['weeklyHours', 'dateOverrides'],
     });
     return schedules.map((schedule) =>
       ScheduleResponseDto.fromEntity(schedule),

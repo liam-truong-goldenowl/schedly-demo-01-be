@@ -2,6 +2,7 @@ import { Type, Expose, plainToInstance } from 'class-transformer';
 
 import { Schedule } from '../entities/schedule.entity';
 
+import { ScheduleDateOverrideResponseDto } from './date-override-response.dto';
 import { ScheduleWeeklyHourResponseDto } from './schedule-weekly-hour-response.dto';
 
 export class ScheduleResponseDto {
@@ -21,10 +22,18 @@ export class ScheduleResponseDto {
   @Type(() => ScheduleWeeklyHourResponseDto)
   weeklyHours: ScheduleWeeklyHourResponseDto[];
 
+  @Expose()
+  @Type(() => ScheduleDateOverrideResponseDto)
+  dateOverrides: ScheduleDateOverrideResponseDto[];
+
   static fromEntity(schedule: Schedule): ScheduleResponseDto {
     return plainToInstance(
       ScheduleResponseDto,
-      { ...schedule, weeklyHours: schedule.weeklyHours.getItems() },
+      {
+        ...schedule,
+        weeklyHours: schedule.weeklyHours.getItems(),
+        dateOverrides: schedule.dateOverrides.getItems(),
+      },
       { excludeExtraneousValues: true },
     );
   }
