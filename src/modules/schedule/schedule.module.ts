@@ -10,10 +10,16 @@ import { ScheduleWeeklyHour } from './entities/schedule-weekly-hour.entity';
 import { ScheduleDateOverride } from './entities/schedule-date-override.entity';
 import { ScheduleCreatedListener } from './listeners/schedule-created.listener';
 import { ScheduleWeeklyHourService } from './services/schedule-weekly-hour.service';
+import { ScheduleDateOverrideService } from './services/schedule-date-override.service';
 import { ScheduleWeeklyHourController } from './controllers/schedule-weekly-hour.controller';
+import { ScheduleDateOverrideController } from './controllers/schedule-date-override.controller';
 
 @Module({
-  controllers: [ScheduleController, ScheduleWeeklyHourController],
+  controllers: [
+    ScheduleController,
+    ScheduleWeeklyHourController,
+    ScheduleDateOverrideController,
+  ],
   imports: [
     MikroOrmModule.forFeature([
       Schedule,
@@ -27,6 +33,7 @@ import { ScheduleWeeklyHourController } from './controllers/schedule-weekly-hour
     UserCreatedListener,
     ScheduleCreatedListener,
     ScheduleWeeklyHourService,
+    ScheduleDateOverrideService,
   ],
 })
 export class ScheduleModule {}

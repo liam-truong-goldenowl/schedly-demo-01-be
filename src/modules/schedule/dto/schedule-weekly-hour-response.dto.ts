@@ -2,6 +2,8 @@ import { Expose, plainToInstance } from 'class-transformer';
 
 import { Weekday } from '@/common/enums';
 
+import { ScheduleWeeklyHour } from '../entities/schedule-weekly-hour.entity';
+
 export class ScheduleWeeklyHourResponseDto {
   @Expose()
   id: number;
@@ -16,7 +18,7 @@ export class ScheduleWeeklyHourResponseDto {
   endTime: string;
 
   static fromEntity(
-    weeklyHour: ScheduleWeeklyHourResponseDto,
+    weeklyHour: ScheduleWeeklyHour,
   ): ScheduleWeeklyHourResponseDto {
     return plainToInstance(ScheduleWeeklyHourResponseDto, weeklyHour, {
       excludeExtraneousValues: true,
