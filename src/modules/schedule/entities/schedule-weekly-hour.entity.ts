@@ -16,6 +16,6 @@ export class ScheduleWeeklyHour extends BaseEntity {
   @Property({ type: 'time' })
   endTime: string; // e.g., '17:00'
 
-  @ManyToOne(() => Schedule)
+  @ManyToOne({ entity: () => Schedule, serializedName: 'scheduleId' })
   schedule: Schedule;
 }

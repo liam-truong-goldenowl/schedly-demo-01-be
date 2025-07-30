@@ -4,6 +4,7 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import type { User } from '../user/entities/user.entity';
 
 import { Schedule } from './entities/schedule.entity';
+import { ScheduleResponseDto } from './dto/schedule-response.dto';
 
 @Injectable()
 export class ScheduleService {
@@ -14,6 +15,8 @@ export class ScheduleService {
       filters: { ownBy: { id: userId } },
       populate: ['weeklyHours'],
     });
-    return schedules;
+    return schedules.map((schedule) =>
+      ScheduleResponseDto.fromEntity(schedule),
+    );
   }
 }

@@ -15,11 +15,7 @@ import { ScheduleWeeklyHour } from './schedule-weekly-hour.entity';
 @Entity()
 @Filter({ name: 'ownBy', cond: (args) => ({ user: { id: args.id } }) })
 export class Schedule extends BaseEntity {
-  @ManyToOne({
-    entity: () => User,
-    serializedName: 'userId',
-    serializer: (value) => value.id,
-  })
+  @ManyToOne({ entity: () => User, serializedName: 'userId' })
   user: User;
 
   @Property()

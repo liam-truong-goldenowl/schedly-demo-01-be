@@ -84,7 +84,7 @@ export class AuthController {
   async refreshTokens(
     @CurrentUser('id') userId: ReqUser['id'],
     @Res({ passthrough: true }) res: Response,
-    @Cookies('refreshToken') refreshToken: string,
+    @Cookies(REFRESH_TOKEN_KEY) refreshToken: string,
   ): Promise<TokenResponseDto> {
     const tokens = await this.authService.refreshTokens({
       userId,
