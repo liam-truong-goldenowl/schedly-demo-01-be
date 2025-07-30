@@ -14,10 +14,10 @@ export class UserSetting extends BaseEntity {
     default: Language.EN,
     nativeEnumName: 'language',
   })
-  language: Language;
+  language?: Language;
 
   @Property({ length: 255, nullable: true })
-  country: string;
+  country?: string;
 
   @OneToOne(() => User)
   user: User;

@@ -10,6 +10,7 @@ import { AuthModule } from '@/modules/auth/auth.module';
 import { UserModule } from '@/modules/user/user.module';
 import { DatabaseModule } from '@/database/database.module';
 import { ScheduleModule } from '@/modules/schedule/schedule.module';
+import { UserSettingsModule } from '@/modules/user-setting/user-setting.module';
 
 import { AppController } from './app.controller';
 
@@ -28,6 +29,7 @@ const confLoaders: ConfigFactory[] = [
     UserModule,
     DatabaseModule,
     ScheduleModule,
+    UserSettingsModule,
     EventEmitterModule.forRoot(),
     ConfigModule.forRoot({ isGlobal: true, load: confLoaders }),
   ],
