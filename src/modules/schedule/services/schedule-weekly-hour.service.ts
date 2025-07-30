@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import {
   EntityManager,
+  NotFoundError,
   ForeignKeyConstraintViolationException,
 } from '@mikro-orm/postgresql';
 
@@ -53,6 +54,21 @@ export class ScheduleWeeklyHourService {
     } catch (error) {
       if (error instanceof ForeignKeyConstraintViolationException) {
         throw new ScheduleNotFoundException(dto.scheduleId);
+      }
+    }
+  }
+
+  async delete(dto: { scheduleId: number; weeklyHourId: number }) {
+    try {
+      const weeklyHour = await this.em.findOneOrFail(ScheduleWeeklyHour, {
+        id: dto.weeklyHourId,
+        schedule: { id: dto.scheduleId },
+      });
+
+      await this.em.removeAndFlush(weeklyHour);
+    } catch (error) {
+      if (error instanceof NotFoundError) {
+        throw new ScheduleNotFoundException(dto.weeklyHourId);
       }
     }
   }

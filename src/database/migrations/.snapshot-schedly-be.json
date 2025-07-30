@@ -316,7 +316,7 @@
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
-          "nullable": true,
+          "nullable": false,
           "mappedType": "integer"
         }
       },
@@ -340,7 +340,7 @@
           "localTableName": "public.schedule_weekly_hour",
           "referencedColumnNames": ["id"],
           "referencedTableName": "public.schedule",
-          "deleteRule": "cascade"
+          "updateRule": "cascade"
         }
       },
       "nativeEnums": {
@@ -431,7 +431,7 @@
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
-          "nullable": true,
+          "nullable": false,
           "mappedType": "integer"
         }
       },
@@ -455,7 +455,7 @@
           "localTableName": "public.schedule_date_override",
           "referencedColumnNames": ["id"],
           "referencedTableName": "public.schedule",
-          "deleteRule": "cascade"
+          "updateRule": "cascade"
         }
       },
       "nativeEnums": {

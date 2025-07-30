@@ -2,6 +2,7 @@ import {
   Opt,
   Entity,
   Filter,
+  Cascade,
   Property,
   ManyToOne,
   OneToMany,
@@ -28,6 +29,10 @@ export class Schedule extends BaseEntity {
   @Property({ default: false })
   isDefault?: boolean & Opt;
 
-  @OneToMany(() => ScheduleWeeklyHour, (weeklyHour) => weeklyHour.schedule)
+  @OneToMany({
+    entity: () => ScheduleWeeklyHour,
+    mappedBy: (hour) => hour.schedule,
+    cascade: [Cascade.REMOVE],
+  })
   weeklyHours = new Collection<ScheduleWeeklyHour>(this);
 }
