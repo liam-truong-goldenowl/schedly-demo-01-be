@@ -108,7 +108,15 @@
         "weekday": {
           "name": "weekday",
           "schema": "public",
-          "items": ["0", "1", "2", "3", "4", "5", "6"]
+          "items": [
+            "sunday",
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday"
+          ]
         },
         "language": {
           "name": "language",
@@ -215,7 +223,15 @@
         "weekday": {
           "name": "weekday",
           "schema": "public",
-          "items": ["0", "1", "2", "3", "4", "5", "6"]
+          "items": [
+            "sunday",
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday"
+          ]
         },
         "language": {
           "name": "language",
@@ -263,7 +279,15 @@
           "primary": false,
           "nullable": false,
           "nativeEnumName": "weekday",
-          "enumItems": ["0", "1", "2", "3", "4", "5", "6"],
+          "enumItems": [
+            "sunday",
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday"
+          ],
           "mappedType": "enum"
         },
         "start_time": {
@@ -323,7 +347,15 @@
         "weekday": {
           "name": "weekday",
           "schema": "public",
-          "items": ["0", "1", "2", "3", "4", "5", "6"]
+          "items": [
+            "sunday",
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday"
+          ]
         },
         "language": {
           "name": "language",
@@ -430,7 +462,15 @@
         "weekday": {
           "name": "weekday",
           "schema": "public",
-          "items": ["0", "1", "2", "3", "4", "5", "6"]
+          "items": [
+            "sunday",
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday"
+          ]
         },
         "language": {
           "name": "language",
@@ -535,7 +575,15 @@
         "weekday": {
           "name": "weekday",
           "schema": "public",
-          "items": ["0", "1", "2", "3", "4", "5", "6"]
+          "items": [
+            "sunday",
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday"
+          ]
         },
         "language": {
           "name": "language",
@@ -652,7 +700,15 @@
         "weekday": {
           "name": "weekday",
           "schema": "public",
-          "items": ["0", "1", "2", "3", "4", "5", "6"]
+          "items": [
+            "sunday",
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday"
+          ]
         },
         "language": {
           "name": "language",
@@ -666,7 +722,15 @@
     "weekday": {
       "name": "weekday",
       "schema": "public",
-      "items": ["0", "1", "2", "3", "4", "5", "6"]
+      "items": [
+        "sunday",
+        "monday",
+        "tuesday",
+        "wednesday",
+        "thursday",
+        "friday",
+        "saturday"
+      ]
     },
     "language": {
       "name": "language",
