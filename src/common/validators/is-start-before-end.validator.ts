@@ -16,6 +16,14 @@ export class IsBeforeConstraint implements ValidatorConstraintInterface {
       return true;
     }
 
+    // Validate time format HH:MM
+    const isValidTime = (timeStr: string) => /^\d{2}:\d{2}$/.test(timeStr);
+
+    // Let other validator handle validation if either value is not a valid time
+    if (!isValidTime(propertyValue) || !isValidTime(relatedValue)) {
+      return true;
+    }
+
     // Convert HH:MM strings to comparable format (e.g., minutes from midnight)
     const timeToMinutes = (timeStr: string) => {
       const [hours, minutes] = timeStr.split(':').map(Number);
