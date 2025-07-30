@@ -1,7 +1,3 @@
-import { OmitType } from '@nestjs/swagger';
+import { IntervalDto } from '@/common/dto/interval.dto';
 
-import { CreateDateOverrideDto } from './create-date-override.dto';
-
-export class UpdateDateOverrideDto extends OmitType(CreateDateOverrideDto, [
-  'date',
-]) {}
+export class UpdateDateOverrideDto extends IntervalDto {}

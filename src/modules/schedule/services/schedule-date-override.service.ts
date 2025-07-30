@@ -5,12 +5,15 @@ import {
   ForeignKeyConstraintViolationException,
 } from '@mikro-orm/postgresql';
 
+import { isOverlapping } from '@/utils/helpers/time';
+
 import { Schedule } from '../entities/schedule.entity';
 import { CreateDateOverrideDto } from '../dto/create-date-override.dto';
 import { UpdateDateOverrideDto } from '../dto/update-date-override.dto';
 import { ScheduleDateOverride } from '../entities/schedule-date-override.entity';
 import { ScheduleDateOverrideResponseDto } from '../dto/date-override-response.dto';
 import { ScheduleNotFoundException } from '../exceptions/schedule-not-found.exception';
+import { OverlappingIntervalsException } from '../exceptions/overlapping-intervals.exception';
 import { DateOverrideNotFoundException } from '../exceptions/date-override-not-found.exception';
 
 @Injectable()
@@ -20,32 +23,43 @@ export class ScheduleDateOverrideService {
     scheduleId: number;
     dateOverrideData: CreateDateOverrideDto;
   }) {
+    const { intervals } = dto.dateOverrideData;
+
+    if (intervals.length > 1) {
+      intervals.forEach((interval, index) => {
+        const nextIntervals = intervals.slice(index + 1);
+        nextIntervals.forEach((nextInterval) => {
+          if (isOverlapping(interval, nextInterval)) {
+            throw new OverlappingIntervalsException(interval, nextInterval);
+          }
+        });
+      });
+    }
+
     try {
-      const existingOverride = await this.em.findOne(ScheduleDateOverride, {
+      const existingOverrides = await this.em.find(ScheduleDateOverride, {
         schedule: { id: dto.scheduleId },
         date: dto.dateOverrideData.date,
       });
 
-      if (existingOverride) {
-        existingOverride.startTime = dto.dateOverrideData.startTime;
-        existingOverride.endTime = dto.dateOverrideData.endTime;
-
-        await this.em.flush();
-
-        return ScheduleDateOverrideResponseDto.fromEntity(existingOverride);
+      if (existingOverrides.length > 0) {
+        this.em.remove(existingOverrides);
       }
 
-      // if no existing override, create a new one
-      const dateOverride = this.em.create(ScheduleDateOverride, {
-        date: new Date(dto.dateOverrideData.date),
-        startTime: dto.dateOverrideData.startTime,
-        endTime: dto.dateOverrideData.endTime,
-        schedule: this.em.getReference(Schedule, dto.scheduleId),
-      });
+      const newOverrides = intervals.map((interval) =>
+        this.em.create(ScheduleDateOverride, {
+          date: new Date(dto.dateOverrideData.date),
+          startTime: interval.startTime,
+          endTime: interval.endTime,
+          schedule: this.em.getReference(Schedule, dto.scheduleId),
+        }),
+      );
 
       await this.em.flush();
 
-      return ScheduleDateOverrideResponseDto.fromEntity(dateOverride);
+      return newOverrides.map((override) =>
+        ScheduleDateOverrideResponseDto.fromEntity(override),
+      );
     } catch (error) {
       if (error instanceof ForeignKeyConstraintViolationException) {
         throw new ScheduleNotFoundException(dto.scheduleId);

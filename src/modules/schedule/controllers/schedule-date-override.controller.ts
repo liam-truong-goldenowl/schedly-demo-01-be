@@ -35,7 +35,7 @@ export class ScheduleDateOverrideController {
 
   @Post()
   @ApiBody({ type: CreateDateOverrideDto })
-  @ApiResponse({ type: ScheduleDateOverrideResponseDto })
+  @ApiResponse({ type: [ScheduleDateOverrideResponseDto] })
   create(
     @Param('scheduleId', ParseIntPipe) scheduleId: number,
     @Body() body: CreateDateOverrideDto,

@@ -1,8 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsDateString } from 'class-validator';
+import { IsNotEmpty, IsDateString } from 'class-validator';
 
-import { IsTime } from '@/common/validators/is-time.validator';
-import { IsBefore } from '@/common/validators/is-start-before-end.validator';
+import { IntervalDto } from '@/common/dto/interval.dto';
 
 export class CreateDateOverrideDto {
   @IsDateString()
@@ -12,12 +11,9 @@ export class CreateDateOverrideDto {
   })
   date: string;
 
-  @IsTime()
-  @IsBefore('endTime')
-  @ApiProperty({ example: '09:00' })
-  startTime: string;
-
-  @IsTime()
-  @ApiProperty({ example: '17:00' })
-  endTime: string;
+  @IsNotEmpty()
+  @ApiProperty({
+    type: [IntervalDto],
+  })
+  intervals: IntervalDto[];
 }
