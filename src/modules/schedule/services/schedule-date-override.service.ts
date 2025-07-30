@@ -7,6 +7,7 @@ import {
 
 import { Schedule } from '../entities/schedule.entity';
 import { CreateDateOverrideDto } from '../dto/create-date-override.dto';
+import { UpdateDateOverrideDto } from '../dto/update-date-override.dto';
 import { ScheduleDateOverride } from '../entities/schedule-date-override.entity';
 import { ScheduleDateOverrideResponseDto } from '../dto/date-override-response.dto';
 import { ScheduleNotFoundException } from '../exceptions/schedule-not-found.exception';
@@ -52,7 +53,31 @@ export class ScheduleDateOverrideService {
     }
   }
 
-  async update() {}
+  async update(dto: {
+    scheduleId: number;
+    dateOverrideId: number;
+    dateOverrideData: UpdateDateOverrideDto;
+  }) {
+    try {
+      const dateOverride = await this.em.findOneOrFail(ScheduleDateOverride, {
+        id: dto.dateOverrideId,
+        schedule: { id: dto.scheduleId },
+      });
+
+      this.em.assign(dateOverride, {
+        startTime: dto.dateOverrideData.startTime,
+        endTime: dto.dateOverrideData.endTime,
+      });
+
+      await this.em.flush();
+
+      return ScheduleDateOverrideResponseDto.fromEntity(dateOverride);
+    } catch (error) {
+      if (error instanceof NotFoundError) {
+        throw new DateOverrideNotFoundException(dto.dateOverrideId);
+      }
+    }
+  }
 
   async delete(dto: { scheduleId: number; dateOverrideId: number }) {
     try {

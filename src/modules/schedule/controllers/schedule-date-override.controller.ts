@@ -13,6 +13,7 @@ import { JwtAuthGuard } from '@/modules/auth/guards/jwt-auth.guard';
 import { UserOwnsResourceGuard } from '@/common/guards/user-owns-resource.guard';
 
 import { CreateDateOverrideDto } from '../dto/create-date-override.dto';
+import { UpdateDateOverrideDto } from '../dto/update-date-override.dto';
 import { UserOwnsScheduleGuard } from '../guards/user-owns-schedule.guard';
 import { ScheduleDateOverrideService } from '../services/schedule-date-override.service';
 
@@ -46,5 +47,15 @@ export class ScheduleDateOverrideController {
   }
 
   @Patch(':id')
-  update() {}
+  update(
+    @Param('scheduleId', ParseIntPipe) scheduleId: number,
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: UpdateDateOverrideDto,
+  ) {
+    return this.dateOverrideService.update({
+      scheduleId,
+      dateOverrideId: id,
+      dateOverrideData: body,
+    });
+  }
 }
