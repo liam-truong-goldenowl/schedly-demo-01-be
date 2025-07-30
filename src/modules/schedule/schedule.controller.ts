@@ -1,41 +1,20 @@
-import {
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  Controller,
-} from '@nestjs/common';
+import { Get, Param, UseGuards, Controller } from '@nestjs/common';
+
+import { UserOwnsResourceGuard } from '@/common/guards/user-owns-resource.guard';
+
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+
+import type { User } from '../user/entities/user.entity';
 
 import { ScheduleService } from './schedule.service';
 
-@Controller('schedule')
+@Controller('users/:userId/schedules')
+@UseGuards(JwtAuthGuard, UserOwnsResourceGuard)
 export class ScheduleController {
   constructor(private readonly scheduleService: ScheduleService) {}
 
-  @Post()
-  create() {
-    return this.scheduleService.create();
-  }
-
   @Get()
-  findAll() {
-    return this.scheduleService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.scheduleService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string) {
-    return this.scheduleService.update(+id);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.scheduleService.remove(+id);
+  findAll(@Param('userId') userId: User['id']) {
+    return this.scheduleService.findAllForUser({ userId });
   }
 }

@@ -1,24 +1,19 @@
 import { Injectable } from '@nestjs/common';
+import { EntityManager } from '@mikro-orm/postgresql';
+
+import type { User } from '../user/entities/user.entity';
+
+import { Schedule } from './entities/schedule.entity';
 
 @Injectable()
 export class ScheduleService {
-  create() {
-    return 'This action adds a new schedule';
-  }
+  constructor(private em: EntityManager) {}
 
-  findAll() {
-    return `This action returns all schedule`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} schedule`;
-  }
-
-  update(id: number) {
-    return `This action updates a #${id} schedule`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} schedule`;
+  async findAllForUser({ userId }: { userId: User['id'] }) {
+    const schedules = await this.em.findAll(Schedule, {
+      filters: { ownBy: { id: userId } },
+      populate: ['weeklyHours'],
+    });
+    return schedules;
   }
 }
