@@ -35,7 +35,15 @@ export class ScheduleDateOverrideController {
   }
 
   @Delete(':id')
-  delete() {}
+  delete(
+    @Param('scheduleId', ParseIntPipe) scheduleId: number,
+    @Param('id', ParseIntPipe) id: number,
+  ) {
+    return this.dateOverrideService.delete({
+      scheduleId,
+      dateOverrideId: id,
+    });
+  }
 
   @Patch(':id')
   update() {}

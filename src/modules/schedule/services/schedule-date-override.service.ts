@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import {
   EntityManager,
+  NotFoundError,
   ForeignKeyConstraintViolationException,
 } from '@mikro-orm/postgresql';
 
@@ -9,6 +10,7 @@ import { CreateDateOverrideDto } from '../dto/create-date-override.dto';
 import { ScheduleDateOverride } from '../entities/schedule-date-override.entity';
 import { ScheduleDateOverrideResponseDto } from '../dto/date-override-response.dto';
 import { ScheduleNotFoundException } from '../exceptions/schedule-not-found.exception';
+import { DateOverrideNotFoundException } from '../exceptions/date-override-not-found.exception';
 
 @Injectable()
 export class ScheduleDateOverrideService {
@@ -51,5 +53,19 @@ export class ScheduleDateOverrideService {
   }
 
   async update() {}
-  async delete() {}
+
+  async delete(dto: { scheduleId: number; dateOverrideId: number }) {
+    try {
+      const dateOverride = await this.em.findOneOrFail(ScheduleDateOverride, {
+        id: dto.dateOverrideId,
+        schedule: { id: dto.scheduleId },
+      });
+
+      await this.em.removeAndFlush(dateOverride);
+    } catch (error) {
+      if (error instanceof NotFoundError) {
+        throw new DateOverrideNotFoundException(dto.dateOverrideId);
+      }
+    }
+  }
 }
