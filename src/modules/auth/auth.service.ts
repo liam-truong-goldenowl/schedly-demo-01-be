@@ -6,7 +6,6 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { UserService } from '../user/user.service';
 import { User } from '../user/entities/user.entity';
 
-import { Account } from './entities/account.entity';
 import { AccountRepository } from './account.repository';
 import { TokenResponseDto } from './dto/token-response.dto';
 import { SignUpResponseDto } from './dto/signup-response.dto';
@@ -40,7 +39,6 @@ export class AuthService {
 
   public async signUp(userInfo: SignUpDto): Promise<SignUpResponseDto> {
     const user = await this.userService.create(userInfo);
-    await this.createAccount({ userId: user.id, password: userInfo.password });
     return new SignUpResponseDto(user);
   }
 
@@ -171,23 +169,11 @@ export class AuthService {
     return { accessToken, refreshToken };
   }
 
-  public async createAccount({
-    userId,
-    password,
-  }: {
-    userId: User['id'];
-    password: string;
-  }): Promise<void> {
-    const account = this.em.create(Account, { user: userId });
-    account.setPassword(password);
-    await this.em.flush();
-  }
-
   private async updateAccountRefreshToken({
     userId,
     refreshToken,
   }: {
-    userId: User['id'];
+    userId: number;
     refreshToken: string;
   }): Promise<void> {
     const account = await this.accountRepository.findOne({

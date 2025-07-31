@@ -1,6 +1,7 @@
 import { randAlpha } from '@ngneat/falso';
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 import { createPublicSlug } from '@/utils/helpers/strings';
 
@@ -8,6 +9,7 @@ import { User } from './entities/user.entity';
 import { UserRepository } from './user.repository';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UserResponseDto } from './dto/user-response.dto';
+import { UserCreatedEvent } from './events/user-created.event';
 import { UserNotFoundException } from './exceptions/user-not-found';
 import { CreateUserResponseDto } from './dto/create-user-response.dto';
 import { UserAlreadyExistsException } from './exceptions/user-already-exists';
@@ -16,6 +18,7 @@ import { UserAlreadyExistsException } from './exceptions/user-already-exists';
 export class UserService {
   constructor(
     private em: EntityManager,
+    private eventEmitter: EventEmitter2,
     private userRepository: UserRepository,
   ) {}
 
@@ -50,6 +53,15 @@ export class UserService {
     const user = new User({ email, name, publicSlug });
 
     await this.em.persistAndFlush(user);
+
+    await this.eventEmitter.emitAsync(
+      'user.created',
+      new UserCreatedEvent({
+        id: user.id,
+        timezone: dto.timezone,
+        password: dto.password,
+      }),
+    );
 
     return new CreateUserResponseDto(user);
   }

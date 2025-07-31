@@ -1,7 +1,7 @@
 import { ApiBody, ApiResponse } from '@nestjs/swagger';
 import {
-  Res,
   Get,
+  Res,
   Body,
   Post,
   HttpCode,
@@ -30,8 +30,8 @@ import { AuthService } from './auth.service';
 import { SignUpDto } from './dto/signup.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { LocalAuthGuard } from './guards/local-auth.guard';
-import { TokenResponseDto } from './dto/token-response.dto';
 import { LoginResponseDto } from './dto/login-response.dto';
+import { TokenResponseDto } from './dto/token-response.dto';
 import { SignUpResponseDto } from './dto/signup-response.dto';
 import { JwtRefreshAuthGuard } from './guards/jwt-refresh-auth.guard';
 
@@ -84,7 +84,7 @@ export class AuthController {
   async refreshTokens(
     @CurrentUser('id') userId: ReqUser['id'],
     @Res({ passthrough: true }) res: Response,
-    @Cookies('refreshToken') refreshToken: string,
+    @Cookies(REFRESH_TOKEN_KEY) refreshToken: string,
   ): Promise<TokenResponseDto> {
     const tokens = await this.authService.refreshTokens({
       userId,

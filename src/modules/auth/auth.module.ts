@@ -11,11 +11,18 @@ import { Account } from './entities/account.entity';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { LocalStrategy } from './strategies/local.strategy';
 import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
+import { UserCreatedListener } from './listeners/user-created.listener';
 
 @Module({
   exports: [AuthService],
   controllers: [AuthController],
-  providers: [AuthService, LocalStrategy, JwtStrategy, JwtRefreshStrategy],
+  providers: [
+    JwtStrategy,
+    AuthService,
+    LocalStrategy,
+    JwtRefreshStrategy,
+    UserCreatedListener,
+  ],
   imports: [
     JwtModule,
     UserModule,

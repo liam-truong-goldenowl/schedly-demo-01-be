@@ -105,6 +105,19 @@
       "checks": [],
       "foreignKeys": {},
       "nativeEnums": {
+        "weekday": {
+          "name": "weekday",
+          "schema": "public",
+          "items": [
+            "sunday",
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday"
+          ]
+        },
         "language": {
           "name": "language",
           "schema": "public",
@@ -179,7 +192,7 @@
           "autoincrement": false,
           "primary": false,
           "nullable": false,
-          "default": "true",
+          "default": "false",
           "mappedType": "boolean"
         }
       },
@@ -207,6 +220,258 @@
         }
       },
       "nativeEnums": {
+        "weekday": {
+          "name": "weekday",
+          "schema": "public",
+          "items": [
+            "sunday",
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday"
+          ]
+        },
+        "language": {
+          "name": "language",
+          "schema": "public",
+          "items": ["en", "vi"]
+        }
+      }
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "unsigned": false,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "weekday": {
+          "name": "weekday",
+          "type": "weekday",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "nativeEnumName": "weekday",
+          "enumItems": [
+            "sunday",
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday"
+          ],
+          "mappedType": "enum"
+        },
+        "start_time": {
+          "name": "start_time",
+          "type": "time(0)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 0,
+          "mappedType": "time"
+        },
+        "end_time": {
+          "name": "end_time",
+          "type": "time(0)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 0,
+          "mappedType": "time"
+        },
+        "schedule_id": {
+          "name": "schedule_id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        }
+      },
+      "name": "schedule_weekly_hour",
+      "schema": "public",
+      "indexes": [
+        {
+          "keyName": "schedule_weekly_hour_pkey",
+          "columnNames": ["id"],
+          "composite": false,
+          "constraint": true,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "schedule_weekly_hour_schedule_id_foreign": {
+          "constraintName": "schedule_weekly_hour_schedule_id_foreign",
+          "columnNames": ["schedule_id"],
+          "localTableName": "public.schedule_weekly_hour",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "public.schedule",
+          "updateRule": "cascade"
+        }
+      },
+      "nativeEnums": {
+        "weekday": {
+          "name": "weekday",
+          "schema": "public",
+          "items": [
+            "sunday",
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday"
+          ]
+        },
+        "language": {
+          "name": "language",
+          "schema": "public",
+          "items": ["en", "vi"]
+        }
+      }
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "unsigned": false,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "date": {
+          "name": "date",
+          "type": "date",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 0,
+          "mappedType": "date"
+        },
+        "start_time": {
+          "name": "start_time",
+          "type": "time(0)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 0,
+          "mappedType": "time"
+        },
+        "end_time": {
+          "name": "end_time",
+          "type": "time(0)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 0,
+          "mappedType": "time"
+        },
+        "schedule_id": {
+          "name": "schedule_id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        }
+      },
+      "name": "schedule_date_override",
+      "schema": "public",
+      "indexes": [
+        {
+          "keyName": "schedule_date_override_pkey",
+          "columnNames": ["id"],
+          "composite": false,
+          "constraint": true,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "schedule_date_override_schedule_id_foreign": {
+          "constraintName": "schedule_date_override_schedule_id_foreign",
+          "columnNames": ["schedule_id"],
+          "localTableName": "public.schedule_date_override",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "public.schedule",
+          "updateRule": "cascade"
+        }
+      },
+      "nativeEnums": {
+        "weekday": {
+          "name": "weekday",
+          "schema": "public",
+          "items": [
+            "sunday",
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday"
+          ]
+        },
         "language": {
           "name": "language",
           "schema": "public",
@@ -307,6 +572,19 @@
         }
       },
       "nativeEnums": {
+        "weekday": {
+          "name": "weekday",
+          "schema": "public",
+          "items": [
+            "sunday",
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday"
+          ]
+        },
         "language": {
           "name": "language",
           "schema": "public",
@@ -419,6 +697,19 @@
         }
       },
       "nativeEnums": {
+        "weekday": {
+          "name": "weekday",
+          "schema": "public",
+          "items": [
+            "sunday",
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday"
+          ]
+        },
         "language": {
           "name": "language",
           "schema": "public",
@@ -428,6 +719,19 @@
     }
   ],
   "nativeEnums": {
+    "weekday": {
+      "name": "weekday",
+      "schema": "public",
+      "items": [
+        "sunday",
+        "monday",
+        "tuesday",
+        "wednesday",
+        "thursday",
+        "friday",
+        "saturday"
+      ]
+    },
     "language": {
       "name": "language",
       "schema": "public",
