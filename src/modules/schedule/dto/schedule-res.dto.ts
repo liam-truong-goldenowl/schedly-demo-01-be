@@ -5,10 +5,10 @@ import { Weekday } from '@/common/enums';
 
 import { Schedule } from '../entities/schedule.entity';
 
-import { ScheduleDateOverrideResponseDto } from './date-override-response.dto';
-import { ScheduleWeeklyHourResponseDto } from './schedule-weekly-hour-response.dto';
+import { ScheduleDateOverrideResDto } from './date-override-res.dto';
+import { ScheduleWeeklyHourResDto } from './schedule-weekly-hour-res.dto';
 
-export class ScheduleResponseDto {
+export class ScheduleResDto {
   @Expose()
   @ApiProperty()
   id: number;
@@ -26,9 +26,9 @@ export class ScheduleResponseDto {
   isDefault: boolean;
 
   @Expose()
-  @Type(() => ScheduleWeeklyHourResponseDto)
+  @Type(() => ScheduleWeeklyHourResDto)
   @ApiProperty({
-    type: [ScheduleWeeklyHourResponseDto],
+    type: [ScheduleWeeklyHourResDto],
     example: [
       {
         id: 1,
@@ -44,12 +44,12 @@ export class ScheduleResponseDto {
       },
     ],
   })
-  weeklyHours: ScheduleWeeklyHourResponseDto[];
+  weeklyHours: ScheduleWeeklyHourResDto[];
 
   @Expose()
-  @Type(() => ScheduleDateOverrideResponseDto)
+  @Type(() => ScheduleDateOverrideResDto)
   @ApiProperty({
-    type: [ScheduleDateOverrideResponseDto],
+    type: [ScheduleDateOverrideResDto],
     example: [
       {
         id: 1,
@@ -65,11 +65,11 @@ export class ScheduleResponseDto {
       },
     ],
   })
-  dateOverrides: ScheduleDateOverrideResponseDto[];
+  dateOverrides: ScheduleDateOverrideResDto[];
 
-  static fromEntity(schedule: Schedule): ScheduleResponseDto {
+  static fromEntity(schedule: Schedule): ScheduleResDto {
     return plainToInstance(
-      ScheduleResponseDto,
+      ScheduleResDto,
       {
         ...schedule,
         weeklyHours: schedule.weeklyHours.getItems(),

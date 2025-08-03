@@ -5,7 +5,7 @@ import { Weekday } from '@/common/enums';
 
 import { ScheduleWeeklyHour } from '../entities/schedule-weekly-hour.entity';
 
-export class ScheduleWeeklyHourResponseDto {
+export class ScheduleWeeklyHourResDto {
   @Expose()
   @ApiProperty({ example: 1 })
   id: number;
@@ -22,10 +22,8 @@ export class ScheduleWeeklyHourResponseDto {
   @ApiProperty({ example: '17:00' })
   endTime: string;
 
-  static fromEntity(
-    weeklyHour: ScheduleWeeklyHour,
-  ): ScheduleWeeklyHourResponseDto {
-    return plainToInstance(ScheduleWeeklyHourResponseDto, weeklyHour, {
+  static fromEntity(weeklyHour: ScheduleWeeklyHour): ScheduleWeeklyHourResDto {
+    return plainToInstance(ScheduleWeeklyHourResDto, weeklyHour, {
       excludeExtraneousValues: true,
     });
   }

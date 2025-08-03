@@ -3,7 +3,7 @@ import { Expose, plainToInstance } from 'class-transformer';
 
 import { ScheduleDateOverride } from '../entities/schedule-date-override.entity';
 
-export class ScheduleDateOverrideResponseDto {
+export class ScheduleDateOverrideResDto {
   @Expose()
   @ApiProperty({ example: 1 })
   id: number;
@@ -22,8 +22,8 @@ export class ScheduleDateOverrideResponseDto {
 
   static fromEntity(
     dateOverride: ScheduleDateOverride,
-  ): ScheduleDateOverrideResponseDto {
-    return plainToInstance(ScheduleDateOverrideResponseDto, dateOverride, {
+  ): ScheduleDateOverrideResDto {
+    return plainToInstance(ScheduleDateOverrideResDto, dateOverride, {
       excludeExtraneousValues: true,
     });
   }

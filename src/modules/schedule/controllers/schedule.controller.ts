@@ -16,10 +16,10 @@ import {
 import { JwtAuthGuard } from '@/modules/auth/guards/jwt-auth.guard';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
 
+import { ScheduleResDto } from '../dto/schedule-res.dto';
 import { CreateScheduleDto } from '../dto/create-schedule.dto';
 import { UpdateScheduleDto } from '../dto/update-schedule.dto';
 import { ScheduleService } from '../services/schedule.service';
-import { ScheduleResponseDto } from '../dto/schedule-response.dto';
 import { UserOwnsScheduleGuard } from '../guards/user-owns-schedule.guard';
 
 @Controller('/schedules')
@@ -28,29 +28,29 @@ export class ScheduleController {
   constructor(private readonly scheduleService: ScheduleService) {}
 
   @Get()
-  @ApiResponse({ type: [ScheduleResponseDto] })
+  @ApiResponse({ type: [ScheduleResDto] })
   findAll(@CurrentUser() userId: number) {
     return this.scheduleService.findAllForUser({ userId });
   }
 
   @Post()
   @ApiBody({ type: CreateScheduleDto })
-  @ApiResponse({ type: ScheduleResponseDto })
+  @ApiResponse({ type: ScheduleResDto })
   create(
     @CurrentUser() userId: number,
     @Body() body: CreateScheduleDto,
-  ): Promise<ScheduleResponseDto> {
+  ): Promise<ScheduleResDto> {
     return this.scheduleService.createForUser({ userId, scheduleData: body });
   }
 
   @Patch(':id')
   @UseGuards(UserOwnsScheduleGuard)
   @ApiBody({ type: UpdateScheduleDto })
-  @ApiResponse({ type: ScheduleResponseDto })
+  @ApiResponse({ type: ScheduleResDto })
   update(
     @CurrentUser() userId: number,
-    @Param('id', ParseIntPipe) id: number,
     @Body() body: UpdateScheduleDto,
+    @Param('id', ParseIntPipe) id: number,
   ) {
     return this.scheduleService.updateForUser({
       userId,
@@ -66,7 +66,6 @@ export class ScheduleController {
     @CurrentUser('id') userId: number,
     @Param('id', ParseIntPipe) id: number,
   ) {
-    console.log('ScheduleID', id, 'UserID', userId);
     return this.scheduleService.deleteFromUser({ userId, scheduleId: id });
   }
 }

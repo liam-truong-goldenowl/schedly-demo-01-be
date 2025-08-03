@@ -12,7 +12,7 @@ import { ScheduleWeeklyHour } from '../entities/schedule-weekly-hour.entity';
 export class ScheduleCreatedListener {
   constructor(private em: EntityManager) {}
 
-  @OnEvent('schedule.created')
+  @OnEvent(ScheduleCreatedEvent.eventName)
   async handleScheduleCreatedEvent(event: ScheduleCreatedEvent) {
     // new weekly hours for mon to fri
     const defaultStart = '09:00';
@@ -21,7 +21,7 @@ export class ScheduleCreatedListener {
     const commonProperties = {
       endTime: defaultEnd,
       startTime: defaultStart,
-      schedule: this.em.getReference(Schedule, event.schedule.id),
+      schedule: this.em.getReference(Schedule, event.payload.id),
     };
 
     const defaultWeekdays = [

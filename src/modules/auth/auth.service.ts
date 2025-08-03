@@ -3,19 +3,20 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { EntityManager } from '@mikro-orm/postgresql';
 
+import type { IJwtConfig } from '@/config/jwt';
 import type { IReqUser } from '@/common/interfaces';
 
 import { UserService } from '../user/user.service';
 import { User } from '../user/entities/user.entity';
 
-import { AccountRepository } from './account.repository';
-import { TokenResponseDto } from './dto/token-response.dto';
-import { SignUpResponseDto } from './dto/signup-response.dto';
+import { LoginResDto } from './dto/login-res.dto';
+import { TokenResDto } from './dto/token-res.dto';
+import { SignUpResDto } from './dto/signup-res.dto';
+import { Account } from './entities/account.entity';
 import { WrongCredentialsException } from './exceptions/wrong-credentials';
 
 import type { SignUpDto } from './dto/signup.dto';
 import type { ITokenPayload } from './auth.interface';
-import type { LoginResponseDto } from './dto/login-response.dto';
 
 @Injectable()
 export class AuthService {
@@ -24,10 +25,9 @@ export class AuthService {
     private jwtService: JwtService,
     private userService: UserService,
     private confService: ConfigService,
-    private accountRepo: AccountRepository,
   ) {}
 
-  async login(attemptUser: IReqUser): Promise<LoginResponseDto> {
+  async login(attemptUser: IReqUser): Promise<LoginResDto> {
     const tokens = await this.generateTokens(attemptUser);
 
     await this.updateAccountRefreshToken({
@@ -35,24 +35,23 @@ export class AuthService {
       refreshToken: tokens.refreshToken,
     });
 
-    return tokens;
+    return LoginResDto.fromTokens(tokens);
   }
 
-  async signUp(userInfo: SignUpDto): Promise<SignUpResponseDto> {
+  async signUp(userInfo: SignUpDto): Promise<SignUpResDto> {
     const user = await this.userService.create(userInfo);
-    return new SignUpResponseDto(user);
+    return SignUpResDto.fromUser(user);
   }
 
   async logout(userId: number): Promise<void> {
-    const account = await this.accountRepo.findOne({
-      user: { id: userId },
-    });
+    const account = await this.em.findOne(Account, { user: { id: userId } });
 
     if (!account) {
       throw new WrongCredentialsException();
     }
 
     await account.revokeRefreshToken();
+
     await this.em.flush();
   }
 
@@ -62,10 +61,10 @@ export class AuthService {
   }: {
     userId: number;
     refreshToken: string;
-  }): Promise<TokenResponseDto> {
+  }): Promise<TokenResDto> {
     const [user, account] = await Promise.all([
-      this.userService.findOneById(userId),
-      this.accountRepo.findOne({ user: { id: userId } }),
+      this.em.findOne(User, { id: userId }),
+      this.em.findOne(Account, { user: { id: userId } }),
     ]);
 
     const isValidRefreshToken = await account?.verifyRefreshToken(refreshToken);
@@ -84,22 +83,23 @@ export class AuthService {
       refreshToken: tokens.refreshToken,
     });
 
-    return tokens;
+    return TokenResDto.fromTokens(tokens);
   }
 
   public async validateUser(credentials: {
     email: string;
     password: string;
   }): Promise<User> {
-    const user = await this.userService.findOneByEmail(credentials.email);
+    const user = await this.em.findOne(User, { email: credentials.email });
 
     if (!user) {
       throw new WrongCredentialsException();
     }
 
-    const account = await this.accountRepo.findOne({
+    const account = await this.em.findOne(Account, {
       user: { id: user.id },
     });
+
     const isCorrectPassword = await account?.verifyPassword(
       credentials.password,
     );
@@ -112,7 +112,7 @@ export class AuthService {
   }
 
   public async validateJwtUser(credentials: { id: number }): Promise<User> {
-    const user = await this.userService.findOneById(credentials.id);
+    const user = await this.em.findOne(User, { id: credentials.id });
 
     if (!user) {
       throw new WrongCredentialsException();
@@ -121,22 +121,23 @@ export class AuthService {
     return user;
   }
 
-  public async validateJwtRefreshUser(credentials: {
-    userId: User['id'];
+  public async validateJwtRefreshUser({
+    userId,
+    refreshToken,
+  }: {
+    userId: number;
     refreshToken: string;
   }): Promise<User> {
-    const user = await this.userService.findOneById(credentials.userId);
+    const [user, account] = await Promise.all([
+      this.em.findOne(User, { id: userId }),
+      this.em.findOne(Account, { user: { id: userId } }),
+    ]);
 
     if (!user) {
       throw new WrongCredentialsException();
     }
 
-    const account = await this.accountRepo.findOne({
-      user: { id: user.id },
-    });
-    const refreshTokenMatches = await account?.verifyRefreshToken(
-      credentials.refreshToken,
-    );
+    const refreshTokenMatches = await account?.verifyRefreshToken(refreshToken);
 
     if (!refreshTokenMatches) {
       throw new WrongCredentialsException();
@@ -151,12 +152,7 @@ export class AuthService {
       expiresIn: accessTokenExpiresIn,
       refreshSecret: refreshTokenSecret,
       refreshExpiresIn: refreshTokenExpiresIn,
-    } = this.confService.getOrThrow<{
-      secret: string;
-      expiresIn: string;
-      refreshSecret: string;
-      refreshExpiresIn: string;
-    }>('jwt');
+    } = this.confService.getOrThrow<IJwtConfig>('jwt');
 
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(payload, {
@@ -179,11 +175,10 @@ export class AuthService {
     userId: number;
     refreshToken: string;
   }): Promise<void> {
-    const account = await this.accountRepo.findOne({
-      user: { id: userId },
-    });
+    const account = await this.em.findOne(Account, { user: { id: userId } });
 
     await account?.setRefreshToken(refreshToken);
+
     await this.em.flush();
   }
 }

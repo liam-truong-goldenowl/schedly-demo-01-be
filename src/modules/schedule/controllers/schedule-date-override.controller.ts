@@ -16,8 +16,8 @@ import { JwtAuthGuard } from '@/modules/auth/guards/jwt-auth.guard';
 
 import { CreateDateOverrideDto } from '../dto/create-date-override.dto';
 import { UpdateDateOverrideDto } from '../dto/update-date-override.dto';
+import { ScheduleDateOverrideResDto } from '../dto/date-override-res.dto';
 import { UserOwnsScheduleGuard } from '../guards/user-owns-schedule.guard';
-import { ScheduleDateOverrideResponseDto } from '../dto/date-override-response.dto';
 import { ScheduleDateOverrideService } from '../services/schedule-date-override.service';
 
 @Controller('schedules/:scheduleId/date-overrides')
@@ -29,7 +29,7 @@ export class ScheduleDateOverrideController {
 
   @Post()
   @ApiBody({ type: CreateDateOverrideDto })
-  @ApiResponse({ type: [ScheduleDateOverrideResponseDto] })
+  @ApiResponse({ type: [ScheduleDateOverrideResDto] })
   create(
     @Param('scheduleId', ParseIntPipe) scheduleId: number,
     @Body() body: CreateDateOverrideDto,
@@ -54,7 +54,7 @@ export class ScheduleDateOverrideController {
 
   @Patch(':id')
   @ApiBody({ type: UpdateDateOverrideDto })
-  @ApiResponse({ type: ScheduleDateOverrideResponseDto })
+  @ApiResponse({ type: ScheduleDateOverrideResDto })
   update(
     @Param('scheduleId', ParseIntPipe) scheduleId: number,
     @Param('id', ParseIntPipe) id: number,

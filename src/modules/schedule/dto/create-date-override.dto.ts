@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsDateString } from 'class-validator';
+import { IsDateString, ArrayNotEmpty } from 'class-validator';
 
 import { IntervalDto } from '@/common/dto/interval.dto';
 
@@ -11,7 +11,7 @@ export class CreateDateOverrideDto {
   })
   date: string;
 
-  @IsNotEmpty()
+  @ArrayNotEmpty()
   @ApiProperty({
     type: [IntervalDto],
   })

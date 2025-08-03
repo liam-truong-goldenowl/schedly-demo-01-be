@@ -9,94 +9,113 @@ import { Schedule } from '../entities/schedule.entity';
 import { CreateWeeklyHourDto } from '../dto/create-weekly-hour.dto';
 import { UpdateWeeklyHourDto } from '../dto/update-weekly-hour.dto';
 import { ScheduleWeeklyHour } from '../entities/schedule-weekly-hour.entity';
+import { ScheduleWeeklyHourResDto } from '../dto/schedule-weekly-hour-res.dto';
 import { OverlappingHoursException } from '../exceptions/overlapping-hours.exception';
 import { ScheduleNotFoundException } from '../exceptions/schedule-not-found.exception';
-import { ScheduleWeeklyHourResponseDto } from '../dto/schedule-weekly-hour-response.dto';
 import { WeeklyHourNotFoundException } from '../exceptions/weekly-hour-not-found.exception';
 
 @Injectable()
 export class ScheduleWeeklyHourService {
   constructor(private em: EntityManager) {}
 
-  async create(dto: {
+  async create({
+    scheduleId,
+    weeklyHourData,
+  }: {
     scheduleId: number;
     weeklyHourData: CreateWeeklyHourDto;
-  }) {
-    const overlappingHours = await this.em.findAll(ScheduleWeeklyHour, {
-      filters: {
-        overlappingHours: {
-          id: dto.scheduleId,
-          weekday: dto.weeklyHourData.weekday,
-          startTime: dto.weeklyHourData.startTime,
-          endTime: dto.weeklyHourData.endTime,
-        },
-      },
-      fields: ['id'],
+  }): Promise<ScheduleWeeklyHourResDto> {
+    const overlappingHoursCount = await this.em.count(ScheduleWeeklyHour, {
+      weekday: weeklyHourData.weekday,
+      schedule: { id: scheduleId },
+      startTime: { $lte: weeklyHourData.endTime },
+      endTime: { $gte: weeklyHourData.startTime },
     });
 
-    if (overlappingHours.length > 0) {
+    if (overlappingHoursCount > 0) {
       throw new OverlappingHoursException({
-        start: dto.weeklyHourData.startTime,
-        end: dto.weeklyHourData.endTime,
-        weekday: dto.weeklyHourData.weekday,
+        weekday: weeklyHourData.weekday,
+        start: weeklyHourData.startTime,
+        end: weeklyHourData.endTime,
       });
     }
 
     try {
       const weeklyHour = this.em.create(ScheduleWeeklyHour, {
-        schedule: this.em.getReference(Schedule, dto.scheduleId),
-        endTime: dto.weeklyHourData.endTime,
-        startTime: dto.weeklyHourData.startTime,
-        weekday: dto.weeklyHourData.weekday,
+        schedule: this.em.getReference(Schedule, scheduleId),
+        weekday: weeklyHourData.weekday,
+        endTime: weeklyHourData.endTime,
+        startTime: weeklyHourData.startTime,
       });
 
       await this.em.flush();
 
-      return ScheduleWeeklyHourResponseDto.fromEntity(weeklyHour);
+      return ScheduleWeeklyHourResDto.fromEntity(weeklyHour);
     } catch (error) {
+      /**
+       * If the schedule does not exist, we throw a ScheduleNotFoundException.
+       */
       if (error instanceof ForeignKeyConstraintViolationException) {
-        throw new ScheduleNotFoundException(dto.scheduleId);
+        throw new ScheduleNotFoundException(scheduleId);
       }
+
+      throw error;
     }
   }
 
-  async delete(dto: { scheduleId: number; weeklyHourId: number }) {
+  async delete({
+    scheduleId,
+    weeklyHourId,
+  }: {
+    scheduleId: number;
+    weeklyHourId: number;
+  }): Promise<void> {
     try {
       const weeklyHour = await this.em.findOneOrFail(ScheduleWeeklyHour, {
-        id: dto.weeklyHourId,
-        schedule: { id: dto.scheduleId },
+        id: weeklyHourId,
+        schedule: { id: scheduleId },
       });
 
       await this.em.removeAndFlush(weeklyHour);
     } catch (error) {
       if (error instanceof NotFoundError) {
-        throw new ScheduleNotFoundException(dto.weeklyHourId);
+        throw new ScheduleNotFoundException(weeklyHourId);
       }
+
+      throw error;
     }
   }
 
-  async update(dto: {
+  async update({
+    scheduleId,
+    weeklyHourId,
+    weeklyHourData,
+  }: {
     scheduleId: number;
     weeklyHourId: number;
     weeklyHourData: UpdateWeeklyHourDto;
-  }) {
+  }): Promise<ScheduleWeeklyHourResDto> {
     try {
       const weeklyHour = await this.em.findOneOrFail(ScheduleWeeklyHour, {
-        id: dto.weeklyHourId,
-        schedule: { id: dto.scheduleId },
+        id: weeklyHourId,
+        schedule: { id: scheduleId },
       });
 
-      weeklyHour.assign(dto.weeklyHourData);
+      weeklyHour.assign(weeklyHourData);
 
       await this.em.flush();
 
-      return ScheduleWeeklyHourResponseDto.fromEntity(weeklyHour);
+      return ScheduleWeeklyHourResDto.fromEntity(weeklyHour);
     } catch (error) {
       if (error instanceof ForeignKeyConstraintViolationException) {
-        throw new ScheduleNotFoundException(dto.scheduleId);
-      } else if (error instanceof NotFoundError) {
-        throw new WeeklyHourNotFoundException(dto.weeklyHourId);
+        throw new ScheduleNotFoundException(scheduleId);
       }
+
+      if (error instanceof NotFoundError) {
+        throw new WeeklyHourNotFoundException(weeklyHourId);
+      }
+
+      throw error;
     }
   }
 }
