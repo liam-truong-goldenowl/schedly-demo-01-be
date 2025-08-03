@@ -3,6 +3,8 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { EntityManager } from '@mikro-orm/postgresql';
 
+import type { IReqUser } from '@/common/interfaces';
+
 import { UserService } from '../user/user.service';
 import { User } from '../user/entities/user.entity';
 
@@ -12,8 +14,8 @@ import { SignUpResponseDto } from './dto/signup-response.dto';
 import { WrongCredentialsException } from './exceptions/wrong-credentials';
 
 import type { SignUpDto } from './dto/signup.dto';
+import type { ITokenPayload } from './auth.interface';
 import type { LoginResponseDto } from './dto/login-response.dto';
-import type { TokenPayload, LocalStrategy } from './auth.interface';
 
 @Injectable()
 export class AuthService {
@@ -22,28 +24,27 @@ export class AuthService {
     private jwtService: JwtService,
     private userService: UserService,
     private confService: ConfigService,
-    private accountRepository: AccountRepository,
+    private accountRepo: AccountRepository,
   ) {}
 
-  public async login({ id, email }: LocalStrategy): Promise<LoginResponseDto> {
-    const payload: TokenPayload = { id, email };
-    const tokens = await this.generateTokens(payload);
+  async login(attemptUser: IReqUser): Promise<LoginResponseDto> {
+    const tokens = await this.generateTokens(attemptUser);
 
     await this.updateAccountRefreshToken({
-      userId: id,
+      userId: attemptUser.id,
       refreshToken: tokens.refreshToken,
     });
 
     return tokens;
   }
 
-  public async signUp(userInfo: SignUpDto): Promise<SignUpResponseDto> {
+  async signUp(userInfo: SignUpDto): Promise<SignUpResponseDto> {
     const user = await this.userService.create(userInfo);
     return new SignUpResponseDto(user);
   }
 
-  public async logout(userId: number): Promise<void> {
-    const account = await this.accountRepository.findOne({
+  async logout(userId: number): Promise<void> {
+    const account = await this.accountRepo.findOne({
       user: { id: userId },
     });
 
@@ -55,7 +56,7 @@ export class AuthService {
     await this.em.flush();
   }
 
-  public async refreshTokens({
+  async refreshTokens({
     userId,
     refreshToken,
   }: {
@@ -64,7 +65,7 @@ export class AuthService {
   }): Promise<TokenResponseDto> {
     const [user, account] = await Promise.all([
       this.userService.findOneById(userId),
-      this.accountRepository.findOne({ user: { id: userId } }),
+      this.accountRepo.findOne({ user: { id: userId } }),
     ]);
 
     const isValidRefreshToken = await account?.verifyRefreshToken(refreshToken);
@@ -73,8 +74,10 @@ export class AuthService {
       throw new WrongCredentialsException();
     }
 
-    const payload: TokenPayload = { id: user.id, email: user.email };
-    const tokens = await this.generateTokens(payload);
+    const tokens = await this.generateTokens({
+      id: user.id,
+      email: user.email,
+    });
 
     await this.updateAccountRefreshToken({
       userId: user.id,
@@ -94,7 +97,7 @@ export class AuthService {
       throw new WrongCredentialsException();
     }
 
-    const account = await this.accountRepository.findOne({
+    const account = await this.accountRepo.findOne({
       user: { id: user.id },
     });
     const isCorrectPassword = await account?.verifyPassword(
@@ -108,8 +111,8 @@ export class AuthService {
     return user;
   }
 
-  public async validateJwtUser(credentials: { email: string }): Promise<User> {
-    const user = await this.userService.findOneByEmail(credentials.email);
+  public async validateJwtUser(credentials: { id: number }): Promise<User> {
+    const user = await this.userService.findOneById(credentials.id);
 
     if (!user) {
       throw new WrongCredentialsException();
@@ -128,7 +131,7 @@ export class AuthService {
       throw new WrongCredentialsException();
     }
 
-    const account = await this.accountRepository.findOne({
+    const account = await this.accountRepo.findOne({
       user: { id: user.id },
     });
     const refreshTokenMatches = await account?.verifyRefreshToken(
@@ -142,7 +145,7 @@ export class AuthService {
     return user;
   }
 
-  private async generateTokens(payload: TokenPayload) {
+  private async generateTokens(payload: ITokenPayload) {
     const {
       secret: accessTokenSecret,
       expiresIn: accessTokenExpiresIn,
@@ -176,7 +179,7 @@ export class AuthService {
     userId: number;
     refreshToken: string;
   }): Promise<void> {
-    const account = await this.accountRepository.findOne({
+    const account = await this.accountRepo.findOne({
       user: { id: userId },
     });
 

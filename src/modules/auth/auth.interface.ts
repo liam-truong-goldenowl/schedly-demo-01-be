@@ -1,7 +1,3 @@
-import { ReqUser } from '@/common/interfaces/req-user.interface';
+import { IReqUser } from '@/common/interfaces';
 
-export type LocalStrategy = ReqUser;
-
-export type JwtStrategy = ReqUser;
-
-export type TokenPayload = ReqUser;
+export type ITokenPayload = IReqUser;

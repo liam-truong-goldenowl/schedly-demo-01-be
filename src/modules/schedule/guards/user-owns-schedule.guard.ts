@@ -7,6 +7,8 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 
+import { IReqUser } from '@/common/interfaces';
+
 import { Schedule } from '../entities/schedule.entity';
 
 @Injectable()
@@ -15,12 +17,16 @@ export class UserOwnsScheduleGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<Request>();
-    const userIdParam = Number(request.params['userId']);
-    const scheduleIdParam = Number(request.params['scheduleId']);
+    const reqUser = request.user as IReqUser;
+
+    const userId = Number(reqUser.id);
+    const scheduleIdParam = Number(
+      request.params['scheduleId'] ?? request.params['id'],
+    );
 
     const ownedSchedule = await this.em.findOne(Schedule, {
       id: scheduleIdParam,
-      user: { id: userIdParam },
+      user: { id: userId },
     });
 
     if (!ownedSchedule) {

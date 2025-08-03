@@ -14,7 +14,7 @@ import {
 } from '@nestjs/common';
 
 import { JwtAuthGuard } from '@/modules/auth/guards/jwt-auth.guard';
-import { UserOwnsResourceGuard } from '@/common/guards/user-owns-resource.guard';
+import { CurrentUser } from '@/common/decorators/current-user.decorator';
 
 import { CreateScheduleDto } from '../dto/create-schedule.dto';
 import { UpdateScheduleDto } from '../dto/update-schedule.dto';
@@ -22,14 +22,14 @@ import { ScheduleService } from '../services/schedule.service';
 import { ScheduleResponseDto } from '../dto/schedule-response.dto';
 import { UserOwnsScheduleGuard } from '../guards/user-owns-schedule.guard';
 
-@Controller('users/:userId/schedules')
-@UseGuards(JwtAuthGuard, UserOwnsResourceGuard)
+@Controller('/schedules')
+@UseGuards(JwtAuthGuard)
 export class ScheduleController {
   constructor(private readonly scheduleService: ScheduleService) {}
 
   @Get()
   @ApiResponse({ type: [ScheduleResponseDto] })
-  findAll(@Param('userId', ParseIntPipe) userId: number) {
+  findAll(@CurrentUser() userId: number) {
     return this.scheduleService.findAllForUser({ userId });
   }
 
@@ -37,7 +37,7 @@ export class ScheduleController {
   @ApiBody({ type: CreateScheduleDto })
   @ApiResponse({ type: ScheduleResponseDto })
   create(
-    @Param('userId', ParseIntPipe) userId: number,
+    @CurrentUser() userId: number,
     @Body() body: CreateScheduleDto,
   ): Promise<ScheduleResponseDto> {
     return this.scheduleService.createForUser({ userId, scheduleData: body });
@@ -48,7 +48,7 @@ export class ScheduleController {
   @ApiBody({ type: UpdateScheduleDto })
   @ApiResponse({ type: ScheduleResponseDto })
   update(
-    @Param('userId', ParseIntPipe) userId: number,
+    @CurrentUser() userId: number,
     @Param('id', ParseIntPipe) id: number,
     @Body() body: UpdateScheduleDto,
   ) {
@@ -63,9 +63,10 @@ export class ScheduleController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(UserOwnsScheduleGuard)
   delete(
-    @Param('userId', ParseIntPipe) userId: number,
+    @CurrentUser('id') userId: number,
     @Param('id', ParseIntPipe) id: number,
   ) {
+    console.log('ScheduleID', id, 'UserID', userId);
     return this.scheduleService.deleteFromUser({ userId, scheduleId: id });
   }
 }

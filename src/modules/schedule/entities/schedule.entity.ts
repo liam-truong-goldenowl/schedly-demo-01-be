@@ -33,14 +33,14 @@ export class Schedule extends BaseEntity {
   @OneToMany({
     entity: () => ScheduleWeeklyHour,
     mappedBy: (hour) => hour.schedule,
-    cascade: [Cascade.REMOVE],
+    cascade: [Cascade.PERSIST, Cascade.REMOVE],
   })
   weeklyHours = new Collection<ScheduleWeeklyHour>(this);
 
   @OneToMany({
     entity: () => ScheduleDateOverride,
     mappedBy: (override) => override.schedule,
-    cascade: [Cascade.REMOVE],
+    cascade: [Cascade.PERSIST, Cascade.REMOVE],
   })
   dateOverrides = new Collection<ScheduleDateOverride>(this);
 }

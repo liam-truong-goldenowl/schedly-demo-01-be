@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { EntityManager } from '@mikro-orm/postgresql';
 
-import { UserCreatedEvent } from '@/modules/user/events/user-created.event';
+import type { UserCreatedEvent } from '@/modules/user/events/user-created.event';
 
 import { Account } from '../entities/account.entity';
 

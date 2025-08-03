@@ -1,4 +1,4 @@
-import { ApiBody, ApiParam, ApiResponse } from '@nestjs/swagger';
+import { ApiBody, ApiResponse } from '@nestjs/swagger';
 import {
   Body,
   Post,
@@ -13,7 +13,6 @@ import {
 } from '@nestjs/common';
 
 import { JwtAuthGuard } from '@/modules/auth/guards/jwt-auth.guard';
-import { UserOwnsResourceGuard } from '@/common/guards/user-owns-resource.guard';
 
 import { CreateDateOverrideDto } from '../dto/create-date-override.dto';
 import { UpdateDateOverrideDto } from '../dto/update-date-override.dto';
@@ -21,13 +20,8 @@ import { UserOwnsScheduleGuard } from '../guards/user-owns-schedule.guard';
 import { ScheduleDateOverrideResponseDto } from '../dto/date-override-response.dto';
 import { ScheduleDateOverrideService } from '../services/schedule-date-override.service';
 
-@Controller('users/:userId/schedules/:scheduleId/date-overrides')
-@UseGuards(JwtAuthGuard, UserOwnsResourceGuard, UserOwnsScheduleGuard)
-@ApiParam({
-  name: 'userId',
-  description: 'ID of the user who owns the schedule',
-  type: Number,
-})
+@Controller('schedules/:scheduleId/date-overrides')
+@UseGuards(JwtAuthGuard, UserOwnsScheduleGuard)
 export class ScheduleDateOverrideController {
   constructor(
     private readonly dateOverrideService: ScheduleDateOverrideService,

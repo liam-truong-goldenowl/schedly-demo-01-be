@@ -5,24 +5,26 @@ import { UnderscoreNamingStrategy } from '@mikro-orm/core';
 
 import { validateEnv } from '@/utils/helpers/envs';
 
-const env = validateEnv();
-
-export const MikroOrm = registerAs(
+export const mikroOrmConfig = registerAs(
   'mikro-orm',
-  (): MikroOrmModuleOptions => ({
-    host: env.DB_HOST,
-    port: env.DB_PORT,
-    dbName: env.DB_NAME,
-    user: env.DB_USERNAME,
-    password: env.DB_PASSWORD,
+  (): MikroOrmModuleOptions => {
+    const env = validateEnv();
 
-    driver: PostgreSqlDriver,
-    debug: env.isDevelopment,
-    driverOptions: { connection: { ssl: env.DB_SSL } },
+    return {
+      host: env.DB_HOST,
+      port: env.DB_PORT,
+      dbName: env.DB_NAME,
+      user: env.DB_USERNAME,
+      password: env.DB_PASSWORD,
 
-    entities: ['dist/**/*.entity.js'],
-    entitiesTs: ['src/**/*.entity.ts'],
+      driver: PostgreSqlDriver,
+      debug: env.isDevelopment,
+      driverOptions: { connection: { ssl: env.DB_SSL } },
 
-    namingStrategy: UnderscoreNamingStrategy,
-  }),
+      entities: ['dist/**/*.entity.js'],
+      entitiesTs: ['src/**/*.entity.ts'],
+
+      namingStrategy: UnderscoreNamingStrategy,
+    };
+  },
 );

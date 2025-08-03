@@ -67,7 +67,7 @@ export class ScheduleService {
 
     await this.em.flush();
 
-    await schedule.populate(['weeklyHours']);
+    await schedule.populate(['weeklyHours', 'dateOverrides']);
 
     return ScheduleResponseDto.fromEntity(schedule);
   }

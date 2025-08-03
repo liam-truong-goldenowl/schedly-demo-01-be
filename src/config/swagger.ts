@@ -1,18 +1,17 @@
 import { registerAs } from '@nestjs/config';
 
-export interface SwaggerConfig {
+export interface ISwaggerConfig {
   title: string;
   version: string;
   siteTitle: string;
   description: string;
 }
 
-export const swaggerConfig = registerAs(
-  'swagger',
-  (): SwaggerConfig => ({
-    siteTitle: 'Schedly API | Documentation',
-    title: 'Schedly API | Documentation',
-    description: 'The Schedly API Documentation',
+export const swaggerConfig = registerAs('swagger', (): ISwaggerConfig => {
+  return {
     version: '1.0',
-  }),
-);
+    title: 'Schedly API | Documentation',
+    siteTitle: 'Schedly API | Documentation',
+    description: 'The Schedly API Documentation',
+  };
+});

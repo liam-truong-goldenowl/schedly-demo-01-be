@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
-import { LogLevel, RequestMethod } from '@nestjs/common';
+import { RequestMethod } from '@nestjs/common';
 
+import type { LogLevel } from '@nestjs/common';
 import type { INestApplication } from '@nestjs/common';
 
 import { validateEnv } from '@/utils/helpers/envs';

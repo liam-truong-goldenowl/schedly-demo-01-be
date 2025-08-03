@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 import { IsTime } from '@/common/validators/is-time.validator';
-import { IsBefore } from '@/common/validators/is-start-before-end.validator';
+import { IsBefore } from '@/common/validators/is-before.validator';
 
 export class IntervalDto {
   @IsTime()

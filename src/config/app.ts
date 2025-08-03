@@ -2,16 +2,14 @@ import { registerAs } from '@nestjs/config';
 
 import { validateEnv } from '@/utils/helpers/envs';
 
-export interface AppConfig {
-  port: number;
+export interface IAppConfig {
   env: string;
+  port: number;
+  corsOrigin: string;
 }
 
-const env = validateEnv();
+export const appConfig = registerAs('app', (): IAppConfig => {
+  const env = validateEnv();
 
-export const appConfig = registerAs('app', (): AppConfig => {
-  return {
-    port: env.PORT,
-    env: env.NODE_ENV,
-  };
+  return { port: env.PORT, env: env.NODE_ENV, corsOrigin: env.CORS_ORIGIN };
 });
