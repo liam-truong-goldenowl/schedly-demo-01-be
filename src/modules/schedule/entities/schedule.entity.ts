@@ -2,7 +2,6 @@ import {
   Opt,
   Entity,
   Filter,
-  Cascade,
   Property,
   ManyToOne,
   OneToMany,
@@ -33,14 +32,14 @@ export class Schedule extends BaseEntity {
   @OneToMany({
     entity: () => ScheduleWeeklyHour,
     mappedBy: (hour) => hour.schedule,
-    cascade: [Cascade.PERSIST, Cascade.REMOVE],
+    orphanRemoval: true,
   })
   weeklyHours = new Collection<ScheduleWeeklyHour>(this);
 
   @OneToMany({
     entity: () => ScheduleDateOverride,
     mappedBy: (override) => override.schedule,
-    cascade: [Cascade.PERSIST, Cascade.REMOVE],
+    orphanRemoval: true,
   })
   dateOverrides = new Collection<ScheduleDateOverride>(this);
 }
