@@ -1,5 +1,4 @@
 {
-  "name": "demo-backend-template",
   "scripts": {
     "build": "nest build",
     "start": "nest start",
