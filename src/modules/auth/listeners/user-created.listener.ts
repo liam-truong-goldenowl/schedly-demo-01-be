@@ -10,9 +10,10 @@ import { Account } from '../entities/account.entity';
 export class UserCreatedListener {
   constructor(private em: EntityManager) {}
 
-  @OnEvent('user.created')
+  @OnEvent(UserCreatedEvent.eventName)
   async handleUserCreatedEvent(event: UserCreatedEvent) {
     const account = this.em.create(Account, { user: event.payload.id });
+
     account.setPassword(event.payload.password);
 
     await this.em.flush();

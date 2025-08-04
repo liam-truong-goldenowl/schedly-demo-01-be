@@ -10,7 +10,7 @@ import { UserSetting } from '../entities/user-setting.entity';
 export class UserCreatedListener {
   constructor(private em: EntityManager) {}
 
-  @OnEvent('user.created')
+  @OnEvent(UserCreatedEvent.eventName)
   async handleUserCreatedEvent(event: UserCreatedEvent) {
     this.em.create(UserSetting, {
       timezone: event.payload.timezone,

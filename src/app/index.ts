@@ -1,11 +1,13 @@
 import { NestFactory } from '@nestjs/core';
-import { LogLevel, RequestMethod } from '@nestjs/common';
+import { RequestMethod } from '@nestjs/common';
 
+import type { LogLevel } from '@nestjs/common';
 import type { INestApplication } from '@nestjs/common';
 
 import { validateEnv } from '@/utils/helpers/envs';
 
 import { AppModule } from './app.module';
+import { loadFilters } from './app.filter';
 import { genAPIDocument } from './app.document';
 import { loadMiddlewares } from './app.middleware';
 import { loadErrorHandling } from './app.exception';
@@ -33,6 +35,7 @@ export const initApplication = async (): Promise<INestApplication> => {
     genAPIDocument(app);
   }
 
+  loadFilters(app);
   loadMiddlewares(app);
   loadErrorHandling(app);
 

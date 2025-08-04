@@ -4,19 +4,14 @@ import {
   Property,
   BeforeCreate,
   BeforeUpdate,
-  EntityRepositoryType,
 } from '@mikro-orm/postgresql';
 
 import { BaseEntity } from '@/common/entities/base.entity';
 import { User } from '@/modules/user/entities/user.entity';
 import { verifyHash, generateHash } from '@/utils/helpers/hash';
 
-import { AccountRepository } from '../account.repository';
-
-@Entity({ repository: () => AccountRepository })
+@Entity()
 export class Account extends BaseEntity {
-  [EntityRepositoryType]?: AccountRepository;
-
   @Property()
   private passwordHash: string;
 

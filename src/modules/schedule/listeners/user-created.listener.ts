@@ -15,7 +15,7 @@ export class UserCreatedListener {
     private eventEmitter: EventEmitter2,
   ) {}
 
-  @OnEvent('user.created')
+  @OnEvent(UserCreatedEvent.eventName)
   async handleUserCreatedEvent(event: UserCreatedEvent) {
     const schedule = this.em.create(Schedule, {
       isDefault: true,
@@ -31,7 +31,7 @@ export class UserCreatedListener {
     await this.em.persistAndFlush(schedule);
 
     await this.eventEmitter.emitAsync(
-      'schedule.created',
+      ScheduleCreatedEvent.eventName,
       new ScheduleCreatedEvent({ id: schedule.id }),
     );
   }

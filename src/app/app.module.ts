@@ -4,8 +4,8 @@ import { ConfigModule, ConfigFactory } from '@nestjs/config';
 
 import { appConfig } from '@/config/app';
 import { jwtConfig } from '@/config/jwt';
-import { MikroOrm } from '@/config/mikro-orm';
 import { swaggerConfig } from '@/config/swagger';
+import { mikroOrmConfig } from '@/config/mikro-orm';
 import { AuthModule } from '@/modules/auth/auth.module';
 import { UserModule } from '@/modules/user/user.module';
 import { DatabaseModule } from '@/database/database.module';
@@ -15,14 +15,13 @@ import { UserSettingsModule } from '@/modules/user-setting/user-setting.module';
 import { AppController } from './app.controller';
 
 const confLoaders: ConfigFactory[] = [
-  MikroOrm,
   appConfig,
   jwtConfig,
   swaggerConfig,
+  mikroOrmConfig,
 ];
 
 @Module({
-  providers: [],
   controllers: [AppController],
   imports: [
     AuthModule,

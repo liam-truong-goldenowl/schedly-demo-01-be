@@ -1,4 +1,4 @@
-import { ApiBody, ApiParam, ApiResponse } from '@nestjs/swagger';
+import { ApiBody, ApiResponse } from '@nestjs/swagger';
 import {
   Body,
   Post,
@@ -13,27 +13,21 @@ import {
 } from '@nestjs/common';
 
 import { JwtAuthGuard } from '@/modules/auth/guards/jwt-auth.guard';
-import { UserOwnsResourceGuard } from '@/common/guards/user-owns-resource.guard';
 
 import { CreateWeeklyHourDto } from '../dto/create-weekly-hour.dto';
 import { UpdateWeeklyHourDto } from '../dto/update-weekly-hour.dto';
 import { UserOwnsScheduleGuard } from '../guards/user-owns-schedule.guard';
+import { ScheduleWeeklyHourResDto } from '../dto/schedule-weekly-hour-res.dto';
 import { ScheduleWeeklyHourService } from '../services/schedule-weekly-hour.service';
-import { ScheduleWeeklyHourResponseDto } from '../dto/schedule-weekly-hour-response.dto';
 
-@Controller('users/:userId/schedules/:scheduleId/weekly-hours')
-@UseGuards(JwtAuthGuard, UserOwnsResourceGuard, UserOwnsScheduleGuard)
-@ApiParam({
-  name: 'userId',
-  description: 'ID of the user who owns the schedule',
-  type: Number,
-})
+@Controller('schedules/:scheduleId/weekly-hours')
+@UseGuards(JwtAuthGuard, UserOwnsScheduleGuard)
 export class ScheduleWeeklyHourController {
   constructor(private readonly weeklyHourService: ScheduleWeeklyHourService) {}
 
   @Post()
   @ApiBody({ type: CreateWeeklyHourDto })
-  @ApiResponse({ type: ScheduleWeeklyHourResponseDto })
+  @ApiResponse({ type: ScheduleWeeklyHourResDto })
   createWeeklyHour(
     @Param('scheduleId', ParseIntPipe) scheduleId: number,
     @Body() createWeeklyHourDto: CreateWeeklyHourDto,
@@ -58,7 +52,7 @@ export class ScheduleWeeklyHourController {
 
   @Patch(':id')
   @ApiBody({ type: UpdateWeeklyHourDto })
-  @ApiResponse({ type: ScheduleWeeklyHourResponseDto })
+  @ApiResponse({ type: ScheduleWeeklyHourResDto })
   update(
     @Param('scheduleId', ParseIntPipe) scheduleId: number,
     @Param('id', ParseIntPipe) id: number,

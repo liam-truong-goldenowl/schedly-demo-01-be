@@ -12,9 +12,9 @@ import {
 
 import type { Response } from 'express';
 
+import { IReqUser } from '@/common/interfaces';
 import { Cookies } from '@/common/decorators/cookies.decorator';
-import { ReqUser } from '@/common/interfaces/req-user.interface';
-import { CurrentUser } from '@/common/decorators/auth/req-user.decorator';
+import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import {
   ACCESS_TOKEN_KEY,
   REFRESH_TOKEN_KEY,
@@ -23,16 +23,16 @@ import {
 } from '@/utils/constants/cookies';
 
 import { UserService } from '../user/user.service';
-import { UserResponseDto } from '../user/dto/user-response.dto';
+import { UserResDto } from '../user/dto/user-res.dto';
 
 import { LoginDto } from './dto/login.dto';
 import { AuthService } from './auth.service';
 import { SignUpDto } from './dto/signup.dto';
+import { LoginResDto } from './dto/login-res.dto';
+import { TokenResDto } from './dto/token-res.dto';
+import { SignUpResDto } from './dto/signup-res.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { LocalAuthGuard } from './guards/local-auth.guard';
-import { LoginResponseDto } from './dto/login-response.dto';
-import { TokenResponseDto } from './dto/token-response.dto';
-import { SignUpResponseDto } from './dto/signup-response.dto';
 import { JwtRefreshAuthGuard } from './guards/jwt-refresh-auth.guard';
 
 @Controller('auth')
@@ -46,11 +46,11 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @UseGuards(LocalAuthGuard)
   @ApiBody({ type: LoginDto })
-  @ApiResponse({ type: LoginResponseDto })
+  @ApiResponse({ type: LoginResDto })
   async login(
-    @CurrentUser() user: ReqUser,
+    @CurrentUser() user: IReqUser,
     @Res({ passthrough: true }) res: Response,
-  ): Promise<LoginResponseDto> {
+  ): Promise<LoginResDto> {
     const tokens = await this.authService.login(user);
     await this.setTokensInCookies({ res, ...tokens });
     return tokens;
@@ -59,8 +59,8 @@ export class AuthController {
   @Post('sign-up')
   @HttpCode(HttpStatus.CREATED)
   @ApiBody({ type: SignUpDto })
-  @ApiResponse({ type: SignUpResponseDto })
-  async signUp(@Body() signUpDto: SignUpDto): Promise<SignUpResponseDto> {
+  @ApiResponse({ type: SignUpResDto })
+  async signUp(@Body() signUpDto: SignUpDto): Promise<SignUpResDto> {
     return this.authService.signUp(signUpDto);
   }
 
@@ -68,7 +68,7 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   async logout(
-    @CurrentUser() user: ReqUser,
+    @CurrentUser() user: IReqUser,
     @Res({ passthrough: true }) res: Response,
   ): Promise<void> {
     await Promise.all([
@@ -80,12 +80,12 @@ export class AuthController {
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtRefreshAuthGuard)
-  @ApiResponse({ type: TokenResponseDto })
+  @ApiResponse({ type: TokenResDto })
   async refreshTokens(
-    @CurrentUser('id') userId: ReqUser['id'],
     @Res({ passthrough: true }) res: Response,
+    @CurrentUser('id') userId: IReqUser['id'],
     @Cookies(REFRESH_TOKEN_KEY) refreshToken: string,
-  ): Promise<TokenResponseDto> {
+  ): Promise<TokenResDto> {
     const tokens = await this.authService.refreshTokens({
       userId,
       refreshToken,
@@ -97,10 +97,8 @@ export class AuthController {
   @Get('me')
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
-  @ApiResponse({ type: UserResponseDto })
-  public async me(
-    @CurrentUser('id') userId: ReqUser['id'],
-  ): Promise<UserResponseDto> {
+  @ApiResponse({ type: UserResDto })
+  async me(@CurrentUser('id') userId: IReqUser['id']): Promise<UserResDto> {
     return this.userService.getUserProfile(userId);
   }
 

@@ -1,24 +1,28 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Expose, plainToInstance } from 'class-transformer';
 
 import { User } from '../entities/user.entity';
 
-export class UserResponseDto {
-  @ApiProperty({ example: '12345' })
+export class UserResDto {
+  @Expose()
+  @ApiProperty({ example: 123 })
   id: number;
 
+  @Expose()
   @ApiProperty({ format: 'email', example: 'liam.truong@example.com' })
   email: string;
 
+  @Expose()
   @ApiProperty({ example: 'Liam Truong' })
   name: string;
 
+  @Expose()
   @ApiProperty({ example: 'liam-truong' })
   publicSlug: string;
 
-  constructor(dto: User) {
-    this.id = dto.id;
-    this.name = dto.name;
-    this.email = dto.email;
-    this.publicSlug = dto.publicSlug;
+  static fromEntity(user: User): UserResDto {
+    return plainToInstance(UserResDto, user, {
+      excludeExtraneousValues: true,
+    });
   }
 }

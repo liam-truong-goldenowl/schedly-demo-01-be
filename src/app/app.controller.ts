@@ -9,7 +9,6 @@ import {
 export class AppController {
   @Get('/health')
   @ApiOkResponse({
-    description: 'Health check endpoint',
     content: { 'text/plain': { schema: { type: 'string', example: 'Ok!' } } },
   })
   @ApiInternalServerErrorResponse({ description: 'Internal server error' })

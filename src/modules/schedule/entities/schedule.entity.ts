@@ -2,7 +2,6 @@ import {
   Opt,
   Entity,
   Filter,
-  Cascade,
   Property,
   ManyToOne,
   OneToMany,
@@ -18,9 +17,6 @@ import { ScheduleDateOverride } from './schedule-date-override.entity';
 @Entity()
 @Filter({ name: 'ownBy', cond: (args) => ({ user: { id: args.id } }) })
 export class Schedule extends BaseEntity {
-  @ManyToOne({ entity: () => User, serializedName: 'userId' })
-  user: User;
-
   @Property()
   name: string;
 
@@ -30,17 +26,20 @@ export class Schedule extends BaseEntity {
   @Property({ default: false })
   isDefault?: boolean & Opt;
 
+  @ManyToOne({ entity: () => User, serializedName: 'userId' })
+  user: User;
+
   @OneToMany({
     entity: () => ScheduleWeeklyHour,
     mappedBy: (hour) => hour.schedule,
-    cascade: [Cascade.REMOVE],
+    orphanRemoval: true,
   })
   weeklyHours = new Collection<ScheduleWeeklyHour>(this);
 
   @OneToMany({
     entity: () => ScheduleDateOverride,
     mappedBy: (override) => override.schedule,
-    cascade: [Cascade.REMOVE],
+    orphanRemoval: true,
   })
   dateOverrides = new Collection<ScheduleDateOverride>(this);
 }

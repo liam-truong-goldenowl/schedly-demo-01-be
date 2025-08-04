@@ -156,15 +156,6 @@
           "length": 6,
           "mappedType": "datetime"
         },
-        "user_id": {
-          "name": "user_id",
-          "type": "int",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "mappedType": "integer"
-        },
         "name": {
           "name": "name",
           "type": "varchar(255)",
@@ -194,6 +185,15 @@
           "nullable": false,
           "default": "false",
           "mappedType": "boolean"
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
         }
       },
       "name": "schedule",
