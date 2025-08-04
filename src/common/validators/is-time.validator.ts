@@ -11,7 +11,7 @@ interface CustomValidationOptions extends ValidationOptions {
 }
 
 /**
- * Custom validator constraint to check if a value is a valid time in HH:MM format.
+ * Custom validator constraint to check if a value is a valid time in HH:MM or HH:MM:SS format.
  */
 @ValidatorConstraint({ name: 'IsTime', async: false })
 export class IsTimeConstraint implements ValidatorConstraintInterface {
@@ -27,8 +27,8 @@ export class IsTimeConstraint implements ValidatorConstraintInterface {
     if (typeof time !== 'string') {
       return false;
     }
-    // Regular expression for HH:MM format (00-23 for hours, 00-59 for minutes)
-    const timeRegex = /^(?:2[0-3]|[01]?[0-9]):[0-5][0-9]$/;
+    // Regular expression for HH:MM or HH:MM:SS format (00-23 for hours, 00-59 for minutes, 00-59 for seconds)
+    const timeRegex = /^(?:2[0-3]|[01]?[0-9]):[0-5][0-9](?::[0-5][0-9])?$/;
     return timeRegex.test(time);
   }
 
@@ -43,7 +43,7 @@ export class IsTimeConstraint implements ValidatorConstraintInterface {
       return `${args.property} is required but not provided.`;
     }
 
-    return `"${args.value}" is not a valid time format. Expected format is HH:MM (e.g., 14:30).`;
+    return `"${args.value}" is not a valid time format. Expected format is HH:MM or HH:MM:SS (e.g., 14:30 or 14:30:45).`;
   }
 }
 

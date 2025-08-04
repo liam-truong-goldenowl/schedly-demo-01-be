@@ -9,11 +9,11 @@ export class ScheduleDateOverride extends BaseEntity {
   @Property({ type: 'date' })
   date: Date;
 
-  @Property({ type: 'time' })
-  startTime: string;
+  @Property({ type: 'time', nullable: true })
+  startTime?: string;
 
-  @Property({ type: 'time' })
-  endTime: string;
+  @Property({ type: 'time', nullable: true })
+  endTime?: string;
 
   @ManyToOne({
     entity: () => Schedule,
