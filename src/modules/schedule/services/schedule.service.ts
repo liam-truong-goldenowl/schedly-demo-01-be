@@ -112,6 +112,7 @@ export class ScheduleService {
       await this.em.flush();
     }
 
+    await schedule.populate(['weeklyHours', 'dateOverrides']);
     await this.em.removeAndFlush(schedule);
   }
 }

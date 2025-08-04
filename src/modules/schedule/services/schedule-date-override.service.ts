@@ -25,7 +25,7 @@ export class ScheduleDateOverrideService {
     scheduleId: number;
     dateOverrideData: CreateDateOverrideDto;
   }) {
-    const { intervals } = dateOverrideData;
+    const { intervals, dates } = dateOverrideData;
 
     for (const [idx, currentInterval] of intervals.entries()) {
       for (const comparingInterval of intervals.slice(idx + 1)) {
@@ -41,21 +41,39 @@ export class ScheduleDateOverrideService {
     try {
       const existingOverrides = await this.em.find(ScheduleDateOverride, {
         schedule: { id: scheduleId },
-        date: dateOverrideData.date,
+        date: { $in: dates.map((date) => new Date(date)) },
       });
 
       if (existingOverrides.length > 0) {
         this.em.remove(existingOverrides);
       }
 
-      const newOverrides = intervals.map((interval) =>
-        this.em.create(ScheduleDateOverride, {
-          endTime: interval.endTime,
-          startTime: interval.startTime,
-          date: new Date(dateOverrideData.date),
-          schedule: this.em.getReference(Schedule, scheduleId),
-        }),
-      );
+      if (intervals.length == 0) {
+        const newOverrides = dates.map((date) =>
+          this.em.create(ScheduleDateOverride, {
+            date: new Date(date),
+            schedule: this.em.getReference(Schedule, scheduleId),
+            startTime: null,
+            endTime: null,
+          }),
+        );
+        await this.em.flush();
+
+        return newOverrides.map((override) =>
+          ScheduleDateOverrideResDto.fromEntity(override),
+        );
+      }
+
+      const newOverrides = intervals.flatMap((interval) => {
+        return dates.map((date) =>
+          this.em.create(ScheduleDateOverride, {
+            date: new Date(date),
+            startTime: interval.startTime,
+            endTime: interval.endTime,
+            schedule: this.em.getReference(Schedule, scheduleId),
+          }),
+        );
+      });
 
       await this.em.flush();
 
