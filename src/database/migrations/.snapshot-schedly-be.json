@@ -118,6 +118,16 @@
             "saturday"
           ]
         },
+        "event_type": {
+          "name": "event_type",
+          "schema": "public",
+          "items": ["one_on_one", "group"]
+        },
+        "location_type": {
+          "name": "location_type",
+          "schema": "public",
+          "items": ["phone", "in_person", "online"]
+        },
         "language": {
           "name": "language",
           "schema": "public",
@@ -232,6 +242,16 @@
             "friday",
             "saturday"
           ]
+        },
+        "event_type": {
+          "name": "event_type",
+          "schema": "public",
+          "items": ["one_on_one", "group"]
+        },
+        "location_type": {
+          "name": "location_type",
+          "schema": "public",
+          "items": ["phone", "in_person", "online"]
         },
         "language": {
           "name": "language",
@@ -357,6 +377,16 @@
             "saturday"
           ]
         },
+        "event_type": {
+          "name": "event_type",
+          "schema": "public",
+          "items": ["one_on_one", "group"]
+        },
+        "location_type": {
+          "name": "location_type",
+          "schema": "public",
+          "items": ["phone", "in_person", "online"]
+        },
         "language": {
           "name": "language",
           "schema": "public",
@@ -472,6 +502,205 @@
             "saturday"
           ]
         },
+        "event_type": {
+          "name": "event_type",
+          "schema": "public",
+          "items": ["one_on_one", "group"]
+        },
+        "location_type": {
+          "name": "location_type",
+          "schema": "public",
+          "items": ["phone", "in_person", "online"]
+        },
+        "language": {
+          "name": "language",
+          "schema": "public",
+          "items": ["en", "vi"]
+        }
+      }
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "unsigned": false,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "description": {
+          "name": "description",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "duration": {
+          "name": "duration",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "type": {
+          "name": "type",
+          "type": "event_type",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "nativeEnumName": "event_type",
+          "enumItems": ["one_on_one", "group"],
+          "mappedType": "enum"
+        },
+        "location_type": {
+          "name": "location_type",
+          "type": "location_type",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "nativeEnumName": "location_type",
+          "enumItems": ["phone", "in_person", "online"],
+          "mappedType": "enum"
+        },
+        "location_details": {
+          "name": "location_details",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "invitee_limit": {
+          "name": "invitee_limit",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "1",
+          "mappedType": "integer"
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "schedule_id": {
+          "name": "schedule_id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        }
+      },
+      "name": "event",
+      "schema": "public",
+      "indexes": [
+        {
+          "keyName": "event_pkey",
+          "columnNames": ["id"],
+          "composite": false,
+          "constraint": true,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [
+        {
+          "name": "event_check",
+          "expression": "duration > 0",
+          "definition": "check ((duration > 0))"
+        }
+      ],
+      "foreignKeys": {
+        "event_user_id_foreign": {
+          "constraintName": "event_user_id_foreign",
+          "columnNames": ["user_id"],
+          "localTableName": "public.event",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "public.user",
+          "updateRule": "cascade"
+        },
+        "event_schedule_id_foreign": {
+          "constraintName": "event_schedule_id_foreign",
+          "columnNames": ["schedule_id"],
+          "localTableName": "public.event",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "public.schedule",
+          "updateRule": "cascade"
+        }
+      },
+      "nativeEnums": {
+        "weekday": {
+          "name": "weekday",
+          "schema": "public",
+          "items": [
+            "sunday",
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday"
+          ]
+        },
+        "event_type": {
+          "name": "event_type",
+          "schema": "public",
+          "items": ["one_on_one", "group"]
+        },
+        "location_type": {
+          "name": "location_type",
+          "schema": "public",
+          "items": ["phone", "in_person", "online"]
+        },
         "language": {
           "name": "language",
           "schema": "public",
@@ -584,6 +813,16 @@
             "friday",
             "saturday"
           ]
+        },
+        "event_type": {
+          "name": "event_type",
+          "schema": "public",
+          "items": ["one_on_one", "group"]
+        },
+        "location_type": {
+          "name": "location_type",
+          "schema": "public",
+          "items": ["phone", "in_person", "online"]
         },
         "language": {
           "name": "language",
@@ -710,6 +949,16 @@
             "saturday"
           ]
         },
+        "event_type": {
+          "name": "event_type",
+          "schema": "public",
+          "items": ["one_on_one", "group"]
+        },
+        "location_type": {
+          "name": "location_type",
+          "schema": "public",
+          "items": ["phone", "in_person", "online"]
+        },
         "language": {
           "name": "language",
           "schema": "public",
@@ -731,6 +980,16 @@
         "friday",
         "saturday"
       ]
+    },
+    "event_type": {
+      "name": "event_type",
+      "schema": "public",
+      "items": ["one_on_one", "group"]
+    },
+    "location_type": {
+      "name": "location_type",
+      "schema": "public",
+      "items": ["phone", "in_person", "online"]
     },
     "language": {
       "name": "language",
