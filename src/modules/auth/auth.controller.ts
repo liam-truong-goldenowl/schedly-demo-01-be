@@ -13,7 +13,6 @@ import {
 import type { Response } from 'express';
 
 import { IReqUser } from '@/common/interfaces';
-import { Cookies } from '@/common/decorators/cookies.decorator';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import {
   ACCESS_TOKEN_KEY,
@@ -83,13 +82,9 @@ export class AuthController {
   @ApiResponse({ type: TokenResDto })
   async refreshTokens(
     @Res({ passthrough: true }) res: Response,
-    @CurrentUser('id') userId: IReqUser['id'],
-    @Cookies(REFRESH_TOKEN_KEY) refreshToken: string,
+    @CurrentUser() user: IReqUser,
   ): Promise<TokenResDto> {
-    const tokens = await this.authService.refreshTokens({
-      userId,
-      refreshToken,
-    });
+    const tokens = await this.authService.refreshTokens(user);
     await this.setTokensInCookies({ res, ...tokens });
     return tokens;
   }
