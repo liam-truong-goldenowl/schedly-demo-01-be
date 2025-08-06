@@ -22,7 +22,12 @@ export class ListEventResDto extends CursorBasedResDto {
 
     return plainToInstance(
       ListEventResDto,
-      { items, nextCursor, hasNextPage, totalCount },
+      {
+        items: items.map((item) => EventResDto.fromEntity(item)),
+        nextCursor,
+        hasNextPage,
+        totalCount,
+      },
       { excludeExtraneousValues: true },
     );
   }
