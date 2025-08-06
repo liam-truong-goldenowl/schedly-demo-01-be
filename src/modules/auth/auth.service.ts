@@ -55,24 +55,7 @@ export class AuthService {
     await this.em.flush();
   }
 
-  async refreshTokens({
-    userId,
-    refreshToken,
-  }: {
-    userId: number;
-    refreshToken: string;
-  }): Promise<TokenResDto> {
-    const [user, account] = await Promise.all([
-      this.em.findOne(User, { id: userId }),
-      this.em.findOne(Account, { user: { id: userId } }),
-    ]);
-
-    const isValidRefreshToken = await account?.verifyRefreshToken(refreshToken);
-
-    if (!user || !isValidRefreshToken) {
-      throw new WrongCredentialsException();
-    }
-
+  async refreshTokens(user: IReqUser): Promise<TokenResDto> {
     const tokens = await this.generateTokens({
       id: user.id,
       email: user.email,
