@@ -6,6 +6,7 @@ import { ScheduleNotFoundException } from '@/modules/schedule/exceptions/schedul
 
 import { Event } from '../entities/event.entity';
 import { CreateEventDto } from '../dto/create-event.dto';
+import { ListEventResDto } from '../dto/list-event-res.dto';
 import { CreateEventResDto } from '../dto/create-event-res.dto';
 
 @Injectable()
@@ -48,26 +49,19 @@ export class EventService {
     userId,
   }: {
     limit: number;
-    cursor: number;
+    cursor?: string;
     userId: number;
   }) {
-    const queryBuilder = this.em.createQueryBuilder(Event, 'e');
+    const currentCursor = await this.em.findByCursor(
+      Event,
+      { user: userId },
+      {
+        first: limit,
+        after: cursor,
+        orderBy: { createdAt: 'DESC' },
+      },
+    );
 
-    queryBuilder
-      .select('*')
-      .where({ user: userId, id: { $gt: cursor } })
-      .orderBy({ id: 'DESC' })
-      .limit(limit + 1);
-
-    const results = await queryBuilder.getResult();
-    const hasNextPage = results.length > limit;
-
-    const events = hasNextPage ? results.slice(0, limit) : results;
-    const nextCursor = hasNextPage ? results[limit].id : null;
-
-    return {
-      events: events.map((event) => CreateEventResDto.fromEntity(event)),
-      nextCursor,
-    };
+    return ListEventResDto.fromCursor(currentCursor);
   }
 }
