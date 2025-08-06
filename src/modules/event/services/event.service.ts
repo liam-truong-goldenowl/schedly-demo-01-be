@@ -41,4 +41,33 @@ export class EventService {
 
     return CreateEventResDto.fromEntity(event);
   }
+
+  async findAllEvents({
+    limit,
+    cursor,
+    userId,
+  }: {
+    limit: number;
+    cursor: number;
+    userId: number;
+  }) {
+    const queryBuilder = this.em.createQueryBuilder(Event, 'e');
+
+    queryBuilder
+      .select('*')
+      .where({ user: userId, id: { $gt: cursor } })
+      .orderBy({ id: 'DESC' })
+      .limit(limit + 1);
+
+    const results = await queryBuilder.getResult();
+    const hasNextPage = results.length > limit;
+
+    const events = hasNextPage ? results.slice(0, limit) : results;
+    const nextCursor = hasNextPage ? results[limit].id : null;
+
+    return {
+      events: events.map((event) => CreateEventResDto.fromEntity(event)),
+      nextCursor,
+    };
+  }
 }

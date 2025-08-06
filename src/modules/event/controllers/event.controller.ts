@@ -1,5 +1,14 @@
 import { ApiBody, ApiResponse } from '@nestjs/swagger';
-import { Body, Post, UseGuards, Controller } from '@nestjs/common';
+import {
+  Get,
+  Body,
+  Post,
+  Query,
+  UseGuards,
+  Controller,
+  ParseIntPipe,
+  DefaultValuePipe,
+} from '@nestjs/common';
 
 import { JwtAuthGuard } from '@/modules/auth/guards/jwt-auth.guard';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
@@ -24,5 +33,14 @@ export class EventController {
       userId,
       body,
     });
+  }
+
+  @Get()
+  async findAll(
+    @CurrentUser('id') userId: number,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
+    @Query('cursor', new DefaultValuePipe(0), ParseIntPipe) cursor: number,
+  ) {
+    return this.eventService.findAllEvents({ userId, limit, cursor });
   }
 }
