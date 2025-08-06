@@ -6,6 +6,7 @@ import { ScheduleNotFoundException } from '@/modules/schedule/exceptions/schedul
 
 import { Event } from '../entities/event.entity';
 import { CreateEventDto } from '../dto/create-event.dto';
+import { ListEventResDto } from '../dto/list-event-res.dto';
 import { CreateEventResDto } from '../dto/create-event-res.dto';
 
 @Injectable()
@@ -40,5 +41,27 @@ export class EventService {
     await this.em.flush();
 
     return CreateEventResDto.fromEntity(event);
+  }
+
+  async findAllEvents({
+    limit,
+    cursor,
+    userId,
+  }: {
+    limit: number;
+    cursor?: string;
+    userId: number;
+  }) {
+    const currentCursor = await this.em.findByCursor(
+      Event,
+      { user: userId },
+      {
+        first: limit,
+        after: cursor,
+        orderBy: { createdAt: 'DESC' },
+      },
+    );
+
+    return ListEventResDto.fromCursor(currentCursor);
   }
 }
