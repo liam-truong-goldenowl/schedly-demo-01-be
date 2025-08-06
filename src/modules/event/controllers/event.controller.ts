@@ -1,4 +1,4 @@
-import { ApiBody, ApiParam, ApiResponse } from '@nestjs/swagger';
+import { ApiBody, ApiQuery, ApiResponse } from '@nestjs/swagger';
 import { Get, Body, Post, Query, UseGuards, Controller } from '@nestjs/common';
 
 import { LimitPipe } from '@/common/pipes/limit.pipe';
@@ -31,8 +31,8 @@ export class EventController {
 
   @Get()
   @ApiResponse({ type: ListEventResDto })
-  @ApiParam({ name: 'cursor', required: false, type: String })
-  @ApiParam({
+  @ApiQuery({ name: 'cursor', required: false, type: String })
+  @ApiQuery({
     name: 'limit',
     required: false,
     type: Number,
