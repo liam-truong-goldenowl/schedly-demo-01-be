@@ -15,6 +15,10 @@ export class EventRespDto {
   name: string;
 
   @Expose()
-  @ApiProperty({ required: false, nullable: true })
+  @ApiProperty({
+    required: false,
+    nullable: true,
+    example: 'Prepare for the next TOEIC test',
+  })
   description?: string | null;
 }
