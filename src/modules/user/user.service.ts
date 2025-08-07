@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
-import { createPublicSlug } from '@/utils/helpers/strings';
+import { generateSlug } from '@/utils/helpers/strings';
 
 import { User } from './entities/user.entity';
 import { UserResDto } from './dto/user-res.dto';
@@ -56,7 +56,7 @@ export class UserService {
   }
 
   private async createUniquePublicSlug(name: string): Promise<string> {
-    const baseSlug = createPublicSlug(name);
+    const baseSlug = generateSlug(name);
     let candidateSlug = baseSlug;
 
     let publicSlugExists = await this.em.count(User, {
