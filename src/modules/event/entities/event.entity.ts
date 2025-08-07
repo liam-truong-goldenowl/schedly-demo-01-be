@@ -1,4 +1,12 @@
-import { Opt, Enum, Check, Entity, Property, ManyToOne } from '@mikro-orm/core';
+import {
+  Opt,
+  Enum,
+  Check,
+  Entity,
+  Unique,
+  Property,
+  ManyToOne,
+} from '@mikro-orm/core';
 
 import { EventType, LocationType } from '@/common/enums';
 import { BaseEntity } from '@/common/entities/base.entity';
@@ -6,10 +14,14 @@ import { User } from '@/modules/user/entities/user.entity';
 import { Schedule } from '@/modules/schedule/entities/schedule.entity';
 
 @Entity()
-@Check<Event>({ expression: (columns) => `${columns.duration} > 0` })
+@Check({ expression: (columns) => `${columns.duration} > 0` })
+@Unique({ properties: ['slug', 'user'] })
 export class Event extends BaseEntity {
   @Property({ length: 255 })
   name: string;
+
+  @Property({ length: 255 })
+  slug: string & Opt;
 
   @Property({ nullable: true })
   description?: string & Opt;
