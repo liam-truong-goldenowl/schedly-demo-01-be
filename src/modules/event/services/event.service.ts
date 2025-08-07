@@ -1,13 +1,13 @@
+import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
-import { Injectable, ForbiddenException } from '@nestjs/common';
 
 import { Schedule } from '@/modules/schedule/entities/schedule.entity';
-import { ScheduleNotFoundException } from '@/modules/schedule/exceptions/schedule-not-found.exception';
 
 import { Event } from '../entities/event.entity';
 import { CreateEventDto } from '../dto/create-event.dto';
 import { ListEventResDto } from '../dto/list-event-res.dto';
 import { CreateEventResDto } from '../dto/create-event-res.dto';
+import { ScheduleNotValidException } from '../exceptions/schedule-not-valid.exception';
 
 @Injectable()
 export class EventService {
@@ -22,14 +22,11 @@ export class EventService {
   }) {
     const referencedSchedule = await this.em.findOne(Schedule, {
       id: body.scheduleId,
+      user: userId,
     });
 
     if (!referencedSchedule) {
-      throw new ScheduleNotFoundException(body.scheduleId);
-    }
-
-    if (referencedSchedule.user.id !== userId) {
-      throw new ForbiddenException();
+      throw new ScheduleNotValidException(body.scheduleId);
     }
 
     const event = this.em.create(Event, {
@@ -63,5 +60,10 @@ export class EventService {
     );
 
     return ListEventResDto.fromCursor(currentCursor);
+  }
+
+  async deleteEvent({ eventId }: { eventId: number }): Promise<void> {
+    const event = await this.em.findOneOrFail(Event, { id: eventId });
+    await this.em.removeAndFlush(event);
   }
 }
