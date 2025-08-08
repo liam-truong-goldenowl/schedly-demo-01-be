@@ -11,6 +11,12 @@ export class GlobalExceptionFilter implements ExceptionFilter {
   private logger = new Logger(GlobalExceptionFilter.name);
 
   catch(exception: any, host: ArgumentsHost) {
+    console.error('[GlobalExceptionFilter] Exception:', {
+      name: exception?.name,
+      message: exception?.message ?? String(exception),
+      stack: exception?.stack,
+    });
+
     const ctx = host.switchToHttp();
     const response = ctx.getResponse();
 
