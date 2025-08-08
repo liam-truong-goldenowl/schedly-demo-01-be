@@ -9,4 +9,8 @@ export class HostRespDto {
   @Expose()
   @ApiProperty({ example: 'John Doe' })
   name: string;
+
+  @Expose()
+  @ApiProperty({ example: 'john.doe@gmail.com' })
+  email: string;
 }
