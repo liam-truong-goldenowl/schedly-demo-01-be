@@ -1,4 +1,4 @@
-import { Entity, Unique, Property, ManyToOne } from '@mikro-orm/core';
+import { Entity, Unique, Cascade, Property, ManyToOne } from '@mikro-orm/core';
 
 import { BaseEntity } from '@/common/entities/base.entity';
 
@@ -7,7 +7,11 @@ import { Meeting } from './meeting.entity';
 @Entity()
 @Unique({ properties: ['meeting', 'email'] })
 export class MeetingInvitee extends BaseEntity {
-  @ManyToOne({ entity: () => Meeting, serializedName: 'meetingId' })
+  @ManyToOne({
+    entity: () => Meeting,
+    serializedName: 'meetingId',
+    cascade: [Cascade.PERSIST, Cascade.REMOVE],
+  })
   meeting: Meeting;
 
   @Property({ length: 255 })

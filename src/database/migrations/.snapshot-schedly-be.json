@@ -906,7 +906,7 @@
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
-          "nullable": false,
+          "nullable": true,
           "mappedType": "integer"
         },
         "email": {
@@ -958,6 +958,7 @@
           "localTableName": "public.meeting_invitee",
           "referencedColumnNames": ["id"],
           "referencedTableName": "public.meeting",
+          "deleteRule": "cascade",
           "updateRule": "cascade"
         }
       },
@@ -1029,7 +1030,7 @@
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
-          "nullable": false,
+          "nullable": true,
           "mappedType": "integer"
         },
         "host_id": {
@@ -1038,7 +1039,7 @@
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
-          "nullable": false,
+          "nullable": true,
           "mappedType": "integer"
         }
       },
@@ -1070,6 +1071,7 @@
           "localTableName": "public.meeting_host",
           "referencedColumnNames": ["id"],
           "referencedTableName": "public.meeting",
+          "deleteRule": "cascade",
           "updateRule": "cascade"
         },
         "meeting_host_host_id_foreign": {
@@ -1078,6 +1080,7 @@
           "localTableName": "public.meeting_host",
           "referencedColumnNames": ["id"],
           "referencedTableName": "public.user",
+          "deleteRule": "cascade",
           "updateRule": "cascade"
         }
       },
@@ -1149,7 +1152,7 @@
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
-          "nullable": false,
+          "nullable": true,
           "mappedType": "integer"
         },
         "email": {
@@ -1191,6 +1194,7 @@
           "localTableName": "public.meeting_guest",
           "referencedColumnNames": ["id"],
           "referencedTableName": "public.meeting",
+          "deleteRule": "cascade",
           "updateRule": "cascade"
         }
       },
