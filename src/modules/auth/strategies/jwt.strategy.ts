@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { Strategy, ExtractJwt } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
 
-import { ACCESS_TOKEN_KEY } from '@/utils/constants/cookies';
+import { ACCESS_TOKEN_KEY } from '@/common/constants/cookies';
 
 import type { IReqUser } from '@/common/interfaces';
 

@@ -19,7 +19,7 @@ import {
   REFRESH_TOKEN_KEY,
   ACCESS_TOKEN_EXPIRES_IN,
   REFRESH_TOKEN_EXPIRES_IN,
-} from '@/utils/constants/cookies';
+} from '@/common/constants/cookies';
 
 import { UserService } from '../user/user.service';
 import { UserResDto } from '../user/dto/user-res.dto';

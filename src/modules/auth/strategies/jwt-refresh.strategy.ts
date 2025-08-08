@@ -4,7 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, ExtractJwt } from 'passport-jwt';
 
-import { REFRESH_TOKEN_KEY } from '@/utils/constants/cookies';
+import { REFRESH_TOKEN_KEY } from '@/common/constants/cookies';
 
 import type { IReqUser } from '@/common/interfaces';
 
