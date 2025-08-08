@@ -3,8 +3,8 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { EntityManager } from '@mikro-orm/postgresql';
 
-import type { IJwtConfig } from '@/config/jwt';
 import type { IReqUser } from '@/common/interfaces';
+import type { IJwtConfig } from '@/config/jwt.loader';
 
 import { UserService } from '../user/user.service';
 import { User } from '../user/entities/user.entity';

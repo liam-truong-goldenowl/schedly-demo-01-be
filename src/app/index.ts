@@ -1,10 +1,9 @@
 import { NestFactory } from '@nestjs/core';
 import { RequestMethod } from '@nestjs/common';
 
-import type { LogLevel } from '@nestjs/common';
-import type { INestApplication } from '@nestjs/common';
+import type { LogLevel, INestApplication } from '@nestjs/common';
 
-import { validateEnv } from '@/utils/helpers/envs';
+import { getEnv } from '@/shared/utils/envs';
 
 import { AppModule } from './app.module';
 import { loadFilters } from './app.filter';
@@ -13,7 +12,7 @@ import { loadMiddlewares } from './app.middleware';
 import { loadErrorHandling } from './app.exception';
 
 export const initApplication = async (): Promise<INestApplication> => {
-  const env = validateEnv();
+  const env = getEnv();
 
   const logLevels: LogLevel[] = env.isDev
     ? ['error', 'warn', 'log', 'verbose', 'debug']

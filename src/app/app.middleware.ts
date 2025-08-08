@@ -5,7 +5,7 @@ import { ConfigService } from '@nestjs/config';
 
 import type { INestApplication } from '@nestjs/common';
 
-import { IAppConfig } from '@/config/app';
+import { IAppConfig } from '@/config/app.loader';
 
 export const loadMiddlewares = (app: INestApplication): void => {
   const confService = app.get(ConfigService);

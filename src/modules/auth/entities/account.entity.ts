@@ -8,7 +8,7 @@ import {
 
 import { BaseEntity } from '@/common/entities/base.entity';
 import { User } from '@/modules/user/entities/user.entity';
-import { verifyHash, generateHash } from '@/utils/helpers/hash';
+import { verifyHash, generateHash } from '@/shared/utils/hash';
 
 @Entity()
 export class Account extends BaseEntity {

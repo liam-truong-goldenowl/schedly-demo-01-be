@@ -4,7 +4,7 @@ import {
   ForeignKeyConstraintViolationException,
 } from '@mikro-orm/postgresql';
 
-import { isOverlapping } from '@/utils/helpers/time';
+import { isOverlapping } from '@/shared/utils/time';
 
 import { Schedule } from '../entities/schedule.entity';
 import { CreateDateOverrideDto } from '../dto/create-date-override.dto';

@@ -1,11 +1,8 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { EventEmitterModule } from '@nestjs/event-emitter';
-import { ConfigModule, ConfigFactory } from '@nestjs/config';
 
-import { appConfig } from '@/config/app';
-import { jwtConfig } from '@/config/jwt';
-import { swaggerConfig } from '@/config/swagger';
-import { mikroOrmConfig } from '@/config/mikro-orm';
+import { loadConfig } from '@/config/conf-factory';
 import { AuthModule } from '@/modules/auth/auth.module';
 import { UserModule } from '@/modules/user/user.module';
 import { UUIDModule } from '@/modules/uuid/uuid.module';
@@ -16,13 +13,6 @@ import { ScheduleModule } from '@/modules/schedule/schedule.module';
 import { UserSettingsModule } from '@/modules/user-setting/user-setting.module';
 
 import { AppController } from './app.controller';
-
-const confLoaders: ConfigFactory[] = [
-  appConfig,
-  jwtConfig,
-  swaggerConfig,
-  mikroOrmConfig,
-];
 
 @Module({
   controllers: [AppController],
@@ -36,7 +26,7 @@ const confLoaders: ConfigFactory[] = [
     ScheduleModule,
     UserSettingsModule,
     EventEmitterModule.forRoot(),
-    ConfigModule.forRoot({ isGlobal: true, load: confLoaders }),
+    ConfigModule.forRoot({ isGlobal: true, load: [loadConfig] }),
   ],
 })
 export class AppModule {}

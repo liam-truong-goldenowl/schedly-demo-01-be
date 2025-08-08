@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 
-import { generateSlug } from '@/utils/helpers/strings';
+import { generateSlug } from '@/shared/utils/strings';
 import { UUIDService } from '@/modules/uuid/uuid.service';
 import { Schedule } from '@/modules/schedule/entities/schedule.entity';
 

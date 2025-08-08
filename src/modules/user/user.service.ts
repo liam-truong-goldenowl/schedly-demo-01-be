@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
-import { generateSlug } from '@/utils/helpers/strings';
+import { generateSlug } from '@/shared/utils/strings';
 
 import { UUIDService } from '../uuid/uuid.service';
 
