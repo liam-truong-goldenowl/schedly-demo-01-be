@@ -8,6 +8,12 @@ import {
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
   catch(exception: any, host: ArgumentsHost) {
+    console.error('[GlobalExceptionFilter] Exception:', {
+      name: exception?.name,
+      message: exception?.message ?? String(exception),
+      stack: exception?.stack,
+    });
+
     const ctx = host.switchToHttp();
     const response = ctx.getResponse();
 
@@ -19,12 +25,10 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         ? responseBody
         : (responseBody.message ?? 'Internal Server Error');
 
-    // const errorCode = responseBody.errorCode ?? 'INTERNAL_ERROR';
     const errors = responseBody.errors ?? undefined;
 
     response.status(status).json({
       message,
-      // errorCode,
       statusCode: status,
       ...(errors && { errors }),
       timestamp: new Date().toISOString(),

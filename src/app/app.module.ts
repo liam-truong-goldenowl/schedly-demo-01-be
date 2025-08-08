@@ -12,6 +12,7 @@ import { UUIDModule } from '@/modules/uuid/uuid.module';
 import { EventModule } from '@/modules/event/event.module';
 import { DatabaseModule } from '@/database/database.module';
 import { SharingModule } from '@/modules/sharing/sharing.module';
+import { BookingModule } from '@/modules/booking/booking.module';
 import { ScheduleModule } from '@/modules/schedule/schedule.module';
 import { LoggerMiddleware } from '@/common/middleware/logger.middleware';
 import { UserSettingsModule } from '@/modules/user-setting/user-setting.module';
@@ -33,6 +34,7 @@ const confLoaders: ConfigFactory[] = [
     UUIDModule,
     EventModule,
     SharingModule,
+    BookingModule,
     DatabaseModule,
     ScheduleModule,
     UserSettingsModule,
