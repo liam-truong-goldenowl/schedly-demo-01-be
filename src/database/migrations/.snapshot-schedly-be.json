@@ -560,6 +560,16 @@
           "length": 255,
           "mappedType": "string"
         },
+        "slug": {
+          "name": "slug",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        },
         "description": {
           "name": "description",
           "type": "varchar(255)",
@@ -643,6 +653,14 @@
       "name": "event",
       "schema": "public",
       "indexes": [
+        {
+          "keyName": "event_slug_user_id_unique",
+          "columnNames": ["slug", "user_id"],
+          "composite": true,
+          "constraint": true,
+          "primary": false,
+          "unique": true
+        },
         {
           "keyName": "event_pkey",
           "columnNames": ["id"],

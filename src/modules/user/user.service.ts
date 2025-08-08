@@ -1,9 +1,10 @@
-import { randAlpha } from '@ngneat/falso';
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
-import { createPublicSlug } from '@/utils/helpers/strings';
+import { generateSlug } from '@/utils/helpers/strings';
+
+import { UUIDService } from '../uuid/uuid.service';
 
 import { User } from './entities/user.entity';
 import { UserResDto } from './dto/user-res.dto';
@@ -17,6 +18,7 @@ import { UserAlreadyExistsException } from './exceptions/user-already-exists';
 export class UserService {
   constructor(
     private em: EntityManager,
+    private uuidService: UUIDService,
     private eventEmitter: EventEmitter2,
   ) {}
 
@@ -56,29 +58,15 @@ export class UserService {
   }
 
   private async createUniquePublicSlug(name: string): Promise<string> {
-    const baseSlug = createPublicSlug(name);
-    let candidateSlug = baseSlug;
+    const slug = generateSlug(name);
 
-    let publicSlugExists = await this.em.count(User, {
-      publicSlug: candidateSlug,
-    });
+    const slugExists = await this.em.count(User, { publicSlug: slug });
 
-    // Check for base slug available
-    if (publicSlugExists == 0) {
-      return candidateSlug;
+    if (slugExists > 0) {
+      const suffix = await this.uuidService.generate();
+      return `${slug}-${suffix}`;
     }
 
-    // Try appending a random suffix until unique
-    do {
-      const suffix = randAlpha({ length: 10 }).join('');
-
-      candidateSlug = `${baseSlug}-${suffix}`;
-
-      publicSlugExists = await this.em.count(User, {
-        publicSlug: candidateSlug,
-      });
-    } while (publicSlugExists > 0);
-
-    return candidateSlug;
+    return slug;
   }
 }

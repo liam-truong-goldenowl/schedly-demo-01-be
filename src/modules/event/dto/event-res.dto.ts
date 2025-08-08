@@ -11,6 +11,10 @@ export class EventResDto {
   id: number;
 
   @Expose()
+  @ApiProperty({ example: 'coding-tutoring' })
+  slug: string;
+
+  @Expose()
   @ApiProperty({ example: 'Team Meeting' })
   name: string;
 
