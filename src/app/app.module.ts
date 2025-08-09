@@ -1,8 +1,7 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 
-import { loadConfig } from '@/config/conf-factory';
+import { ConfigModule } from '@/config/config.module';
 import { AuthModule } from '@/modules/auth/auth.module';
 import { UserModule } from '@/modules/user/user.module';
 import { UUIDModule } from '@/modules/uuid/uuid.module';
@@ -21,12 +20,12 @@ import { AppController } from './app.controller';
     UserModule,
     UUIDModule,
     EventModule,
+    ConfigModule,
     SharingModule,
     DatabaseModule,
     ScheduleModule,
     UserSettingsModule,
     EventEmitterModule.forRoot(),
-    ConfigModule.forRoot({ isGlobal: true, load: [loadConfig] }),
   ],
 })
 export class AppModule {}

@@ -1,51 +1,25 @@
 import { ConfigFactory } from '@nestjs/config';
-import { MikroOrmModuleOptions } from '@mikro-orm/nestjs';
-import {
-  PostgreSqlDriver,
-  UnderscoreNamingStrategy,
-} from '@mikro-orm/postgresql';
+import { PostgreSqlDriver } from '@mikro-orm/postgresql';
+import { UnderscoreNamingStrategy } from '@mikro-orm/core';
 
-import { getEnv } from '@/shared/utils/envs';
+import { validateEnv } from './env.validator';
 
-export interface AppConfig {
-  env: string;
-  port: number;
-  corsOrigin: string;
-}
-
-export interface SwaggerConfig {
-  title: string;
-  version: string;
-  siteTitle: string;
-  description: string;
-}
-
-export interface JwtConfig {
-  secret: string;
-  expiresIn: string;
-  refreshSecret: string;
-  refreshExpiresIn: string;
-}
-
-export interface Config {
-  app: AppConfig;
-  swagger: SwaggerConfig;
-  jwt: JwtConfig;
-  ['mikro-orm']: MikroOrmModuleOptions;
-}
+import type { Config } from './config.interface';
 
 export const loadConfig: ConfigFactory<Config> = () => {
-  const env = getEnv();
+  const env = validateEnv();
 
   return {
     app: {
       port: env.PORT,
       env: env.NODE_ENV,
-      corsOrigin: env.CORS_ORIGIN,
+      isDev: env.NODE_ENV === 'development',
+      corsOrigins: env.CORS_ORIGINS,
     },
 
     swagger: {
       version: '1.0',
+      path: 'api/documentation',
       title: 'Schedly API | Documentation',
       siteTitle: 'Schedly API | Documentation',
       description: 'The Schedly API Documentation',
@@ -58,11 +32,11 @@ export const loadConfig: ConfigFactory<Config> = () => {
       refreshExpiresIn: env.JWT_REFRESH_EXPIRES_IN,
     },
 
-    ['mikro-orm']: {
+    mikroOrm: {
       host: env.DB_HOST,
       port: env.DB_PORT,
+      user: env.DB_USER,
       dbName: env.DB_NAME,
-      user: env.DB_USERNAME,
       password: env.DB_PASSWORD,
 
       driver: PostgreSqlDriver,

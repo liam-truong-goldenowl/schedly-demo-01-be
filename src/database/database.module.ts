@@ -1,15 +1,15 @@
 import { Module } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { PostgreSqlDriver } from '@mikro-orm/postgresql';
-import { MikroOrmModule, MikroOrmModuleOptions } from '@mikro-orm/nestjs';
+
+import { ConfigService } from '@/config/config.service';
 
 @Module({
   imports: [
     MikroOrmModule.forRootAsync({
       inject: [ConfigService],
       driver: PostgreSqlDriver,
-      useFactory: (configService: ConfigService) =>
-        configService.get<MikroOrmModuleOptions>('mikro-orm')!,
+      useFactory: (config: ConfigService) => config.getOrThrow('mikroOrm'),
     }),
   ],
 })

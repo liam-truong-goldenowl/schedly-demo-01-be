@@ -3,8 +3,9 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { EntityManager } from '@mikro-orm/postgresql';
 
+import { Config } from '@/config/config.interface';
+
 import type { IReqUser } from '@/common/interfaces';
-import type { IJwtConfig } from '@/config/jwt.loader';
 
 import { UserService } from '../user/user.service';
 import { User } from '../user/entities/user.entity';
@@ -135,7 +136,7 @@ export class AuthService {
       expiresIn: accessTokenExpiresIn,
       refreshSecret: refreshTokenSecret,
       refreshExpiresIn: refreshTokenExpiresIn,
-    } = this.confService.getOrThrow<IJwtConfig>('jwt');
+    } = this.confService.getOrThrow<Config['jwt']>('jwt');
 
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(payload, {
