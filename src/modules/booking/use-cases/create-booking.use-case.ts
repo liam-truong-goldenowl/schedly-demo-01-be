@@ -43,6 +43,7 @@ export class CreateBookingUseCase
     const isValidStartTime = await this.bookingService.isValidStartTime({
       startTime: dto.startTime,
       eventId: targetEvent.id,
+      date: dto.startDate,
     });
 
     if (!isValidStartTime) {
