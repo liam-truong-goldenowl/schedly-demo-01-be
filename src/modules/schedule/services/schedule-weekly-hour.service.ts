@@ -5,17 +5,18 @@ import {
   ForeignKeyConstraintViolationException,
 } from '@mikro-orm/postgresql';
 
-import { Schedule } from '../entities/schedule.entity';
+import { Schedule } from '@/database/entities/schedule.entity';
+import { WeeklyHour } from '@/database/entities/weekly-hour.entity';
+
 import { CreateWeeklyHourDto } from '../dto/create-weekly-hour.dto';
 import { UpdateWeeklyHourDto } from '../dto/update-weekly-hour.dto';
-import { ScheduleWeeklyHour } from '../entities/schedule-weekly-hour.entity';
-import { ScheduleWeeklyHourResDto } from '../dto/schedule-weekly-hour-res.dto';
+import { WeeklyHourResDto } from '../dto/schedule-weekly-hour-res.dto';
 import { OverlappingHoursException } from '../exceptions/overlapping-hours.exception';
 import { ScheduleNotFoundException } from '../exceptions/schedule-not-found.exception';
 import { WeeklyHourNotFoundException } from '../exceptions/weekly-hour-not-found.exception';
 
 @Injectable()
-export class ScheduleWeeklyHourService {
+export class WeeklyHourService {
   constructor(private em: EntityManager) {}
 
   async create({
@@ -24,8 +25,8 @@ export class ScheduleWeeklyHourService {
   }: {
     scheduleId: number;
     weeklyHourData: CreateWeeklyHourDto;
-  }): Promise<ScheduleWeeklyHourResDto> {
-    const overlappingHoursCount = await this.em.count(ScheduleWeeklyHour, {
+  }): Promise<WeeklyHourResDto> {
+    const overlappingHoursCount = await this.em.count(WeeklyHour, {
       weekday: weeklyHourData.weekday,
       schedule: { id: scheduleId },
       startTime: { $lte: weeklyHourData.endTime },
@@ -41,7 +42,7 @@ export class ScheduleWeeklyHourService {
     }
 
     try {
-      const weeklyHour = this.em.create(ScheduleWeeklyHour, {
+      const weeklyHour = this.em.create(WeeklyHour, {
         schedule: this.em.getReference(Schedule, scheduleId),
         weekday: weeklyHourData.weekday,
         endTime: weeklyHourData.endTime,
@@ -50,7 +51,7 @@ export class ScheduleWeeklyHourService {
 
       await this.em.flush();
 
-      return ScheduleWeeklyHourResDto.fromEntity(weeklyHour);
+      return WeeklyHourResDto.fromEntity(weeklyHour);
     } catch (error) {
       /**
        * If the schedule does not exist, we throw a ScheduleNotFoundException.
@@ -71,7 +72,7 @@ export class ScheduleWeeklyHourService {
     weeklyHourId: number;
   }): Promise<void> {
     try {
-      const weeklyHour = await this.em.findOneOrFail(ScheduleWeeklyHour, {
+      const weeklyHour = await this.em.findOneOrFail(WeeklyHour, {
         id: weeklyHourId,
         schedule: { id: scheduleId },
       });
@@ -94,9 +95,9 @@ export class ScheduleWeeklyHourService {
     scheduleId: number;
     weeklyHourId: number;
     weeklyHourData: UpdateWeeklyHourDto;
-  }): Promise<ScheduleWeeklyHourResDto> {
+  }): Promise<WeeklyHourResDto> {
     try {
-      const weeklyHour = await this.em.findOneOrFail(ScheduleWeeklyHour, {
+      const weeklyHour = await this.em.findOneOrFail(WeeklyHour, {
         id: weeklyHourId,
         schedule: { id: scheduleId },
       });
@@ -105,7 +106,7 @@ export class ScheduleWeeklyHourService {
 
       await this.em.flush();
 
-      return ScheduleWeeklyHourResDto.fromEntity(weeklyHour);
+      return WeeklyHourResDto.fromEntity(weeklyHour);
     } catch (error) {
       if (error instanceof ForeignKeyConstraintViolationException) {
         throw new ScheduleNotFoundException(scheduleId);

@@ -1,12 +1,11 @@
 import { Module } from '@nestjs/common';
 
-import { AuthModule } from '@/modules/auth/auth.module';
-import { UserModule } from '@/modules/user/user.module';
-import { UUIDModule } from '@/modules/uuid/uuid.module';
-import { EventModule } from '@/modules/event/event.module';
-import { SharingModule } from '@/modules/sharing/sharing.module';
-import { ScheduleModule } from '@/modules/schedule/schedule.module';
-import { UserSettingsModule } from '@/modules/user-setting/user-setting.module';
+import { AuthModule } from './auth/auth.module';
+import { UserModule } from './user/user.module';
+import { UUIDModule } from './uuid/uuid.module';
+import { EventModule } from './event/event.module';
+import { SharingModule } from './sharing/sharing.module';
+import { ScheduleModule } from './schedule/schedule.module';
 
 @Module({
   imports: [
@@ -16,7 +15,6 @@ import { UserSettingsModule } from '@/modules/user-setting/user-setting.module';
     EventModule,
     SharingModule,
     ScheduleModule,
-    UserSettingsModule,
   ],
 })
 export class ModuleRegistry {}

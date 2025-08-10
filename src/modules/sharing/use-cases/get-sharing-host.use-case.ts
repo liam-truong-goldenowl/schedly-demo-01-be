@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 
-import { User } from '@/modules/user/entities/user.entity';
-import { UseCase } from '@/common/interfaces/use-case.interface';
+import { UseCase } from '@/common/interfaces/';
+import { User } from '@/database/entities/user.entity';
 
 import { HostRespDto } from '../dto/host-resp.dto';
 import { HostMapper } from '../mappers/host.mapper';

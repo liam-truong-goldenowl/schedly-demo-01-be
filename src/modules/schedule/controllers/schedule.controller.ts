@@ -13,8 +13,8 @@ import {
   ParseIntPipe,
 } from '@nestjs/common';
 
+import { CurrentUser } from '@/decorators/current-user.decorator';
 import { JwtAuthGuard } from '@/modules/auth/guards/jwt-auth.guard';
-import { CurrentUser } from '@/common/decorators/current-user.decorator';
 
 import { ScheduleResDto } from '../dto/schedule-res.dto';
 import { CreateScheduleDto } from '../dto/create-schedule.dto';

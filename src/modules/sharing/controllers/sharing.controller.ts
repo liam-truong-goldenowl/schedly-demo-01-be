@@ -1,7 +1,7 @@
 import { Get, Controller } from '@nestjs/common';
 import { ApiParam, ApiResponse } from '@nestjs/swagger';
 
-import { User } from '@/modules/user/entities/user.entity';
+import { User } from '@/database/entities/user.entity';
 
 import { HostRespDto } from '../dto/host-resp.dto';
 import { USER_SLUG_PARAM } from '../sharing.config';

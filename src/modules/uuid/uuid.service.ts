@@ -1,7 +1,7 @@
 import { customAlphabet } from 'nanoid';
 import { Injectable } from '@nestjs/common';
 
-import { UUID_LENGTH, CHARACTER_SET } from './config';
+import { UUID_LENGTH, CHARACTER_SET } from './uuid.config';
 
 @Injectable()
 export class UUIDService {

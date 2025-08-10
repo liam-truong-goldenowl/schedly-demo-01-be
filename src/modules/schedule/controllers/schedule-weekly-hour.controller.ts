@@ -16,18 +16,18 @@ import { JwtAuthGuard } from '@/modules/auth/guards/jwt-auth.guard';
 
 import { CreateWeeklyHourDto } from '../dto/create-weekly-hour.dto';
 import { UpdateWeeklyHourDto } from '../dto/update-weekly-hour.dto';
+import { WeeklyHourResDto } from '../dto/schedule-weekly-hour-res.dto';
 import { UserOwnsScheduleGuard } from '../guards/user-owns-schedule.guard';
-import { ScheduleWeeklyHourResDto } from '../dto/schedule-weekly-hour-res.dto';
-import { ScheduleWeeklyHourService } from '../services/schedule-weekly-hour.service';
+import { WeeklyHourService } from '../services/schedule-weekly-hour.service';
 
 @Controller('schedules/:scheduleId/weekly-hours')
 @UseGuards(JwtAuthGuard, UserOwnsScheduleGuard)
 export class ScheduleWeeklyHourController {
-  constructor(private readonly weeklyHourService: ScheduleWeeklyHourService) {}
+  constructor(private readonly weeklyHourService: WeeklyHourService) {}
 
   @Post()
   @ApiBody({ type: CreateWeeklyHourDto })
-  @ApiResponse({ type: ScheduleWeeklyHourResDto })
+  @ApiResponse({ type: WeeklyHourResDto })
   createWeeklyHour(
     @Param('scheduleId', ParseIntPipe) scheduleId: number,
     @Body() createWeeklyHourDto: CreateWeeklyHourDto,
@@ -52,7 +52,7 @@ export class ScheduleWeeklyHourController {
 
   @Patch(':id')
   @ApiBody({ type: UpdateWeeklyHourDto })
-  @ApiResponse({ type: ScheduleWeeklyHourResDto })
+  @ApiResponse({ type: WeeklyHourResDto })
   update(
     @Param('scheduleId', ParseIntPipe) scheduleId: number,
     @Param('id', ParseIntPipe) id: number,

@@ -7,9 +7,9 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 
-import { IReqUser } from '@/common/interfaces';
+import { RequestUser } from '@/common/interfaces';
 
-import { Event } from '../entities/event.entity';
+import { Event } from '../../../database/entities/event.entity';
 import { EventNotFoundException } from '../exceptions/event-not-found.exception';
 
 @Injectable()
@@ -18,7 +18,7 @@ export class UserOwnsEventGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<Request>();
-    const reqUser = request.user as IReqUser;
+    const reqUser = request.user as RequestUser;
 
     const userId = Number(reqUser.id);
     const eventIdParam = Number(

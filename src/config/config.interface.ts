@@ -11,6 +11,8 @@ export interface AppConfig {
   port: number;
   env: 'development' | 'production' | 'staging';
   isDev: boolean;
+  isProd: boolean;
+  isStaging: boolean;
   corsOrigins: string[];
 }
 

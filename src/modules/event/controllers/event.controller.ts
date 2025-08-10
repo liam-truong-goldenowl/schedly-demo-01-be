@@ -13,9 +13,9 @@ import {
   ParseIntPipe,
 } from '@nestjs/common';
 
-import { LimitPipe } from '@/common/pipes/limit.pipe';
+import { LimitPipe } from '@/pipes/limit.pipe';
+import { CurrentUser } from '@/decorators/current-user.decorator';
 import { JwtAuthGuard } from '@/modules/auth/guards/jwt-auth.guard';
-import { CurrentUser } from '@/common/decorators/current-user.decorator';
 
 import { DEFAULT_EVENT_LIMIT } from '../config';
 import { CreateEventDto } from '../dto/create-event.dto';

@@ -4,7 +4,7 @@ import { Type, Expose, plainToInstance } from 'class-transformer';
 
 import { CursorBasedResDto } from '@/common/dto/cursor-based-res.dto';
 
-import { Event } from '../entities/event.entity';
+import { Event } from '../../../database/entities/event.entity';
 
 import { EventResDto } from './event-res.dto';
 

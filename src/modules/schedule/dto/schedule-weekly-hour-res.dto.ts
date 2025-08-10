@@ -2,10 +2,9 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Expose, plainToInstance } from 'class-transformer';
 
 import { Weekday } from '@/common/enums';
+import { WeeklyHour } from '@/database/entities/weekly-hour.entity';
 
-import { ScheduleWeeklyHour } from '../entities/schedule-weekly-hour.entity';
-
-export class ScheduleWeeklyHourResDto {
+export class WeeklyHourResDto {
   @Expose()
   @ApiProperty({ example: 1 })
   id: number;
@@ -22,8 +21,8 @@ export class ScheduleWeeklyHourResDto {
   @ApiProperty({ example: '17:00' })
   endTime: string;
 
-  static fromEntity(weeklyHour: ScheduleWeeklyHour): ScheduleWeeklyHourResDto {
-    return plainToInstance(ScheduleWeeklyHourResDto, weeklyHour, {
+  static fromEntity(weeklyHour: WeeklyHour): WeeklyHourResDto {
+    return plainToInstance(WeeklyHourResDto, weeklyHour, {
       excludeExtraneousValues: true,
     });
   }

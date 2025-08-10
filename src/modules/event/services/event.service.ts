@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 
-import { generateSlug } from '@/shared/utils/strings';
+import { generateSlug } from '@/utils/helpers/strings';
 import { UUIDService } from '@/modules/uuid/uuid.service';
-import { Schedule } from '@/modules/schedule/entities/schedule.entity';
+import { Schedule } from '@/database/entities/schedule.entity';
 
-import { Event } from '../entities/event.entity';
 import { CreateEventDto } from '../dto/create-event.dto';
 import { ListEventResDto } from '../dto/list-event-res.dto';
+import { Event } from '../../../database/entities/event.entity';
 import { CreateEventResDto } from '../dto/create-event-res.dto';
 import { ScheduleNotValidException } from '../exceptions/schedule-not-valid.exception';
 

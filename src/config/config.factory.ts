@@ -14,6 +14,8 @@ export const loadConfig: ConfigFactory<Config> = () => {
       port: env.PORT,
       env: env.NODE_ENV,
       isDev: env.NODE_ENV === 'development',
+      isProd: env.NODE_ENV === 'production',
+      isStaging: env.NODE_ENV === 'staging',
       corsOrigins: env.CORS_ORIGINS,
     },
 
