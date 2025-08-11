@@ -51,12 +51,14 @@ export class Event extends BaseEntity {
   @ManyToOne({
     entity: () => User,
     serializedName: 'userId',
+    deleteRule: 'cascade',
   })
   user: User;
 
   @ManyToOne({
     entity: () => Schedule,
     serializedName: 'scheduleId',
+    deleteRule: 'cascade',
   })
   schedule: Schedule;
 }

@@ -536,6 +536,7 @@
           "localTableName": "public.event",
           "referencedColumnNames": ["id"],
           "referencedTableName": "public.user",
+          "deleteRule": "cascade",
           "updateRule": "cascade"
         },
         "event_schedule_id_foreign": {
@@ -544,6 +545,7 @@
           "localTableName": "public.event",
           "referencedColumnNames": ["id"],
           "referencedTableName": "public.schedule",
+          "deleteRule": "cascade",
           "updateRule": "cascade"
         }
       },
