@@ -10,15 +10,31 @@ export class ScheduleService {
   constructor(private em: EntityManager) {}
 
   async changeDefaultSchedule(userId: number) {
-    const anotherSchedule = await this.em.findOne(Schedule, {
+    const currentDefault = await this.em.findOneOrFail(Schedule, {
       user: { id: userId },
-      isDefault: false,
+      isDefault: true,
     });
 
-    if (!anotherSchedule) {
+    const newDefault = await this.em.findOne(
+      Schedule,
+      {
+        user: { id: userId },
+        isDefault: false,
+      },
+      {
+        orderBy: {
+          createdAt: 'DESC',
+        },
+      },
+    );
+
+    if (!newDefault) {
       throw new AtLeastOneScheduleException();
     }
 
-    anotherSchedule.isDefault = true;
+    currentDefault.isDefault = false;
+    newDefault.isDefault = true;
+
+    await this.em.flush();
   }
 }
