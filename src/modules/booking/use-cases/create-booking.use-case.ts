@@ -8,9 +8,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 
-import { User } from '@/modules/user/entities/user.entity';
-import { Event } from '@/modules/event/entities/event.entity';
-import { UseCase } from '@/common/interfaces/use-case.interface';
+import { User, Event } from '@/database/entities';
 
 import { Meeting } from '../entities/meeting.entity';
 import { BookingRespDto } from '../dto/booking-resp.dto';
@@ -21,9 +19,7 @@ import { MeetingGuest } from '../entities/meeting-guest.entity';
 import { MeetingInvitee } from '../entities/meeting-invitee.entity';
 
 @Injectable()
-export class CreateBookingUseCase
-  implements UseCase<CreateBookingDto, BookingRespDto>
-{
+export class CreateBookingUseCase {
   constructor(
     private em: EntityManager,
     private bookingService: BookingService,

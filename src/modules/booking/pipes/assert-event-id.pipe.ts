@@ -1,7 +1,7 @@
 import { EntityManager, NotFoundError } from '@mikro-orm/core';
 import { Injectable, PipeTransform, NotFoundException } from '@nestjs/common';
 
-import { Event } from '@/modules/event/entities/event.entity';
+import { Event } from '@/database/entities';
 
 @Injectable()
 export class AssertEventIdPipe implements PipeTransform {

@@ -1,7 +1,7 @@
 import { Entity, Unique, Property, ManyToOne } from '@mikro-orm/core';
 
+import { Event } from '@/database/entities';
 import { BaseEntity } from '@/common/entities/base.entity';
-import { Event } from '@/modules/event/entities/event.entity';
 
 @Entity()
 @Unique({ properties: ['startDate', 'startTime', 'event'] })

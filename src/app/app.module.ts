@@ -1,5 +1,7 @@
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 
+import { LoggerMiddleware } from '@/middleware';
 import { ConfigModule } from '@/config/config.module';
 import { ModuleRegistry } from '@/modules/module.registry';
 import { DatabaseModule } from '@/database/database.module';

@@ -1,7 +1,7 @@
 import { Entity, Unique, ManyToOne } from '@mikro-orm/core';
 
+import { User } from '@/database/entities';
 import { BaseEntity } from '@/common/entities/base.entity';
-import { User } from '@/modules/user/entities/user.entity';
 
 import { Meeting } from './meeting.entity';
 
