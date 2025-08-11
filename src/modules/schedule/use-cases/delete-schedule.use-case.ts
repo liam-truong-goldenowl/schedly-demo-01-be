@@ -18,7 +18,7 @@ export class DeleteScheduleUseCase {
   }: {
     userId: number;
     scheduleId: number;
-  }): Promise<void> {
+  }) {
     const schedule = await this.em.findOneOrFail(Schedule, {
       id: scheduleId,
       user: { id: userId },

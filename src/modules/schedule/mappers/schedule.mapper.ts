@@ -6,9 +6,17 @@ import { ScheduleResDto } from '../dto';
 
 export class ScheduleMapper {
   static toResponse(schedule: Schedule): ScheduleResDto {
-    return plainToInstance(ScheduleResDto, schedule, {
-      excludeExtraneousValues: true,
-    });
+    return plainToInstance(
+      ScheduleResDto,
+      {
+        ...schedule,
+        dateOverrides: schedule.dateOverrides.getItems(),
+        weeklyHours: schedule.weeklyHours.getItems(),
+      },
+      {
+        excludeExtraneousValues: true,
+      },
+    );
   }
 
   static toResponseList(schedules: Schedule[]): ScheduleResDto[] {

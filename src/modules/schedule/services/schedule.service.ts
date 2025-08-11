@@ -20,6 +20,5 @@ export class ScheduleService {
     }
 
     anotherSchedule.isDefault = true;
-    await this.em.flush();
   }
 }

@@ -27,7 +27,11 @@ export class UserOwnsScheduleGuard implements CanActivate {
         request.body['scheduleId'],
     );
 
-    const schedule = await this.em.findOne(Schedule, { id: scheduleIdParam });
+    const schedule = await this.em.findOne(
+      Schedule,
+      { id: scheduleIdParam },
+      { populate: ['user'] },
+    );
 
     if (!schedule) {
       throw new ScheduleNotFoundException(scheduleIdParam);

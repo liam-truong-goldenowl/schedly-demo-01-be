@@ -1,4 +1,4 @@
-import { generateSlug } from '../strings';
+import { generateSlug } from './strings';
 
 describe('fullNameToSlug', () => {
   it('should convert a simple full name to a slug', () => {

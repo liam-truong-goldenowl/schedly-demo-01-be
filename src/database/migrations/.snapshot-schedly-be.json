@@ -105,6 +105,16 @@
       "checks": [],
       "foreignKeys": {},
       "nativeEnums": {
+        "event_type": {
+          "name": "event_type",
+          "schema": "public",
+          "items": ["one_on_one", "group"]
+        },
+        "location_type": {
+          "name": "location_type",
+          "schema": "public",
+          "items": ["phone", "in_person", "online"]
+        },
         "weekday": {
           "name": "weekday",
           "schema": "public",
@@ -117,21 +127,6 @@
             "friday",
             "saturday"
           ]
-        },
-        "event_type": {
-          "name": "event_type",
-          "schema": "public",
-          "items": ["one_on_one", "group"]
-        },
-        "location_type": {
-          "name": "location_type",
-          "schema": "public",
-          "items": ["phone", "in_person", "online"]
-        },
-        "language": {
-          "name": "language",
-          "schema": "public",
-          "items": ["en", "vi"]
         }
       }
     },
@@ -230,6 +225,16 @@
         }
       },
       "nativeEnums": {
+        "event_type": {
+          "name": "event_type",
+          "schema": "public",
+          "items": ["one_on_one", "group"]
+        },
+        "location_type": {
+          "name": "location_type",
+          "schema": "public",
+          "items": ["phone", "in_person", "online"]
+        },
         "weekday": {
           "name": "weekday",
           "schema": "public",
@@ -242,155 +247,6 @@
             "friday",
             "saturday"
           ]
-        },
-        "event_type": {
-          "name": "event_type",
-          "schema": "public",
-          "items": ["one_on_one", "group"]
-        },
-        "location_type": {
-          "name": "location_type",
-          "schema": "public",
-          "items": ["phone", "in_person", "online"]
-        },
-        "language": {
-          "name": "language",
-          "schema": "public",
-          "items": ["en", "vi"]
-        }
-      }
-    },
-    {
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "unsigned": false,
-          "autoincrement": true,
-          "primary": true,
-          "nullable": false,
-          "mappedType": "integer"
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamptz",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "length": 6,
-          "mappedType": "datetime"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamptz",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": true,
-          "length": 6,
-          "mappedType": "datetime"
-        },
-        "weekday": {
-          "name": "weekday",
-          "type": "weekday",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "nativeEnumName": "weekday",
-          "enumItems": [
-            "sunday",
-            "monday",
-            "tuesday",
-            "wednesday",
-            "thursday",
-            "friday",
-            "saturday"
-          ],
-          "mappedType": "enum"
-        },
-        "start_time": {
-          "name": "start_time",
-          "type": "time(0)",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "length": 0,
-          "mappedType": "time"
-        },
-        "end_time": {
-          "name": "end_time",
-          "type": "time(0)",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "length": 0,
-          "mappedType": "time"
-        },
-        "schedule_id": {
-          "name": "schedule_id",
-          "type": "int",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "mappedType": "integer"
-        }
-      },
-      "name": "schedule_weekly_hour",
-      "schema": "public",
-      "indexes": [
-        {
-          "keyName": "schedule_weekly_hour_pkey",
-          "columnNames": ["id"],
-          "composite": false,
-          "constraint": true,
-          "primary": true,
-          "unique": true
-        }
-      ],
-      "checks": [],
-      "foreignKeys": {
-        "schedule_weekly_hour_schedule_id_foreign": {
-          "constraintName": "schedule_weekly_hour_schedule_id_foreign",
-          "columnNames": ["schedule_id"],
-          "localTableName": "public.schedule_weekly_hour",
-          "referencedColumnNames": ["id"],
-          "referencedTableName": "public.schedule",
-          "updateRule": "cascade"
-        }
-      },
-      "nativeEnums": {
-        "weekday": {
-          "name": "weekday",
-          "schema": "public",
-          "items": [
-            "sunday",
-            "monday",
-            "tuesday",
-            "wednesday",
-            "thursday",
-            "friday",
-            "saturday"
-          ]
-        },
-        "event_type": {
-          "name": "event_type",
-          "schema": "public",
-          "items": ["one_on_one", "group"]
-        },
-        "location_type": {
-          "name": "location_type",
-          "schema": "public",
-          "items": ["phone", "in_person", "online"]
-        },
-        "language": {
-          "name": "language",
-          "schema": "public",
-          "items": ["en", "vi"]
         }
       }
     },
@@ -465,11 +321,11 @@
           "mappedType": "integer"
         }
       },
-      "name": "schedule_date_override",
+      "name": "date_override",
       "schema": "public",
       "indexes": [
         {
-          "keyName": "schedule_date_override_pkey",
+          "keyName": "date_override_pkey",
           "columnNames": ["id"],
           "composite": false,
           "constraint": true,
@@ -479,16 +335,27 @@
       ],
       "checks": [],
       "foreignKeys": {
-        "schedule_date_override_schedule_id_foreign": {
-          "constraintName": "schedule_date_override_schedule_id_foreign",
+        "date_override_schedule_id_foreign": {
+          "constraintName": "date_override_schedule_id_foreign",
           "columnNames": ["schedule_id"],
-          "localTableName": "public.schedule_date_override",
+          "localTableName": "public.date_override",
           "referencedColumnNames": ["id"],
           "referencedTableName": "public.schedule",
+          "deleteRule": "cascade",
           "updateRule": "cascade"
         }
       },
       "nativeEnums": {
+        "event_type": {
+          "name": "event_type",
+          "schema": "public",
+          "items": ["one_on_one", "group"]
+        },
+        "location_type": {
+          "name": "location_type",
+          "schema": "public",
+          "items": ["phone", "in_person", "online"]
+        },
         "weekday": {
           "name": "weekday",
           "schema": "public",
@@ -501,21 +368,6 @@
             "friday",
             "saturday"
           ]
-        },
-        "event_type": {
-          "name": "event_type",
-          "schema": "public",
-          "items": ["one_on_one", "group"]
-        },
-        "location_type": {
-          "name": "location_type",
-          "schema": "public",
-          "items": ["phone", "in_person", "online"]
-        },
-        "language": {
-          "name": "language",
-          "schema": "public",
-          "items": ["en", "vi"]
         }
       }
     },
@@ -696,6 +548,16 @@
         }
       },
       "nativeEnums": {
+        "event_type": {
+          "name": "event_type",
+          "schema": "public",
+          "items": ["one_on_one", "group"]
+        },
+        "location_type": {
+          "name": "location_type",
+          "schema": "public",
+          "items": ["phone", "in_person", "online"]
+        },
         "weekday": {
           "name": "weekday",
           "schema": "public",
@@ -708,21 +570,6 @@
             "friday",
             "saturday"
           ]
-        },
-        "event_type": {
-          "name": "event_type",
-          "schema": "public",
-          "items": ["one_on_one", "group"]
-        },
-        "location_type": {
-          "name": "location_type",
-          "schema": "public",
-          "items": ["phone", "in_person", "online"]
-        },
-        "language": {
-          "name": "language",
-          "schema": "public",
-          "items": ["en", "vi"]
         }
       }
     },
@@ -756,16 +603,6 @@
           "nullable": true,
           "length": 6,
           "mappedType": "datetime"
-        },
-        "provider_id": {
-          "name": "provider_id",
-          "type": "varchar(255)",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "length": 255,
-          "mappedType": "string"
         },
         "password_hash": {
           "name": "password_hash",
@@ -829,6 +666,16 @@
         }
       },
       "nativeEnums": {
+        "event_type": {
+          "name": "event_type",
+          "schema": "public",
+          "items": ["one_on_one", "group"]
+        },
+        "location_type": {
+          "name": "location_type",
+          "schema": "public",
+          "items": ["phone", "in_person", "online"]
+        },
         "weekday": {
           "name": "weekday",
           "schema": "public",
@@ -841,21 +688,6 @@
             "friday",
             "saturday"
           ]
-        },
-        "event_type": {
-          "name": "event_type",
-          "schema": "public",
-          "items": ["one_on_one", "group"]
-        },
-        "location_type": {
-          "name": "location_type",
-          "schema": "public",
-          "items": ["phone", "in_person", "online"]
-        },
-        "language": {
-          "name": "language",
-          "schema": "public",
-          "items": ["en", "vi"]
         }
       }
     },
@@ -890,40 +722,47 @@
           "length": 6,
           "mappedType": "datetime"
         },
-        "timezone": {
-          "name": "timezone",
-          "type": "varchar(255)",
+        "weekday": {
+          "name": "weekday",
+          "type": "weekday",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": false,
-          "length": 255,
-          "mappedType": "string"
-        },
-        "language": {
-          "name": "language",
-          "type": "language",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "nativeEnumName": "language",
-          "default": "'en'",
-          "enumItems": ["en", "vi"],
+          "nativeEnumName": "weekday",
+          "enumItems": [
+            "sunday",
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday"
+          ],
           "mappedType": "enum"
         },
-        "country": {
-          "name": "country",
-          "type": "varchar(255)",
+        "start_time": {
+          "name": "start_time",
+          "type": "time(0)",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
-          "nullable": true,
-          "length": 255,
-          "mappedType": "string"
+          "nullable": false,
+          "length": 0,
+          "mappedType": "time"
         },
-        "user_id": {
-          "name": "user_id",
+        "end_time": {
+          "name": "end_time",
+          "type": "time(0)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 0,
+          "mappedType": "time"
+        },
+        "schedule_id": {
+          "name": "schedule_id",
           "type": "int",
           "unsigned": false,
           "autoincrement": false,
@@ -932,19 +771,11 @@
           "mappedType": "integer"
         }
       },
-      "name": "user_setting",
+      "name": "weekly_hour",
       "schema": "public",
       "indexes": [
         {
-          "columnNames": ["user_id"],
-          "composite": false,
-          "keyName": "user_setting_user_id_unique",
-          "constraint": true,
-          "primary": false,
-          "unique": true
-        },
-        {
-          "keyName": "user_setting_pkey",
+          "keyName": "weekly_hour_pkey",
           "columnNames": ["id"],
           "composite": false,
           "constraint": true,
@@ -954,16 +785,27 @@
       ],
       "checks": [],
       "foreignKeys": {
-        "user_setting_user_id_foreign": {
-          "constraintName": "user_setting_user_id_foreign",
-          "columnNames": ["user_id"],
-          "localTableName": "public.user_setting",
+        "weekly_hour_schedule_id_foreign": {
+          "constraintName": "weekly_hour_schedule_id_foreign",
+          "columnNames": ["schedule_id"],
+          "localTableName": "public.weekly_hour",
           "referencedColumnNames": ["id"],
-          "referencedTableName": "public.user",
+          "referencedTableName": "public.schedule",
+          "deleteRule": "cascade",
           "updateRule": "cascade"
         }
       },
       "nativeEnums": {
+        "event_type": {
+          "name": "event_type",
+          "schema": "public",
+          "items": ["one_on_one", "group"]
+        },
+        "location_type": {
+          "name": "location_type",
+          "schema": "public",
+          "items": ["phone", "in_person", "online"]
+        },
         "weekday": {
           "name": "weekday",
           "schema": "public",
@@ -976,26 +818,21 @@
             "friday",
             "saturday"
           ]
-        },
-        "event_type": {
-          "name": "event_type",
-          "schema": "public",
-          "items": ["one_on_one", "group"]
-        },
-        "location_type": {
-          "name": "location_type",
-          "schema": "public",
-          "items": ["phone", "in_person", "online"]
-        },
-        "language": {
-          "name": "language",
-          "schema": "public",
-          "items": ["en", "vi"]
         }
       }
     }
   ],
   "nativeEnums": {
+    "event_type": {
+      "name": "event_type",
+      "schema": "public",
+      "items": ["one_on_one", "group"]
+    },
+    "location_type": {
+      "name": "location_type",
+      "schema": "public",
+      "items": ["phone", "in_person", "online"]
+    },
     "weekday": {
       "name": "weekday",
       "schema": "public",
@@ -1008,21 +845,6 @@
         "friday",
         "saturday"
       ]
-    },
-    "event_type": {
-      "name": "event_type",
-      "schema": "public",
-      "items": ["one_on_one", "group"]
-    },
-    "location_type": {
-      "name": "location_type",
-      "schema": "public",
-      "items": ["phone", "in_person", "online"]
-    },
-    "language": {
-      "name": "language",
-      "schema": "public",
-      "items": ["en", "vi"]
     }
   }
 }

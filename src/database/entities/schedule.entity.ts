@@ -8,9 +8,9 @@ import {
   Collection,
 } from '@mikro-orm/postgresql';
 
-import { User } from '@/database/entities/user.entity';
 import { BaseEntity } from '@/common/entities/base.entity';
 
+import { User } from './user.entity';
 import { WeeklyHour } from './weekly-hour.entity';
 import { DateOverride } from './date-override.entity';
 
@@ -26,7 +26,7 @@ export class Schedule extends BaseEntity {
   @Property({ default: false })
   isDefault?: boolean & Opt;
 
-  @ManyToOne({ entity: () => User, serializedName: 'userId' })
+  @ManyToOne({ entity: () => User, serializedName: 'userId', lazy: true })
   user: User;
 
   @OneToMany({

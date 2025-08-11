@@ -1,4 +1,4 @@
-import { Entity, Property, ManyToOne } from '@mikro-orm/core';
+import { Entity, Property, ManyToOne } from '@mikro-orm/postgresql';
 
 import { BaseEntity } from '@/common/entities/base.entity';
 
@@ -18,6 +18,7 @@ export class DateOverride extends BaseEntity {
   @ManyToOne({
     entity: () => Schedule,
     serializedName: 'scheduleId',
+    deleteRule: 'cascade',
   })
   schedule: Schedule;
 }
