@@ -1,7 +1,7 @@
 import { EntityManager } from '@mikro-orm/core';
 import { Injectable, PipeTransform, NotFoundException } from '@nestjs/common';
 
-import { User } from '@/modules/user/entities/user.entity';
+import { User } from '@/database/entities/user.entity';
 
 @Injectable()
 export class GetUserFromSlugPipe implements PipeTransform {

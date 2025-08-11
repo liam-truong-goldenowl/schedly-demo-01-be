@@ -1,17 +1,17 @@
 import { plainToInstance } from 'class-transformer';
 
-import { Event } from '@/modules/event/entities/event.entity';
+import { Event } from '@/database/entities/event.entity';
 
-import { EventRespDto } from '../dto/event-resp.dto';
+import { SharingEventResDto } from '../dto/sharing-event-res.dto';
 
 export class EventMapper {
-  static toResponse(event: Event): EventRespDto {
-    return plainToInstance(EventRespDto, event, {
+  static toResponse(event: Event): SharingEventResDto {
+    return plainToInstance(SharingEventResDto, event, {
       excludeExtraneousValues: true,
     });
   }
 
-  static toResponseList(events: Event[]): EventRespDto[] {
+  static toResponseList(events: Event[]): SharingEventResDto[] {
     return events.map((event) => this.toResponse(event));
   }
 }

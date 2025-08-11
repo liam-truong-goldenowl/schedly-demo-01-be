@@ -1,10 +1,10 @@
+import 'dotenv/config';
 import { NestFactory } from '@nestjs/core';
 import { RequestMethod } from '@nestjs/common';
 
-import type { LogLevel } from '@nestjs/common';
 import type { INestApplication } from '@nestjs/common';
 
-import { validateEnv } from '@/utils/helpers/envs';
+import { ConfigService } from '@/config';
 
 import { AppModule } from './app.module';
 import { loadFilters } from './app.filter';
@@ -13,13 +13,11 @@ import { loadMiddlewares } from './app.middleware';
 import { loadErrorHandling } from './app.exception';
 
 export const initApplication = async (): Promise<INestApplication> => {
-  const env = validateEnv();
+  const app = await NestFactory.create(AppModule);
 
-  const logLevels: LogLevel[] = env.isDev
-    ? ['error', 'warn', 'log', 'verbose', 'debug']
-    : ['error', 'log', 'warn'];
+  const configService = app.get(ConfigService);
 
-  const app = await NestFactory.create(AppModule, { logger: logLevels });
+  const { isDev } = configService.getOrThrow('app');
 
   app.setGlobalPrefix('v1/api', {
     exclude: [{ path: 'health', method: RequestMethod.GET }],
@@ -31,7 +29,7 @@ export const initApplication = async (): Promise<INestApplication> => {
    */
   app.enableShutdownHooks();
 
-  if (env.isDev) {
+  if (isDev) {
     genAPIDocument(app);
   }
 

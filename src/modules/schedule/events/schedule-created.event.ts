@@ -1,15 +1,7 @@
-import { BaseEvent } from '@/common/events/base-event.event';
-
-interface ScheduleCreatedPayload {
+export interface ScheduleCreatedPayload {
   id: number;
 }
 
-export class ScheduleCreatedEvent extends BaseEvent {
-  constructor(public payload: ScheduleCreatedPayload) {
-    super();
-  }
-
-  static override get eventName(): symbol {
-    return Symbol.for('schedule.created');
-  }
+export class ScheduleCreatedEvent {
+  constructor(public payload: ScheduleCreatedPayload) {}
 }

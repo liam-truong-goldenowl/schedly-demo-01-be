@@ -5,11 +5,10 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { generateSlug } from '@/utils/helpers/strings';
 
 import { UUIDService } from '../uuid/uuid.service';
+import { User } from '../../database/entities/user.entity';
 
-import { User } from './entities/user.entity';
 import { UserResDto } from './dto/user-res.dto';
 import { CreateUserDto } from './dto/create-user.dto';
-import { CreateUserResDto } from './dto/create-user-res.dto';
 import { UserCreatedEvent } from './events/user-created.event';
 import { UserNotFoundException } from './exceptions/user-not-found';
 import { UserAlreadyExistsException } from './exceptions/user-already-exists';
@@ -37,7 +36,7 @@ export class UserService {
     name,
     timezone,
     password,
-  }: CreateUserDto): Promise<CreateUserResDto> {
+  }: CreateUserDto): Promise<User> {
     const emailExists = await this.em.count(User, { email });
 
     if (emailExists > 0) {
@@ -50,11 +49,11 @@ export class UserService {
     await this.em.flush();
 
     await this.eventEmitter.emitAsync(
-      UserCreatedEvent.eventName,
+      'user.created',
       new UserCreatedEvent({ id: user.id, timezone, password }),
     );
 
-    return CreateUserResDto.fromEntity(user);
+    return user;
   }
 
   private async createUniquePublicSlug(name: string): Promise<string> {

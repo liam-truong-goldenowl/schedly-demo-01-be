@@ -1,5 +1,5 @@
+import { Expose } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
-import { Expose, plainToInstance } from 'class-transformer';
 
 export class SignUpResDto {
   @Expose()
@@ -13,14 +13,4 @@ export class SignUpResDto {
   @Expose()
   @ApiProperty({ example: 'john_doe' })
   publicSlug: string;
-
-  static fromUser(user: {
-    name: string;
-    email: string;
-    publicSlug: string;
-  }): SignUpResDto {
-    return plainToInstance(SignUpResDto, user, {
-      excludeExtraneousValues: true,
-    });
-  }
 }

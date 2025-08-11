@@ -3,7 +3,7 @@ import { Strategy } from 'passport-local';
 import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 
-import type { IReqUser } from '@/common/interfaces';
+import type { RequestUser } from '@/common/interfaces';
 
 import { AuthService } from '../auth.service';
 
@@ -17,9 +17,8 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(req: Request): Promise<IReqUser> {
+  async validate(req: Request): Promise<RequestUser> {
     const user = await this.authService.validateUser(req.body);
-
     return { id: user.id, email: user.email };
   }
 }

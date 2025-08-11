@@ -1,3 +1,6 @@
-import { IReqUser } from '@/common/interfaces';
-
-export type ITokenPayload = IReqUser;
+export type TokenPayload = {
+  id: number;
+  email: string;
+  iat?: number;
+  exp?: number;
+};

@@ -1,8 +1,8 @@
 import { ApiBody, ApiResponse } from '@nestjs/swagger';
 import {
   Get,
-  Post,
   Body,
+  Post,
   Param,
   Patch,
   Delete,
@@ -13,49 +13,57 @@ import {
   ParseIntPipe,
 } from '@nestjs/common';
 
-import { JwtAuthGuard } from '@/modules/auth/guards/jwt-auth.guard';
-import { CurrentUser } from '@/common/decorators/current-user.decorator';
+import { CurrentUser } from '@/decorators/';
+import { JwtAuthGuard } from '@/modules/auth/guards';
 
-import { ScheduleResDto } from '../dto/schedule-res.dto';
-import { CreateScheduleDto } from '../dto/create-schedule.dto';
-import { UpdateScheduleDto } from '../dto/update-schedule.dto';
-import { ScheduleService } from '../services/schedule.service';
-import { UserOwnsScheduleGuard } from '../guards/user-owns-schedule.guard';
+import { UserOwnsScheduleGuard } from '../guards';
+import { ScheduleResDto, CreateScheduleDto, UpdateScheduleDto } from '../dto';
+import {
+  ListSchedulesUseCase,
+  CreateScheduleUseCase,
+  DeleteScheduleUseCase,
+  UpdateScheduleUseCase,
+} from '../use-cases';
 
 @Controller('/schedules')
 @UseGuards(JwtAuthGuard)
 export class ScheduleController {
-  constructor(private readonly scheduleService: ScheduleService) {}
+  constructor(
+    private listSchedulesUseCase: ListSchedulesUseCase,
+    private createScheduleUseCase: CreateScheduleUseCase,
+    private updateScheduleUseCase: UpdateScheduleUseCase,
+    private deleteScheduleUseCase: DeleteScheduleUseCase,
+  ) {}
 
   @Get()
   @ApiResponse({ type: [ScheduleResDto] })
-  findAll(@CurrentUser() userId: number) {
-    return this.scheduleService.findAllForUser({ userId });
+  findAll(@CurrentUser('id') userId: number) {
+    return this.listSchedulesUseCase.execute({ userId });
   }
 
   @Post()
   @ApiBody({ type: CreateScheduleDto })
   @ApiResponse({ type: ScheduleResDto })
   create(
-    @CurrentUser() userId: number,
-    @Body() body: CreateScheduleDto,
+    @CurrentUser('id') userId: number,
+    @Body() scheduleData: CreateScheduleDto,
   ): Promise<ScheduleResDto> {
-    return this.scheduleService.createForUser({ userId, scheduleData: body });
+    return this.createScheduleUseCase.execute({ userId, scheduleData });
   }
 
   @Patch(':id')
-  @UseGuards(UserOwnsScheduleGuard)
   @ApiBody({ type: UpdateScheduleDto })
   @ApiResponse({ type: ScheduleResDto })
+  @UseGuards(UserOwnsScheduleGuard)
   update(
     @CurrentUser() userId: number,
-    @Body() body: UpdateScheduleDto,
-    @Param('id', ParseIntPipe) id: number,
+    @Body() scheduleData: UpdateScheduleDto,
+    @Param('id', ParseIntPipe) scheduleId: number,
   ) {
-    return this.scheduleService.updateForUser({
+    return this.updateScheduleUseCase.execute({
       userId,
-      scheduleId: id,
-      scheduleData: body,
+      scheduleId,
+      scheduleData,
     });
   }
 
@@ -64,8 +72,11 @@ export class ScheduleController {
   @UseGuards(UserOwnsScheduleGuard)
   delete(
     @CurrentUser('id') userId: number,
-    @Param('id', ParseIntPipe) id: number,
+    @Param('id', ParseIntPipe) scheduleId: number,
   ) {
-    return this.scheduleService.deleteFromUser({ userId, scheduleId: id });
+    return this.deleteScheduleUseCase.execute({
+      userId,
+      scheduleId,
+    });
   }
 }

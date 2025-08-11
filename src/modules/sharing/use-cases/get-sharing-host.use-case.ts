@@ -1,14 +1,13 @@
 import { Injectable } from '@nestjs/common';
 
-import { User } from '@/modules/user/entities/user.entity';
-import { UseCase } from '@/common/interfaces/use-case.interface';
+import { User } from '@/database/entities';
 
-import { HostRespDto } from '../dto/host-resp.dto';
-import { HostMapper } from '../mappers/host.mapper';
+import { HostResDto } from '../dto';
+import { HostMapper } from '../mappers';
 
 @Injectable()
-export class GetSharingHostUseCase implements UseCase<User, HostRespDto> {
-  async execute(user: User): Promise<HostRespDto> {
+export class GetSharingHostUseCase {
+  async execute(user: User): Promise<HostResDto> {
     return HostMapper.toResponse(user);
   }
 }

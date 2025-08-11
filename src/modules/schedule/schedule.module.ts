@@ -1,39 +1,31 @@
 import { Module } from '@nestjs/common';
-import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { EntityRepository } from '@mikro-orm/postgresql';
 
-import { Schedule } from './entities/schedule.entity';
+import * as UseCases from './use-cases';
 import { ScheduleService } from './services/schedule.service';
+import { WeeklyHourService } from './services/weekly-hour.service';
 import { ScheduleController } from './controllers/schedule.controller';
+import { DateOverrideService } from './services/date-override.service';
 import { UserCreatedListener } from './listeners/user-created.listener';
-import { ScheduleWeeklyHour } from './entities/schedule-weekly-hour.entity';
-import { ScheduleDateOverride } from './entities/schedule-date-override.entity';
+import { WeeklyHourController } from './controllers/weekly-hour.controller';
 import { ScheduleCreatedListener } from './listeners/schedule-created.listener';
-import { ScheduleWeeklyHourService } from './services/schedule-weekly-hour.service';
-import { ScheduleDateOverrideService } from './services/schedule-date-override.service';
-import { ScheduleWeeklyHourController } from './controllers/schedule-weekly-hour.controller';
-import { ScheduleDateOverrideController } from './controllers/schedule-date-override.controller';
+import { DateOverrideController } from './controllers/date-override.controller';
 
 @Module({
   controllers: [
     ScheduleController,
-    ScheduleWeeklyHourController,
-    ScheduleDateOverrideController,
+    WeeklyHourController,
+    DateOverrideController,
   ],
-  imports: [
-    MikroOrmModule.forFeature([
-      Schedule,
-      ScheduleWeeklyHour,
-      ScheduleDateOverride,
-    ]),
-  ],
+  imports: [],
   providers: [
     ScheduleService,
     EntityRepository,
     UserCreatedListener,
     ScheduleCreatedListener,
-    ScheduleWeeklyHourService,
-    ScheduleDateOverrideService,
+    WeeklyHourService,
+    DateOverrideService,
+    ...Object.values(UseCases),
   ],
 })
 export class ScheduleModule {}

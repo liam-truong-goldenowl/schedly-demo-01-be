@@ -1,12 +1,12 @@
-import { ConfigService } from '@nestjs/config';
-
 import { initApplication } from './app';
+import { ConfigService } from './config/config.service';
 
 async function bootstrap() {
   const app = await initApplication();
 
-  const conf = app.get(ConfigService);
-  const port = conf.get<number>('app.port', 3000);
+  const configService = app.get(ConfigService);
+
+  const { port } = configService.getOrThrow('app');
 
   await app.listen(port, () => {
     console.log('\n');

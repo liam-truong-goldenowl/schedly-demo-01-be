@@ -2,11 +2,10 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Type, Expose, plainToInstance } from 'class-transformer';
 
 import { Weekday } from '@/common/enums';
+import { Schedule } from '@/database/entities/schedule.entity';
 
-import { Schedule } from '../entities/schedule.entity';
-
-import { ScheduleDateOverrideResDto } from './date-override-res.dto';
-import { ScheduleWeeklyHourResDto } from './schedule-weekly-hour-res.dto';
+import { DateOverrideResDto } from './override-res.dto';
+import { WeeklyHourResDto } from './weekly-hour-res.dto';
 
 export class ScheduleResDto {
   @Expose()
@@ -26,9 +25,9 @@ export class ScheduleResDto {
   isDefault: boolean;
 
   @Expose()
-  @Type(() => ScheduleWeeklyHourResDto)
+  @Type(() => WeeklyHourResDto)
   @ApiProperty({
-    type: [ScheduleWeeklyHourResDto],
+    type: [WeeklyHourResDto],
     example: [
       {
         id: 1,
@@ -44,12 +43,12 @@ export class ScheduleResDto {
       },
     ],
   })
-  weeklyHours: ScheduleWeeklyHourResDto[];
+  weeklyHours: WeeklyHourResDto[];
 
   @Expose()
-  @Type(() => ScheduleDateOverrideResDto)
+  @Type(() => DateOverrideResDto)
   @ApiProperty({
-    type: [ScheduleDateOverrideResDto],
+    type: [DateOverrideResDto],
     example: [
       {
         id: 1,
@@ -65,7 +64,7 @@ export class ScheduleResDto {
       },
     ],
   })
-  dateOverrides: ScheduleDateOverrideResDto[];
+  dateOverrides: DateOverrideResDto[];
 
   static fromEntity(schedule: Schedule): ScheduleResDto {
     return plainToInstance(

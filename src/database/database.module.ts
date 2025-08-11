@@ -1,16 +1,31 @@
 import { Module } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { PostgreSqlDriver } from '@mikro-orm/postgresql';
-import { MikroOrmModule, MikroOrmModuleOptions } from '@mikro-orm/nestjs';
+
+import { ConfigService } from '@/config';
+
+import { User } from './entities/user.entity';
+import { Event } from './entities/event.entity';
+import { Account } from './entities/account.entity';
+import { Schedule } from './entities/schedule.entity';
+import { WeeklyHour } from './entities/weekly-hour.entity';
+import { DateOverride } from './entities/date-override.entity';
 
 @Module({
   imports: [
     MikroOrmModule.forRootAsync({
       inject: [ConfigService],
       driver: PostgreSqlDriver,
-      useFactory: (configService: ConfigService) =>
-        configService.get<MikroOrmModuleOptions>('mikro-orm')!,
+      useFactory: (config: ConfigService) => config.getOrThrow('mikroOrm'),
     }),
+    MikroOrmModule.forFeature([
+      User,
+      Account,
+      Event,
+      Schedule,
+      DateOverride,
+      WeeklyHour,
+    ]),
   ],
 })
 export class DatabaseModule {}

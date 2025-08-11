@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose, plainToInstance } from 'class-transformer';
 
-import { User } from '../entities/user.entity';
+import { User } from '@/database/entities/user.entity';
 
 export class UserResDto {
   @Expose()

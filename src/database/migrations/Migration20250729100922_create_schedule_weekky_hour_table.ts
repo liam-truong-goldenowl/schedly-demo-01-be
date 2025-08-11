@@ -17,6 +17,6 @@ export class Migration20250729100922_create_schedule_weekky_hour_table extends M
   override async down(): Promise<void> {
     this.addSql(`drop table if exists "schedule_weekly_hour" cascade;`);
 
-    this.addSql(`drop type "weekday";`);
+    this.addSql(`drop type "weekday" cascade;`);
   }
 }

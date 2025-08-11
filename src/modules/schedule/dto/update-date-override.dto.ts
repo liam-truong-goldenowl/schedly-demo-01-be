@@ -1,3 +1,3 @@
-import { IntervalDto } from '@/common/dto/interval.dto';
+import { HasIntervalDto } from '@/common/dto/interval.dto';
 
-export class UpdateDateOverrideDto extends IntervalDto {}
+export class UpdateDateOverrideDto extends HasIntervalDto {}

@@ -2,8 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Expose, plainToInstance } from 'class-transformer';
 
 import { EventType, LocationType } from '@/common/enums';
-
-import { Event } from '../entities/event.entity';
+import { Event } from '@/database/entities/event.entity';
 
 export class EventResDto {
   @Expose()

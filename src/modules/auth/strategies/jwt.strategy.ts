@@ -1,34 +1,41 @@
 import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { Strategy, ExtractJwt } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
 
+import type { Request } from 'express';
+
+import { ConfigService } from '@/config';
 import { ACCESS_TOKEN_KEY } from '@/utils/constants/cookies';
 
-import type { IReqUser } from '@/common/interfaces';
+import type { RequestUser } from '@/common/interfaces';
 
 import { AuthService } from '../auth.service';
 
-import type { ITokenPayload } from '../auth.interface';
+import type { TokenPayload } from '../auth.interface';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   constructor(
-    confService: ConfigService,
     private authService: AuthService,
+    private confService: ConfigService,
   ) {
+    const { secret } = confService.getOrThrow('jwt');
+
+    const extractTokenFromCookie = (req: Request) => {
+      return req.cookies?.[ACCESS_TOKEN_KEY];
+    };
+
     super({
-      secretOrKey: confService.getOrThrow<string>('jwt.secret'),
+      secretOrKey: secret,
       jwtFromRequest: ExtractJwt.fromExtractors([
         ExtractJwt.fromAuthHeaderAsBearerToken(),
-        (req) => req.cookies?.[ACCESS_TOKEN_KEY],
+        extractTokenFromCookie,
       ]),
     });
   }
 
-  async validate({ id }: ITokenPayload): Promise<IReqUser> {
-    const user = await this.authService.validateJwtUser({ id });
-
-    return { id, email: user.email };
+  async validate(payload: TokenPayload): Promise<RequestUser> {
+    const user = await this.authService.validateJwtUser(payload.id);
+    return { id: user.id, email: user.email };
   }
 }

@@ -3,16 +3,16 @@ import { OnEvent } from '@nestjs/event-emitter';
 import { EntityManager } from '@mikro-orm/postgresql';
 
 import { Weekday } from '@/common/enums';
+import { Schedule } from '@/database/entities/schedule.entity';
+import { WeeklyHour } from '@/database/entities/weekly-hour.entity';
 
-import { Schedule } from '../entities/schedule.entity';
 import { ScheduleCreatedEvent } from '../events/schedule-created.event';
-import { ScheduleWeeklyHour } from '../entities/schedule-weekly-hour.entity';
 
 @Injectable()
 export class ScheduleCreatedListener {
   constructor(private em: EntityManager) {}
 
-  @OnEvent(ScheduleCreatedEvent.eventName)
+  @OnEvent('schedule.created')
   async handleScheduleCreatedEvent(event: ScheduleCreatedEvent) {
     // new weekly hours for mon to fri
     const defaultStart = '09:00';
@@ -33,7 +33,7 @@ export class ScheduleCreatedListener {
     ];
 
     const weeklyHours = defaultWeekdays.map((weekday) =>
-      this.em.create(ScheduleWeeklyHour, {
+      this.em.create(WeeklyHour, {
         ...commonProperties,
         weekday: weekday,
       }),

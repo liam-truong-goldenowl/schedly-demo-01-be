@@ -1,19 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/core';
 
-import { User } from '@/modules/user/entities/user.entity';
-import { Event } from '@/modules/event/entities/event.entity';
-import { UseCase } from '@/common/interfaces/use-case.interface';
-import { Schedule } from '@/modules/schedule/entities/schedule.entity';
+import { User, Event, Schedule } from '@/database/entities';
 
-import { EventRespDto } from '../dto/event-resp.dto';
-import { EventMapper } from '../mappers/event.mapper';
+import { EventMapper } from '../mappers';
+import { SharingEventResDto } from '../dto';
 
 @Injectable()
-export class GetSharingEventsUseCase implements UseCase<User, EventRespDto[]> {
+export class GetSharingEventsUseCase {
   constructor(private em: EntityManager) {}
 
-  async execute(user: User): Promise<EventRespDto[]> {
+  async execute(user: User): Promise<SharingEventResDto[]> {
     const schedules = await this.em.findAll(Schedule, {
       fields: ['id'],
       filters: { ownBy: { id: user.id } },
