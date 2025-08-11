@@ -8,15 +8,18 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 
-import { User, Event } from '@/database/entities';
+import {
+  User,
+  Event,
+  Meeting,
+  MeetingHost,
+  MeetingGuest,
+  MeetingInvitee,
+} from '@/database/entities';
 
-import { Meeting } from '../entities/meeting.entity';
-import { BookingRespDto } from '../dto/booking-resp.dto';
-import { CreateBookingDto } from '../dto/create-booking.dto';
-import { BookingService } from '../services/booking.service';
-import { MeetingHost } from '../entities/meeting-host.entity';
-import { MeetingGuest } from '../entities/meeting-guest.entity';
-import { MeetingInvitee } from '../entities/meeting-invitee.entity';
+import { CreateBookingDto } from '../dto';
+import { MeetingMapper } from '../mappers';
+import { BookingService } from '../booking.service';
 
 @Injectable()
 export class CreateBookingUseCase {
@@ -25,42 +28,41 @@ export class CreateBookingUseCase {
     private bookingService: BookingService,
   ) {}
 
-  async execute(dto: CreateBookingDto): Promise<BookingRespDto> {
+  async execute(dto: CreateBookingDto) {
     const targetEvent = await this.em.findOne(
       Event,
       { id: dto.eventId },
-      { fields: ['id', 'user'] },
+      { fields: ['id', 'user', 'schedule'] },
     );
 
     if (!targetEvent) {
       throw new NotFoundException('Event not found');
     }
 
-    const isValidStartTime = await this.bookingService.isValidStartTime({
+    await this.bookingService.validateEventStartTime({
       startTime: dto.startTime,
+      startDate: dto.startDate,
       eventId: targetEvent.id,
-    });
-
-    if (!isValidStartTime) {
-      throw new BadRequestException('Invalid start time for the event');
-    }
-
-    const eventRef = this.em.getReference(Event, targetEvent.id);
-    const hostRef = this.em.getReference(User, targetEvent.user.id);
-
-    const meeting = this.em.create(Meeting, { ...dto, event: eventRef });
-
-    this.em.create(MeetingHost, { meeting, host: hostRef });
-    this.em.create(MeetingInvitee, { meeting, ...dto });
-
-    dto.guestEmails.forEach((email) => {
-      this.em.create(MeetingGuest, { meeting, email });
+      scheduleId: targetEvent.schedule.id,
+      timezone: dto.timezone,
     });
 
     try {
+      const eventRef = this.em.getReference(Event, targetEvent.id);
+      const hostRef = this.em.getReference(User, targetEvent.user.id);
+
+      const meeting = this.em.create(Meeting, { ...dto, event: eventRef });
+
+      this.em.create(MeetingHost, { meeting, host: hostRef });
+      this.em.create(MeetingInvitee, { meeting, ...dto });
+
+      dto.guestEmails.forEach((email) => {
+        this.em.create(MeetingGuest, { meeting, email });
+      });
+
       await this.em.flush();
 
-      return { id: meeting.id };
+      return MeetingMapper.toResponse(meeting);
     } catch (error) {
       if (error instanceof UniqueConstraintViolationException) {
         throw new BadRequestException(

@@ -1,6 +1,6 @@
 import { Expose } from 'class-transformer';
 
-export class BookingRespDto {
+export class MeetingResDto {
   @Expose()
   id: number;
 }

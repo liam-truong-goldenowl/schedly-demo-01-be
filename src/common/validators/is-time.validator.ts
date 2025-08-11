@@ -1,3 +1,4 @@
+import { DateTime } from 'luxon';
 import {
   registerDecorator,
   ValidationOptions,
@@ -27,9 +28,9 @@ export class IsTimeConstraint implements ValidatorConstraintInterface {
     if (typeof time !== 'string') {
       return false;
     }
-    // Regular expression for HH:MM or HH:MM:SS format (00-23 for hours, 00-59 for minutes, 00-59 for seconds)
-    const timeRegex = /^(?:2[0-3]|[01]?[0-9]):[0-5][0-9](?::[0-5][0-9])?$/;
-    return timeRegex.test(time);
+
+    const dt = DateTime.fromFormat(time, 'HH:mm:ss');
+    return dt.isValid;
   }
 
   defaultMessage(args: ValidationArguments) {
@@ -43,7 +44,7 @@ export class IsTimeConstraint implements ValidatorConstraintInterface {
       return `${args.property} is required but not provided.`;
     }
 
-    return `"${args.value}" is not a valid time format. Expected format is HH:MM or HH:MM:SS (e.g., 14:30 or 14:30:45).`;
+    return `"${args.value}" is not a valid time format. Expected format is HH:MM:SS (e.g. 14:30:45).`;
   }
 }
 
