@@ -5,7 +5,7 @@ import { Weekday } from '@/common/enums';
 import { Schedule } from '@/database/entities/schedule.entity';
 
 import { DateOverrideResDto } from './override-res.dto';
-import { WeeklyHourResDto } from './schedule-weekly-hour-res.dto';
+import { WeeklyHourResDto } from './weekly-hour-res.dto';
 
 export class ScheduleResDto {
   @Expose()

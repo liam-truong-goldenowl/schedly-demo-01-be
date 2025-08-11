@@ -12,7 +12,7 @@ import { ScheduleCreatedEvent } from '../events/schedule-created.event';
 export class ScheduleCreatedListener {
   constructor(private em: EntityManager) {}
 
-  @OnEvent(ScheduleCreatedEvent.eventName)
+  @OnEvent('schedule.created')
   async handleScheduleCreatedEvent(event: ScheduleCreatedEvent) {
     // new weekly hours for mon to fri
     const defaultStart = '09:00';

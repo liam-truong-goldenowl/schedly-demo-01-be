@@ -49,7 +49,7 @@ export class UserService {
     await this.em.flush();
 
     await this.eventEmitter.emitAsync(
-      UserCreatedEvent.eventName,
+      'user.created',
       new UserCreatedEvent({ id: user.id, timezone, password }),
     );
 

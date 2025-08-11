@@ -1,32 +1,17 @@
 import { Injectable } from '@nestjs/common';
-import {
-  EntityManager,
-  ForeignKeyConstraintViolationException,
-} from '@mikro-orm/postgresql';
+import { EntityManager } from '@mikro-orm/core';
 
+import { Interval } from '@/common/interfaces';
 import { isOverlapping } from '@/utils/helpers/time';
-import { Schedule } from '@/database/entities/schedule.entity';
-import { DateOverride } from '@/database/entities/date-override.entity';
+import { Schedule, DateOverride } from '@/database/entities';
 
-import { DateOverrideResDto } from '../dto/override-res.dto';
-import { CreateDateOverrideDto } from '../dto/create-date-override.dto';
-import { UpdateDateOverrideDto } from '../dto/update-date-override.dto';
-import { ScheduleNotFoundException } from '../exceptions/schedule-not-found.exception';
-import { OverlappingIntervalsException } from '../exceptions/overlapping-intervals.exception';
-import { DateOverrideNotFoundException } from '../exceptions/date-override-not-found.exception';
+import { OverlappingIntervalsException } from '../exceptions';
 
 @Injectable()
 export class DateOverrideService {
   constructor(private em: EntityManager) {}
-  async create({
-    scheduleId,
-    dateOverrideData,
-  }: {
-    scheduleId: number;
-    dateOverrideData: CreateDateOverrideDto;
-  }) {
-    const { intervals, dates } = dateOverrideData;
 
+  async checkOverlappingIntervals(intervals: Interval[]) {
     for (const [idx, currentInterval] of intervals.entries()) {
       for (const comparingInterval of intervals.slice(idx + 1)) {
         if (isOverlapping(currentInterval, comparingInterval)) {
@@ -37,102 +22,51 @@ export class DateOverrideService {
         }
       }
     }
-
-    try {
-      const existingOverrides = await this.em.find(DateOverride, {
-        schedule: { id: scheduleId },
-        date: { $in: dates.map((date) => new Date(date)) },
-      });
-
-      if (existingOverrides.length > 0) {
-        this.em.remove(existingOverrides);
-      }
-
-      if (intervals.length == 0) {
-        const newOverrides = dates.map((date) =>
-          this.em.create(DateOverride, {
-            date: new Date(date),
-            schedule: this.em.getReference(Schedule, scheduleId),
-            startTime: null,
-            endTime: null,
-          }),
-        );
-        await this.em.flush();
-
-        return newOverrides.map((override) =>
-          DateOverrideResDto.fromEntity(override),
-        );
-      }
-
-      const newOverrides = intervals.flatMap((interval) => {
-        return dates.map((date) =>
-          this.em.create(DateOverride, {
-            date: new Date(date),
-            startTime: interval.startTime,
-            endTime: interval.endTime,
-            schedule: this.em.getReference(Schedule, scheduleId),
-          }),
-        );
-      });
-
-      await this.em.flush();
-
-      return newOverrides.map((override) =>
-        DateOverrideResDto.fromEntity(override),
-      );
-    } catch (error) {
-      if (error instanceof ForeignKeyConstraintViolationException) {
-        throw new ScheduleNotFoundException(scheduleId);
-      }
-
-      throw error;
-    }
   }
 
-  async update({
-    scheduleId,
-    dateOverrideId,
-    dateOverrideData,
-  }: {
-    scheduleId: number;
-    dateOverrideId: number;
-    dateOverrideData: UpdateDateOverrideDto;
-  }): Promise<DateOverrideResDto> {
-    const dateOverride = await this.em.findOne(DateOverride, {
-      id: dateOverrideId,
+  async removeExistingOverrides(scheduleId: number, dates: string[]) {
+    const existingOverrides = await this.em.find(DateOverride, {
       schedule: { id: scheduleId },
+      date: { $in: dates },
     });
 
-    if (!dateOverride) {
-      throw new DateOverrideNotFoundException(dateOverrideId);
+    if (existingOverrides.length > 0) {
+      this.em.remove(existingOverrides);
     }
-
-    this.em.assign(dateOverride, {
-      startTime: dateOverrideData.startTime,
-      endTime: dateOverrideData.endTime,
-    });
 
     await this.em.flush();
-
-    return DateOverrideResDto.fromEntity(dateOverride);
   }
 
-  async delete({
-    scheduleId,
-    dateOverrideId,
-  }: {
-    scheduleId: number;
-    dateOverrideId: number;
-  }): Promise<void> {
-    const dateOverride = await this.em.findOne(DateOverride, {
-      id: dateOverrideId,
-      schedule: { id: scheduleId },
+  async createUnavailableOverrides(scheduleId: number, dates: string[]) {
+    const scheduleRef = this.em.getReference(Schedule, scheduleId);
+    const newOverrides = dates.map((date) =>
+      this.em.create(DateOverride, {
+        schedule: scheduleRef,
+        date: new Date(date),
+        startTime: null,
+        endTime: null,
+      }),
+    );
+    await this.em.flush();
+    return newOverrides;
+  }
+
+  async createAvailableOverrides(
+    scheduleId: number,
+    { dates, intervals }: { dates: string[]; intervals: Interval[] },
+  ) {
+    const scheduleRef = this.em.getReference(Schedule, scheduleId);
+    const newOverrides = intervals.flatMap((interval) => {
+      return dates.map((date) =>
+        this.em.create(DateOverride, {
+          date: new Date(date),
+          schedule: scheduleRef,
+          startTime: interval.startTime,
+          endTime: interval.endTime,
+        }),
+      );
     });
-
-    if (!dateOverride) {
-      throw new DateOverrideNotFoundException(dateOverrideId);
-    }
-
-    await this.em.removeAndFlush(dateOverride);
+    await this.em.flush();
+    return newOverrides;
   }
 }

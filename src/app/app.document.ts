@@ -2,7 +2,7 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
 import type { INestApplication } from '@nestjs/common';
 
-import { ConfigService } from '@/config/config.service';
+import { ConfigService } from '@/config';
 
 export const genAPIDocument = (app: INestApplication) => {
   const configService = app.get(ConfigService);

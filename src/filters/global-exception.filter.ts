@@ -19,12 +19,10 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         ? responseBody
         : (responseBody.message ?? 'Internal Server Error');
 
-    // const errorCode = responseBody.errorCode ?? 'INTERNAL_ERROR';
     const errors = responseBody.errors ?? undefined;
 
     response.status(status).json({
       message,
-      // errorCode,
       statusCode: status,
       ...(errors && { errors }),
       timestamp: new Date().toISOString(),

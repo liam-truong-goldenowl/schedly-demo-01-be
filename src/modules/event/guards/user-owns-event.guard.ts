@@ -8,8 +8,8 @@ import {
 } from '@nestjs/common';
 
 import { RequestUser } from '@/common/interfaces';
+import { Event } from '@/database/entities/event.entity';
 
-import { Event } from '../../../database/entities/event.entity';
 import { EventNotFoundException } from '../exceptions/event-not-found.exception';
 
 @Injectable()

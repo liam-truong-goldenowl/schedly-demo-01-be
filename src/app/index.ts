@@ -4,7 +4,7 @@ import { RequestMethod } from '@nestjs/common';
 
 import type { INestApplication } from '@nestjs/common';
 
-import { ConfigService } from '@/config/config.service';
+import { ConfigService } from '@/config';
 
 import { AppModule } from './app.module';
 import { loadFilters } from './app.filter';

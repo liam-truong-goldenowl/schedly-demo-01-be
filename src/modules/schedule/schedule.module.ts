@@ -1,20 +1,21 @@
 import { Module } from '@nestjs/common';
 import { EntityRepository } from '@mikro-orm/postgresql';
 
+import * as UseCases from './use-cases';
 import { ScheduleService } from './services/schedule.service';
+import { WeeklyHourService } from './services/weekly-hour.service';
 import { ScheduleController } from './controllers/schedule.controller';
 import { DateOverrideService } from './services/date-override.service';
 import { UserCreatedListener } from './listeners/user-created.listener';
-import { WeeklyHourService } from './services/schedule-weekly-hour.service';
+import { WeeklyHourController } from './controllers/weekly-hour.controller';
 import { ScheduleCreatedListener } from './listeners/schedule-created.listener';
-import { ScheduleWeeklyHourController } from './controllers/schedule-weekly-hour.controller';
-import { ScheduleDateOverrideController } from './controllers/schedule-date-override.controller';
+import { DateOverrideController } from './controllers/date-override.controller';
 
 @Module({
   controllers: [
     ScheduleController,
-    ScheduleWeeklyHourController,
-    ScheduleDateOverrideController,
+    WeeklyHourController,
+    DateOverrideController,
   ],
   imports: [],
   providers: [
@@ -24,6 +25,7 @@ import { ScheduleDateOverrideController } from './controllers/schedule-date-over
     ScheduleCreatedListener,
     WeeklyHourService,
     DateOverrideService,
+    ...Object.values(UseCases),
   ],
 })
 export class ScheduleModule {}

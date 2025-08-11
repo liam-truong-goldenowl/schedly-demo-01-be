@@ -2,11 +2,11 @@ import { plainToInstance } from 'class-transformer';
 
 import { User } from '@/database/entities/user.entity';
 
-import { HostRespDto } from '../dto/host-resp.dto';
+import { HostResDto } from '../dto/host-res.dto';
 
 export class HostMapper {
-  static toResponse(user: User): HostRespDto {
-    return plainToInstance(HostRespDto, user, {
+  static toResponse(user: User): HostResDto {
+    return plainToInstance(HostResDto, user, {
       excludeExtraneousValues: true,
     });
   }

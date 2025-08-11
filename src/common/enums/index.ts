@@ -1,8 +1,3 @@
-export enum Language {
-  EN = 'en',
-  VI = 'vi',
-}
-
 export enum Weekday {
   SUNDAY = 'sunday',
   MONDAY = 'monday',

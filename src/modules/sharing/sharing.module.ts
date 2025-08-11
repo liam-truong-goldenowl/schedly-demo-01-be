@@ -1,11 +1,10 @@
 import { Module } from '@nestjs/common';
 
-import { SharingController } from './controllers/sharing.controller';
-import { GetSharingHostUseCase } from './use-cases/get-sharing-host.use-case';
-import { GetSharingEventsUseCase } from './use-cases/get-sharing-events.use-case';
+import * as UseCases from './use-cases';
+import { SharingController } from './sharing.controller';
 
 @Module({
   controllers: [SharingController],
-  providers: [GetSharingHostUseCase, GetSharingEventsUseCase],
+  providers: [...Object.values(UseCases)],
 })
 export class SharingModule {}

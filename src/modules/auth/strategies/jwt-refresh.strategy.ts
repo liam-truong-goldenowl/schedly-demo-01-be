@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, ExtractJwt } from 'passport-jwt';
 
-import { ConfigService } from '@/config/config.service';
+import { ConfigService } from '@/config';
 import { REFRESH_TOKEN_KEY } from '@/utils/constants/cookies';
 
 import type { RequestUser } from '@/common/interfaces';

@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { PostgreSqlDriver } from '@mikro-orm/postgresql';
 
-import { ConfigService } from '@/config/config.service';
+import { ConfigService } from '@/config';
 
 import { User } from './entities/user.entity';
 import { Event } from './entities/event.entity';

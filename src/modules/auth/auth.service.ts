@@ -2,8 +2,8 @@ import { JwtService } from '@nestjs/jwt';
 import { Injectable } from '@nestjs/common';
 import { EntityManager, NotFoundError } from '@mikro-orm/core';
 
+import { ConfigService } from '@/config';
 import { User } from '@/database/entities/user.entity';
-import { ConfigService } from '@/config/config.service';
 import { Account } from '@/database/entities/account.entity';
 
 import { WrongCredentialsException } from './exceptions/wrong-credentials';

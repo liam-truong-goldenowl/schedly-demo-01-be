@@ -4,16 +4,16 @@ import { UseCase } from '@/common/interfaces/';
 import { RequestUser } from '@/common/interfaces';
 
 import { AuthService } from '../auth.service';
-import { TokenRespDto } from '../dto/token-resp.dto';
+import { TokenResDto } from '../dto/token-res.dto';
 import { TokenMapper } from '../mappers/token.mapper';
 
 @Injectable()
 export class RefreshTokensUserCase
-  implements UseCase<RequestUser, TokenRespDto>
+  implements UseCase<RequestUser, TokenResDto>
 {
   constructor(private authService: AuthService) {}
 
-  async execute(user: RequestUser): Promise<TokenRespDto> {
+  async execute(user: RequestUser): Promise<TokenResDto> {
     const tokens = await this.authService.generateTokens(user);
     await this.authService.updateAccountRefreshToken({
       userId: user.id,

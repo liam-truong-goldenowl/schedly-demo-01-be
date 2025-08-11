@@ -4,7 +4,7 @@ import * as cookieParser from 'cookie-parser';
 
 import type { INestApplication } from '@nestjs/common';
 
-import { ConfigService } from '@/config/config.service';
+import { ConfigService } from '@/config';
 
 export const loadMiddlewares = (app: INestApplication): void => {
   const configService = app.get(ConfigService);

@@ -1,6 +1,5 @@
 import { ApiBody, ApiResponse } from '@nestjs/swagger';
 import {
-  Get,
   Res,
   Body,
   Post,
@@ -13,8 +12,8 @@ import {
 import type { Response } from 'express';
 
 import { ConfigService } from '@/config';
+import { CurrentUser } from '@/decorators';
 import { RequestUser } from '@/common/interfaces';
-import { CurrentUser } from '@/decorators/current-user.decorator';
 import {
   ACCESS_TOKEN_KEY,
   REFRESH_TOKEN_KEY,
@@ -22,15 +21,12 @@ import {
   REFRESH_TOKEN_EXPIRES_IN,
 } from '@/utils/constants/cookies';
 
-import { UserResDto } from '../user/dto/user-res.dto';
-
-import { LoginDto, SignUpDto, TokenRespDto, SignUpRespDto } from './dto';
+import { LoginDto, SignUpDto, TokenResDto, SignUpResDto } from './dto';
 import { JwtAuthGuard, LocalAuthGuard, JwtRefreshAuthGuard } from './guards';
 import {
   LoginUseCase,
-  SignUpUseCase,
   LogoutUseCase,
-  GetProfileUseCase,
+  SignUpUseCase,
   RefreshTokensUserCase,
 } from './use-cases';
 
@@ -41,7 +37,6 @@ export class AuthController {
     private loginUC: LoginUseCase,
     private signUpUC: SignUpUseCase,
     private logoutUC: LogoutUseCase,
-    private getProfileUC: GetProfileUseCase,
     private refreshTokensUc: RefreshTokensUserCase,
   ) {}
 
@@ -49,7 +44,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @UseGuards(LocalAuthGuard)
   @ApiBody({ type: LoginDto })
-  @ApiResponse({ type: TokenRespDto })
+  @ApiResponse({ type: TokenResDto })
   async login(
     @CurrentUser() user: RequestUser,
     @Res({ passthrough: true }) res: Response,
@@ -59,10 +54,10 @@ export class AuthController {
     return tokens;
   }
 
-  @Post('sign-up')
+  @Post('signup')
   @HttpCode(HttpStatus.CREATED)
   @ApiBody({ type: SignUpDto })
-  @ApiResponse({ type: SignUpRespDto })
+  @ApiResponse({ type: SignUpResDto })
   async signUp(@Body() signUpDto: SignUpDto) {
     return this.signUpUC.execute(signUpDto);
   }
@@ -83,7 +78,7 @@ export class AuthController {
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtRefreshAuthGuard)
-  @ApiResponse({ type: TokenRespDto })
+  @ApiResponse({ type: TokenResDto })
   async refreshTokens(
     @CurrentUser() user: RequestUser,
     @Res({ passthrough: true }) res: Response,
@@ -91,14 +86,6 @@ export class AuthController {
     const tokens = await this.refreshTokensUc.execute(user);
     await this.setTokensInCookies({ res, ...tokens });
     return tokens;
-  }
-
-  @Get('me')
-  @UseGuards(JwtAuthGuard)
-  @HttpCode(HttpStatus.OK)
-  @ApiResponse({ type: UserResDto })
-  async me(@CurrentUser() user: RequestUser) {
-    return this.getProfileUC.execute(user);
   }
 
   private async setTokensInCookies({

@@ -4,7 +4,7 @@ import { PassportStrategy } from '@nestjs/passport';
 
 import type { Request } from 'express';
 
-import { ConfigService } from '@/config/config.service';
+import { ConfigService } from '@/config';
 import { ACCESS_TOKEN_KEY } from '@/utils/constants/cookies';
 
 import type { RequestUser } from '@/common/interfaces';
