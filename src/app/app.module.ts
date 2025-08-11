@@ -1,4 +1,3 @@
-import { Module } from '@nestjs/common';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 
 import { ConfigModule } from '@/config/config.module';
@@ -16,4 +15,8 @@ import { AppController } from './app.controller';
     EventEmitterModule.forRoot(),
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(LoggerMiddleware).forRoutes('/');
+  }
+}
