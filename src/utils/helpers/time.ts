@@ -76,3 +76,41 @@ export function generateValidTimeStartTimes({
 
   return startTimes;
 }
+
+export function getStartDateOfMonth(monthString: string, timezone: string) {
+  const date = DateTime.fromFormat(monthString, 'yyyy-MM', { zone: timezone });
+  return date.startOf('month').toISODate();
+}
+
+export function getEndDateOfMonth(monthString: string, timezone: string) {
+  const date = DateTime.fromFormat(monthString, 'yyyy-MM', { zone: timezone });
+  return date.endOf('month').toISODate();
+}
+
+/**
+ * @param monthString - in format YYYY-MM
+ * @param weekday - 1 = Monday, 7 = Sunday (Luxon convention)
+ * @returns array of YYYY-MM-DD strings
+ */
+export function getDatesByWeekday(
+  monthString: string,
+  weekday: Weekday,
+  timezone: string,
+): string[] {
+  const start = DateTime.fromFormat(monthString, 'yyyy-MM', {
+    zone: timezone,
+  }).startOf('month');
+  const end = start.endOf('month');
+
+  let current = start;
+  const dates: string[] = [];
+
+  while (current <= end && current.isValid) {
+    if (current.weekdayLong.toLowerCase() === weekday.toLocaleLowerCase()) {
+      dates.push(current.toISODate());
+    }
+    current = current.plus({ days: 1 });
+  }
+
+  return dates;
+}

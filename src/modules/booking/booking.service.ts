@@ -92,8 +92,6 @@ export class BookingService {
             }),
           );
 
-    console.debug(validStartTimes);
-
     if (!validStartTimes.includes(startTime)) {
       throw new BadRequestException(`Invalid start time: ${startTime}`);
     }

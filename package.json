@@ -41,6 +41,7 @@
     "compression": "^1.8.1",
     "cookie-parser": "^1.4.7",
     "envalid": "^8.1.0",
+    "es-toolkit": "^1.39.9",
     "helmet": "^8.1.0",
     "lefthook": "^1.12.2",
     "luxon": "^3.7.1",
