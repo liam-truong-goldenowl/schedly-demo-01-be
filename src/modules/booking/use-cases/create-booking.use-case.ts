@@ -1,12 +1,5 @@
-import {
-  EntityManager,
-  UniqueConstraintViolationException,
-} from '@mikro-orm/core';
-import {
-  Injectable,
-  NotFoundException,
-  BadRequestException,
-} from '@nestjs/common';
+import { EntityManager } from '@mikro-orm/core';
+import { Injectable, NotFoundException } from '@nestjs/common';
 
 import {
   User,
@@ -46,31 +39,25 @@ export class CreateBookingUseCase {
       scheduleId: targetEvent.schedule.id,
       timezone: dto.timezone,
     });
+    await this.bookingService.validateEventLimit({
+      eventId: targetEvent.id,
+      startTime: dto.startTime,
+    });
 
-    try {
-      const eventRef = this.em.getReference(Event, targetEvent.id);
-      const hostRef = this.em.getReference(User, targetEvent.user.id);
+    const eventRef = this.em.getReference(Event, targetEvent.id);
+    const hostRef = this.em.getReference(User, targetEvent.user.id);
 
-      const meeting = this.em.create(Meeting, { ...dto, event: eventRef });
+    const meeting = this.em.create(Meeting, { ...dto, event: eventRef });
 
-      this.em.create(MeetingHost, { meeting, host: hostRef });
-      this.em.create(MeetingInvitee, { meeting, ...dto });
+    this.em.create(MeetingHost, { meeting, host: hostRef });
+    this.em.create(MeetingInvitee, { meeting, ...dto });
 
-      dto.guestEmails.forEach((email) => {
-        this.em.create(MeetingGuest, { meeting, email });
-      });
+    dto.guestEmails.forEach((email) => {
+      this.em.create(MeetingGuest, { meeting, email });
+    });
 
-      await this.em.flush();
+    await this.em.flush();
 
-      return MeetingMapper.toResponse(meeting);
-    } catch (error) {
-      if (error instanceof UniqueConstraintViolationException) {
-        throw new BadRequestException(
-          'Booking already exists for this time slot',
-        );
-      }
-
-      throw error;
-    }
+    return MeetingMapper.toResponse(meeting);
   }
 }
