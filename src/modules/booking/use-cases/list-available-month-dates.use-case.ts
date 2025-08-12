@@ -53,7 +53,7 @@ export class ListAvailableMonthDatesUseCase {
     );
 
     const weekdays = Array.from(new Set(weeklyHours.map((wh) => wh.weekday)));
-    const availableDates = [
+    const allDates = [
       weekdays.flatMap((weekday) =>
         getDatesByWeekday(monthString, weekday, timezone),
       ),
@@ -66,7 +66,8 @@ export class ListAvailableMonthDatesUseCase {
         (override) => override.startTime == null && override.endTime == null,
       )
       .map((override) => override.date.toISOString().split('T')[0]);
+    const availableDates = difference(allDates, unavailableDates).toSorted();
 
-    return difference(availableDates, unavailableDates).toSorted();
+    return availableDates;
   }
 }
