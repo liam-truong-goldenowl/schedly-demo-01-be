@@ -29,6 +29,11 @@ export class IsTimeConstraint implements ValidatorConstraintInterface {
       return false;
     }
 
+    // if time is in HH:mm format, convert to HH:mm:ss
+    if (time.length === 5) {
+      time += ':00';
+    }
+
     const dt = DateTime.fromFormat(time, 'HH:mm:ss');
     return dt.isValid;
   }
