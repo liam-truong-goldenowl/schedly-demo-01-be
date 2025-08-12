@@ -1,10 +1,9 @@
-import { Entity, Unique, Property, ManyToOne } from '@mikro-orm/core';
+import { Entity, Property, ManyToOne } from '@mikro-orm/core';
 
 import { Event } from '@/database/entities';
 import { BaseEntity } from '@/common/entities/base.entity';
 
 @Entity()
-@Unique({ properties: ['startDate', 'startTime', 'event'] })
 export class Meeting extends BaseEntity {
   @Property({ nullable: true })
   note?: string;

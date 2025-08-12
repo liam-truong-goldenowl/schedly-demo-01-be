@@ -660,14 +660,6 @@
       "schema": "public",
       "indexes": [
         {
-          "keyName": "meeting_start_date_start_time_event_id_unique",
-          "columnNames": ["start_date", "start_time", "event_id"],
-          "composite": true,
-          "constraint": true,
-          "primary": false,
-          "unique": true
-        },
-        {
           "keyName": "meeting_pkey",
           "columnNames": ["id"],
           "composite": false,
@@ -688,6 +680,16 @@
         }
       },
       "nativeEnums": {
+        "event_type": {
+          "name": "event_type",
+          "schema": "public",
+          "items": ["one_on_one", "group"]
+        },
+        "location_type": {
+          "name": "location_type",
+          "schema": "public",
+          "items": ["phone", "in_person", "online"]
+        },
         "weekday": {
           "name": "weekday",
           "schema": "public",
@@ -700,21 +702,6 @@
             "friday",
             "saturday"
           ]
-        },
-        "event_type": {
-          "name": "event_type",
-          "schema": "public",
-          "items": ["one_on_one", "group"]
-        },
-        "location_type": {
-          "name": "location_type",
-          "schema": "public",
-          "items": ["phone", "in_person", "online"]
-        },
-        "language": {
-          "name": "language",
-          "schema": "public",
-          "items": ["en", "vi"]
         }
       }
     },
@@ -811,6 +798,16 @@
         }
       },
       "nativeEnums": {
+        "event_type": {
+          "name": "event_type",
+          "schema": "public",
+          "items": ["one_on_one", "group"]
+        },
+        "location_type": {
+          "name": "location_type",
+          "schema": "public",
+          "items": ["phone", "in_person", "online"]
+        },
         "weekday": {
           "name": "weekday",
           "schema": "public",
@@ -823,21 +820,6 @@
             "friday",
             "saturday"
           ]
-        },
-        "event_type": {
-          "name": "event_type",
-          "schema": "public",
-          "items": ["one_on_one", "group"]
-        },
-        "location_type": {
-          "name": "location_type",
-          "schema": "public",
-          "items": ["phone", "in_person", "online"]
-        },
-        "language": {
-          "name": "language",
-          "schema": "public",
-          "items": ["en", "vi"]
         }
       }
     },
@@ -931,6 +913,16 @@
         }
       },
       "nativeEnums": {
+        "event_type": {
+          "name": "event_type",
+          "schema": "public",
+          "items": ["one_on_one", "group"]
+        },
+        "location_type": {
+          "name": "location_type",
+          "schema": "public",
+          "items": ["phone", "in_person", "online"]
+        },
         "weekday": {
           "name": "weekday",
           "schema": "public",
@@ -943,21 +935,6 @@
             "friday",
             "saturday"
           ]
-        },
-        "event_type": {
-          "name": "event_type",
-          "schema": "public",
-          "items": ["one_on_one", "group"]
-        },
-        "location_type": {
-          "name": "location_type",
-          "schema": "public",
-          "items": ["phone", "in_person", "online"]
-        },
-        "language": {
-          "name": "language",
-          "schema": "public",
-          "items": ["en", "vi"]
         }
       }
     },
@@ -1044,6 +1021,16 @@
         }
       },
       "nativeEnums": {
+        "event_type": {
+          "name": "event_type",
+          "schema": "public",
+          "items": ["one_on_one", "group"]
+        },
+        "location_type": {
+          "name": "location_type",
+          "schema": "public",
+          "items": ["phone", "in_person", "online"]
+        },
         "weekday": {
           "name": "weekday",
           "schema": "public",
@@ -1056,21 +1043,6 @@
             "friday",
             "saturday"
           ]
-        },
-        "event_type": {
-          "name": "event_type",
-          "schema": "public",
-          "items": ["one_on_one", "group"]
-        },
-        "location_type": {
-          "name": "location_type",
-          "schema": "public",
-          "items": ["phone", "in_person", "online"]
-        },
-        "language": {
-          "name": "language",
-          "schema": "public",
-          "items": ["en", "vi"]
         }
       }
     },
