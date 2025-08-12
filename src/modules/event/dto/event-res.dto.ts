@@ -1,8 +1,7 @@
+import { Expose } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
-import { Expose, plainToInstance } from 'class-transformer';
 
 import { EventType, LocationType } from '@/common/enums';
-import { Event } from '@/database/entities/event.entity';
 
 export class EventResDto {
   @Expose()
@@ -49,14 +48,4 @@ export class EventResDto {
   @Expose()
   @ApiProperty({ example: 1 })
   scheduleId: number;
-
-  static fromEntity(entity: Event): EventResDto {
-    return plainToInstance(
-      EventResDto,
-      { ...entity, scheduleId: entity.schedule.id },
-      {
-        excludeExtraneousValues: true,
-      },
-    );
-  }
 }
