@@ -1,7 +1,13 @@
+import { ApiBody, ApiResponse } from '@nestjs/swagger';
 import { Get, Body, Post, Query, Controller } from '@nestjs/common';
 
-import { CreateBookingDto, ListAvailableTimeSlotsQueryDto } from './dto';
 import { CreateBookingUseCase, ListTimeSlotsUseCase } from './use-cases';
+import {
+  MeetingResDto,
+  TimeSlotResDto,
+  CreateBookingDto,
+  ListTimeSlotsQueryDto,
+} from './dto';
 
 @Controller('bookings')
 export class BookingController {
@@ -11,12 +17,15 @@ export class BookingController {
   ) {}
 
   @Post()
+  @ApiBody({ type: CreateBookingDto })
+  @ApiResponse({ type: MeetingResDto })
   async createBooking(@Body() body: CreateBookingDto) {
     return this.createBookingUC.execute(body);
   }
 
   @Get('time-slots')
-  async listAvailableTimeSlots(@Query() query: ListAvailableTimeSlotsQueryDto) {
+  @ApiResponse({ type: [TimeSlotResDto] })
+  async listAvailableTimeSlots(@Query() query: ListTimeSlotsQueryDto) {
     return this.listTimeSlotsUC.execute(query);
   }
 }
