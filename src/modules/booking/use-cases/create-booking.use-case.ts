@@ -34,6 +34,7 @@ export class CreateBookingUseCase {
     await this.bookingService.validateEventLimit({
       eventId: targetEvent.id,
       startTime: dto.startTime,
+      startDate: dto.startDate,
     });
 
     const eventRef = this.em.getReference(Event, targetEvent.id);

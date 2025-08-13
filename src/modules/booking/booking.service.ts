@@ -112,9 +112,11 @@ export class BookingService {
   async validateEventLimit({
     eventId,
     startTime,
+    startDate,
   }: {
     eventId: number;
     startTime: string;
+    startDate: string;
   }) {
     const event = await this.em.findOneOrFail(
       Event,
@@ -124,7 +126,11 @@ export class BookingService {
     const currentParticipants = await this.em.count(Meeting, {
       event: { id: eventId },
       startTime,
+      startDate,
     });
+
+    console.log(currentParticipants);
+    // console.log(event);
 
     if (currentParticipants >= event.inviteeLimit) {
       throw new BadRequestException(

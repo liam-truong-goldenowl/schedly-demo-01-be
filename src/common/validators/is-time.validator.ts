@@ -19,22 +19,17 @@ export class IsTimeConstraint implements ValidatorConstraintInterface {
   validate(time: any, args: ValidationArguments) {
     const [required] = args.constraints;
 
-    // If not required and the value is null or undefined, consider it valid
     if (required === false && (time === null || time === undefined)) {
       return true;
     }
 
-    // Otherwise, perform the actual validation
     if (typeof time !== 'string') {
       return false;
     }
 
-    // if time is in HH:mm format, convert to HH:mm:ss
-    if (time.length === 5) {
-      time += ':00';
-    }
+    const format = time.length == 5 ? 'HH:mm' : 'HH:mm:ss';
 
-    const dt = DateTime.fromFormat(time, 'HH:mm:ss');
+    const dt = DateTime.fromFormat(time, format);
     return dt.isValid;
   }
 
