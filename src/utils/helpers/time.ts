@@ -139,8 +139,11 @@ export function getAllDatesOfAMonth(
   return dates;
 }
 
-export function formatDateString(date: Date): string {
-  const dt = DateTime.fromJSDate(date);
+export function formatDateString(date: Date | string): string {
+  const dt =
+    typeof date === 'string'
+      ? DateTime.fromISO(date)
+      : DateTime.fromJSDate(date);
   return dt.toFormat('yyyy-MM-dd');
 }
 
@@ -150,26 +153,26 @@ export function formatTimeString(time: string): string {
   return dt.toFormat('HH:mm');
 }
 
-export function convertTimeZone({
+export function transformTimeZoneDates({
   baseTz,
   otherTz,
-  dateString,
-  startTimeString,
-  endTimeString,
+  date,
+  startTime,
+  endTime,
 }: {
   baseTz: string;
   otherTz: string;
-  dateString: string;
-  startTimeString: string;
-  endTimeString: string;
+  date: string;
+  startTime: string;
+  endTime: string;
 }): Array<{
   date: string;
-  startTimeString: string;
-  endTimeString: string;
+  startTime: string;
+  endTime: string;
 }> {
   // Combine date and time strings into ISO format
-  const startISO = `${dateString}T${startTimeString}`;
-  const endISO = `${dateString}T${endTimeString}`;
+  const startISO = `${date}T${startTime}`;
+  const endISO = `${date}T${endTime}`;
 
   // Parse in base timezone
   const baseStart = DateTime.fromISO(startISO, { zone: baseTz });
@@ -190,8 +193,8 @@ export function convertTimeZone({
     return [
       {
         date: startDate,
-        startTimeString: otherStart.toFormat('HH:mm'),
-        endTimeString: otherEnd.toFormat('HH:mm'),
+        startTime: otherStart.toFormat('HH:mm'),
+        endTime: otherEnd.toFormat('HH:mm'),
       },
     ];
   }
@@ -199,13 +202,13 @@ export function convertTimeZone({
   return [
     {
       date: startDate,
-      startTimeString: otherStart.toFormat('HH:mm'),
-      endTimeString: '23:59',
+      startTime: otherStart.toFormat('HH:mm'),
+      endTime: '23:59',
     },
     {
       date: endDate,
-      startTimeString: '00:00',
-      endTimeString: otherEnd.toFormat('HH:mm'),
+      startTime: '00:00',
+      endTime: otherEnd.toFormat('HH:mm'),
     },
   ];
 }
@@ -245,13 +248,13 @@ export function generateTimeSlots({
 export function getOffsetTime({
   baseTz,
   otherTz,
-  timeString,
+  time,
 }: {
   baseTz: string;
   otherTz: string;
-  timeString: string;
+  time: string;
 }) {
-  const format = timeString.length === 5 ? 'HH:mm' : 'HH:mm:ss';
-  const time = DateTime.fromFormat(timeString, format, { zone: baseTz });
-  return time.setZone(otherTz).toFormat('HH:mm');
+  const format = time.length === 5 ? 'HH:mm' : 'HH:mm:ss';
+  const parsedTime = DateTime.fromFormat(time, format, { zone: baseTz });
+  return parsedTime.setZone(otherTz).toFormat('HH:mm');
 }

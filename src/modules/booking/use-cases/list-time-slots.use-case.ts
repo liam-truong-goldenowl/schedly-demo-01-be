@@ -1,11 +1,10 @@
 import { difference } from 'es-toolkit';
 import { EntityManager } from '@mikro-orm/core';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Body, Injectable } from '@nestjs/common';
 
-import { Event, Meeting, WeeklyHour, DateOverride } from '@/database/entities';
+import { Meeting, WeeklyHour, DateOverride } from '@/database/entities';
 import {
   getOffsetTime,
-  convertTimeZone,
   formatDateString,
   formatTimeString,
   generateTimeSlots,
@@ -13,91 +12,54 @@ import {
   getEndDateOfMonth,
   getAllDatesOfAMonth,
   getStartDateOfMonth,
+  transformTimeZoneDates,
 } from '@/utils/helpers/time';
+
+import { BookingService } from '../booking.service';
+
+interface ListTimeSlotsUseCaseBody {
+  eventId: number;
+  month: string;
+  timezone: string;
+}
 
 @Injectable()
 export class ListTimeSlotsUseCase {
-  constructor(private em: EntityManager) {}
+  constructor(
+    private em: EntityManager,
+    private bookingService: BookingService,
+  ) {}
 
-  async execute({
-    eventId,
-    month,
-    timezone,
-  }: {
-    eventId: number;
-    month: string;
-    timezone: string;
-  }) {
-    const targetEvent = await this.em.findOne(
-      Event,
-      { id: eventId },
-      { fields: ['id', 'duration', 'schedule', 'inviteeLimit'] },
-    );
-
-    if (!targetEvent) {
-      throw new NotFoundException('Event not found');
-    }
+  async execute(body: ListTimeSlotsUseCaseBody) {
+    const { eventId, month, timezone } = body;
+    const targetEvent = await this.bookingService.findEventOrThrow(eventId);
+    const baseTz = targetEvent.schedule.timezone;
+    const otherTz = body.timezone;
+    const { duration } = targetEvent;
 
     const startOfMonth = getStartDateOfMonth(month, timezone);
     const endOfMonth = getEndDateOfMonth(month, timezone);
 
-    const weeklyHours = await this.em.find(
-      WeeklyHour,
-      {
-        schedule: { id: targetEvent.schedule.id },
-      },
-      { fields: ['weekday', 'startTime', 'endTime'] },
-    );
-    const weeklyHourDates = weeklyHours.flatMap((wh) => {
-      const dates = getDatesByWeekday(month, wh.weekday, timezone);
-      return dates.map((date) => ({
-        date,
-        startTime: wh.startTime,
-        endTime: wh.endTime,
-      }));
-    });
-
-    const dateOverrides = await this.em.find(
-      DateOverride,
-      {
+    const [weeklyHours, dateOverrides] = await Promise.all([
+      this.em.find(WeeklyHour, { schedule: { id: targetEvent.schedule.id } }),
+      this.em.find(DateOverride, {
         schedule: { id: targetEvent.schedule.id },
         date: { $gte: startOfMonth, $lte: endOfMonth },
-      },
-      {
-        fields: ['date', 'startTime', 'endTime'],
-      },
-    );
-    const unavailableDates = dateOverrides
-      .filter((override) => !override.startTime && !override.endTime)
-      .flatMap((override) => {
-        const dateString = formatDateString(override.date);
+      }),
+    ]);
 
-        const result = convertTimeZone({
-          baseTz: targetEvent.schedule.timezone,
-          otherTz: timezone,
-          dateString: dateString,
-          startTimeString: '00:00',
-          endTimeString: '23:59',
-        });
-
-        return result.map((slot) => ({
-          date: slot.date,
-          startTime: slot.startTimeString,
-          endTime: slot.endTimeString,
-        }));
-      });
     const overriddenDates = dateOverrides
-      .filter((override) => override.startTime && override.endTime)
-      .map((override) => ({
-        date: formatDateString(override.date),
-        startTime: override.startTime!,
-        endTime: override.endTime!,
-      }));
-
-    const weeklyHourDatesMap = new Map<
-      string,
-      { date: string; startTime: string; endTime: string }[]
-    >();
+      .map(({ date, startTime, endTime }) => {
+        const isAvailable = startTime && endTime;
+        return isAvailable
+          ? {
+              date: formatDateString(date),
+              startTime: startTime,
+              endTime: endTime,
+            }
+          : null;
+      })
+      .filter((d) => d != null);
     const overriddenDatesMap = new Map<
       string,
       { date: string; startTime: string; endTime: string }[]
@@ -111,6 +73,17 @@ export class ListTimeSlotsUseCase {
       }
     });
 
+    const weeklyHourDates = weeklyHours.flatMap(
+      ({ weekday, startTime, endTime }) => {
+        const dates = getDatesByWeekday(body.month, weekday, body.timezone);
+        return dates.map((date) => ({ date, startTime, endTime }));
+      },
+    );
+    const weeklyHourDatesMap = new Map<
+      string,
+      { date: string; startTime: string; endTime: string }[]
+    >();
+
     weeklyHourDates.forEach((wh) => {
       if (weeklyHourDatesMap.has(wh.date)) {
         weeklyHourDatesMap.get(wh.date)!.push(wh);
@@ -119,9 +92,8 @@ export class ListTimeSlotsUseCase {
       }
     });
 
-    const allDatesInMonth = getAllDatesOfAMonth(month, timezone);
-
     const timeSlotsMap = new Map<string, string[]>();
+    const allDatesInMonth = getAllDatesOfAMonth(month, timezone);
 
     allDatesInMonth.forEach((date) => {
       if (!timeSlotsMap.has(date)) {
@@ -138,42 +110,42 @@ export class ListTimeSlotsUseCase {
         return;
       }
 
-      const result = currentDateItems.flatMap((item) =>
-        convertTimeZone({
-          baseTz: targetEvent.schedule.timezone,
-          otherTz: timezone,
-          dateString: item.date,
-          startTimeString: item.startTime,
-          endTimeString: item.endTime,
-        }),
+      const zonedDates = currentDateItems.flatMap((item) =>
+        transformTimeZoneDates({ baseTz, otherTz, ...item }),
       );
-
-      const slots = result.map((slot) => ({
-        date: slot.date,
-        slots: generateTimeSlots({
-          startTime: slot.startTimeString,
-          endTime: slot.endTimeString,
-          duration: targetEvent.duration,
-        }),
+      const timeSlots = zonedDates.map(({ date, startTime, endTime }) => ({
+        date,
+        slots: generateTimeSlots({ startTime, endTime, duration }),
       }));
 
-      slots.forEach((slot) => {
-        if (timeSlotsMap.has(slot.date)) {
-          timeSlotsMap.get(slot.date)!.push(...slot.slots);
+      timeSlots.forEach((timeSlot) => {
+        if (timeSlotsMap.has(timeSlot.date)) {
+          timeSlotsMap.get(timeSlot.date)!.push(...timeSlot.slots);
         } else {
-          timeSlotsMap.set(slot.date, slot.slots);
+          timeSlotsMap.set(timeSlot.date, timeSlot.slots);
         }
       });
     });
 
-    unavailableDates.forEach((date) => {
-      const currentSlot = timeSlotsMap.get(date.date);
-
-      if (currentSlot) {
-        const newSlots = currentSlot.filter(
-          (slot) => slot < date.startTime || slot > date.endTime,
+    const unavailableDates = dateOverrides
+      .map(({ date, ...rest }) => ({ ...rest, date: formatDateString(date) }))
+      .filter(({ startTime, endTime }) => !startTime && !endTime)
+      .flatMap(({ date }) =>
+        transformTimeZoneDates({
+          baseTz,
+          otherTz,
+          date,
+          startTime: '00:00',
+          endTime: '23:59',
+        }),
+      );
+    unavailableDates.forEach(({ date, startTime, endTime }) => {
+      const slots = timeSlotsMap.get(date);
+      if (slots) {
+        const newSlots = slots.filter(
+          (slot) => slot < startTime || slot > endTime,
         );
-        timeSlotsMap.set(date.date, newSlots);
+        timeSlotsMap.set(date, newSlots);
       }
     });
 
@@ -199,39 +171,31 @@ export class ListTimeSlotsUseCase {
         remainingInviteesMap.set(key, targetEvent.inviteeLimit - 1);
       }
     });
-    const alreadyBookedSlots = meetings.flatMap((meeting) => {
-      const zonedTime = getOffsetTime({
-        timeString: meeting.startTime,
-        baseTz: targetEvent.schedule.timezone,
-        otherTz: timezone,
-      });
-      const date = formatDateString(meeting.startDate);
-      return {
+
+    const alreadyBookedSlots = meetings
+      .map(({ startDate, startTime, ...rest }) => ({
+        date: formatDateString(startDate),
+        time: formatTimeString(startTime),
+        ...rest,
+      }))
+      .flatMap(({ date, time }) => ({
         date,
-        startTime: zonedTime,
-      };
-    });
+        startTime: getOffsetTime({ time, baseTz, otherTz }),
+      }));
 
-    alreadyBookedSlots.forEach((bookedSlot) => {
-      const bookedTime = bookedSlot.startTime;
-      const bookedDate = bookedSlot.date;
-      const time = formatTimeString(bookedTime);
-      const remainingInviteesKey = `${bookedDate}T${time}`;
-
+    alreadyBookedSlots.forEach(({ date, startTime: time }) => {
+      const remainingInviteesKey = `${date}T${time}`;
       const remainingInvitees =
         remainingInviteesMap.get(remainingInviteesKey) ?? 1;
-      const currentSlot = timeSlotsMap.get(bookedSlot.date);
+      const slots = timeSlotsMap.get(date);
 
-      if (currentSlot && remainingInvitees < 1) {
-        timeSlotsMap.set(bookedSlot.date, difference(currentSlot, [time]));
+      if (slots && remainingInvitees < 1) {
+        timeSlotsMap.set(date, difference(slots, [time]));
       }
     });
 
     const timeSlots = Array.from(timeSlotsMap.entries()).map(
-      ([date, slots]) => ({
-        date,
-        slots,
-      }),
+      ([date, slots]) => ({ date, slots }),
     );
 
     return timeSlots;

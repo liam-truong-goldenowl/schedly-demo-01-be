@@ -1,5 +1,5 @@
+import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/core';
-import { Injectable, NotFoundException } from '@nestjs/common';
 
 import {
   User,
@@ -22,15 +22,7 @@ export class CreateBookingUseCase {
   ) {}
 
   async execute(dto: CreateBookingDto) {
-    const targetEvent = await this.em.findOne(
-      Event,
-      { id: dto.eventId },
-      { fields: ['id', 'user', 'schedule'] },
-    );
-
-    if (!targetEvent) {
-      throw new NotFoundException('Event not found');
-    }
+    const targetEvent = await this.bookingService.findEventOrThrow(dto.eventId);
 
     await this.bookingService.validateEventStartTime({
       startTime: dto.startTime,

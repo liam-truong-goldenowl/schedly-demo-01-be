@@ -1,5 +1,9 @@
 import { EntityManager } from '@mikro-orm/core';
-import { Injectable, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 
 import { Schedule } from '@/database/entities/schedule.entity';
 import { Event, Meeting, WeeklyHour, DateOverride } from '@/database/entities';
@@ -13,6 +17,14 @@ import {
 @Injectable()
 export class BookingService {
   constructor(private em: EntityManager) {}
+
+  async findEventOrThrow(eventId: number) {
+    const event = await this.em.findOne(Event, { id: eventId });
+    if (!event) {
+      throw new NotFoundException('Event not found');
+    }
+    return event;
+  }
 
   async validateEventStartTime({
     eventId,
