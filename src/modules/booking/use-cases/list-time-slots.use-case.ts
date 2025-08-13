@@ -180,11 +180,12 @@ export class ListTimeSlotsUseCase {
       }))
       .flatMap(({ date, time }) => ({
         date,
-        startTime: getOffsetTime({ time, baseTz, otherTz }),
+        startTime: time,
+        time: getOffsetTime({ time, baseTz, otherTz }),
       }));
 
-    alreadyBookedSlots.forEach(({ date, startTime: time }) => {
-      const remainingInviteesKey = `${date}T${time}`;
+    alreadyBookedSlots.forEach(({ date, startTime, time }) => {
+      const remainingInviteesKey = `${date}T${startTime}`;
       const remainingInvitees =
         remainingInviteesMap.get(remainingInviteesKey) ?? 1;
       const slots = timeSlotsMap.get(date);
