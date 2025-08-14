@@ -1,3 +1,4 @@
+import { SmtpConfig } from '@upyo/smtp';
 import { MikroOrmModuleOptions } from '@mikro-orm/nestjs';
 
 export interface Config {
@@ -5,6 +6,7 @@ export interface Config {
   jwt: JwtConfig;
   swagger: SwaggerConfig;
   mikroOrm: MikroOrmConfig;
+  mail: MailConfig;
 }
 
 export interface AppConfig {
@@ -32,3 +34,7 @@ export interface JwtConfig {
 }
 
 export type MikroOrmConfig = MikroOrmModuleOptions;
+
+export type MailConfig = SmtpConfig & {
+  sender: string;
+};

@@ -49,4 +49,20 @@ export const EnvSchema = {
     default: '7d',
     desc: 'refresh token expiration time',
   }),
+
+  MAIL_HOST: host({
+    desc: 'Mail server host',
+  }),
+  MAIL_PORT: port({
+    desc: 'Mail server port',
+  }),
+  MAIL_USER: str({
+    desc: 'Mail server user',
+  }),
+  MAIL_PASS: str({
+    desc: 'Mail server password',
+  }),
+  MAIL_SENDER: str({
+    desc: 'Mail sender address',
+  }),
 };
