@@ -9,13 +9,17 @@ import type { Config } from './config.interface';
 export const loadConfig: ConfigFactory<Config> = () => {
   const env = validateEnv();
 
+  const isDev = env.NODE_ENV === 'development';
+  const isProd = env.NODE_ENV === 'production';
+  const isStaging = env.NODE_ENV === 'staging';
+
   return {
     app: {
+      isDev,
+      isProd,
+      isStaging,
       port: env.PORT,
       env: env.NODE_ENV,
-      isDev: env.NODE_ENV === 'development',
-      isProd: env.NODE_ENV === 'production',
-      isStaging: env.NODE_ENV === 'staging',
       corsOrigins: env.CORS_ORIGINS,
     },
 
@@ -49,6 +53,19 @@ export const loadConfig: ConfigFactory<Config> = () => {
       entitiesTs: ['src/**/*.entity.ts'],
 
       namingStrategy: UnderscoreNamingStrategy,
+    },
+
+    mail: {
+      host: env.MAIL_HOST,
+      port: env.MAIL_PORT,
+      secure: isProd || isStaging,
+      auth: isDev
+        ? undefined
+        : {
+            user: env.MAIL_USER,
+            pass: env.MAIL_PASS,
+          },
+      sender: env.MAIL_SENDER,
     },
   };
 };
