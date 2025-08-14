@@ -19,7 +19,11 @@ export class BookingService {
   constructor(private em: EntityManager) {}
 
   async findEventOrThrow(eventId: number) {
-    const event = await this.em.findOne(Event, { id: eventId });
+    const event = await this.em.findOne(
+      Event,
+      { id: eventId },
+      { populate: ['schedule'] },
+    );
     if (!event) {
       throw new NotFoundException('Event not found');
     }
