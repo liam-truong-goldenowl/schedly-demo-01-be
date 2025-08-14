@@ -1,5 +1,6 @@
 import {
   IsEnum,
+  IsString,
   IsOptional,
   IsDateString,
   registerDecorator,
@@ -26,6 +27,10 @@ export class ListMeetingsQueryDto {
   @IsOptional()
   @IsDateString()
   endDate?: string;
+
+  @IsOptional()
+  @IsString()
+  eventSlug?: string;
 }
 
 function DatesRequiredWhenFixed(validationOptions?: ValidationOptions) {

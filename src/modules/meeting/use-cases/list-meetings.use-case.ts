@@ -1,6 +1,6 @@
 import { DateTime } from 'luxon';
 import { Injectable } from '@nestjs/common';
-import { FilterQuery, EntityManager } from '@mikro-orm/core';
+import { EntityManager } from '@mikro-orm/core';
 
 import { Meeting } from '@/database/entities';
 
@@ -15,11 +15,15 @@ export class ListMeetingsUseCase {
   constructor(private em: EntityManager) {}
 
   async execute(input: Input) {
-    const filters: FilterQuery<Meeting> = {
+    const filters: Record<string, any> = {
       event: {
         user: input.userId,
       },
     };
+
+    if (input.eventSlug) {
+      filters.event.slug = input.eventSlug;
+    }
 
     switch (input.period) {
       case Period.UPCOMING: {
