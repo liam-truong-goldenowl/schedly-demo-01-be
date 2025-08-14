@@ -24,21 +24,22 @@ import {
   ListEventsUseCase,
   CreateEventUseCase,
   DeleteEventUseCase,
+  ReadEventDetailsUseCase,
 } from './use-cases';
 
 @Controller('events')
-@UseGuards(JwtAuthGuard)
 export class EventController {
   constructor(
     private listEventsUC: ListEventsUseCase,
     private createEventUC: CreateEventUseCase,
     private deleteEventUC: DeleteEventUseCase,
+    private readEventDetailsUC: ReadEventDetailsUseCase,
   ) {}
 
   @Post()
   @ApiBody({ type: CreateEventDto })
   @ApiResponse({ type: EventResDto })
-  @UseGuards(UserOwnsScheduleGuard)
+  @UseGuards(JwtAuthGuard, UserOwnsScheduleGuard)
   async create(
     @CurrentUser('id') userId: number,
     @Body() body: CreateEventDto,
@@ -50,6 +51,7 @@ export class EventController {
   }
 
   @Get()
+  @UseGuards(JwtAuthGuard)
   @ApiResponse({ type: ListEventResDto })
   @ApiQuery({ name: 'cursor', required: false, type: String })
   @ApiQuery({
@@ -68,8 +70,13 @@ export class EventController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @UseGuards(UserOwnsEventGuard)
+  @UseGuards(JwtAuthGuard, UserOwnsEventGuard)
   async delete(@Param('id', ParseIntPipe) eventId: number) {
     return this.deleteEventUC.execute(eventId);
+  }
+
+  @Get(':slug')
+  async findOne(@Param('slug') eventSlug: string) {
+    return this.readEventDetailsUC.execute(eventSlug);
   }
 }

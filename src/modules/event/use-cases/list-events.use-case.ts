@@ -25,6 +25,7 @@ export class ListEventsUseCase {
         first: limit,
         after: cursor,
         orderBy: { createdAt: 'DESC' },
+        populate: ['schedule'],
       },
     );
 

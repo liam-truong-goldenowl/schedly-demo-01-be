@@ -9,4 +9,7 @@ export class UserProfileResDto {
 
   @Expose()
   name: string;
+
+  @Expose()
+  publicSlug: string;
 }

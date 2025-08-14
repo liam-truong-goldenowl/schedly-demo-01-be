@@ -4,12 +4,7 @@ import { PostgreSqlDriver } from '@mikro-orm/postgresql';
 
 import { ConfigService } from '@/config';
 
-import { User } from './entities/user.entity';
-import { Event } from './entities/event.entity';
-import { Account } from './entities/account.entity';
-import { Schedule } from './entities/schedule.entity';
-import { WeeklyHour } from './entities/weekly-hour.entity';
-import { DateOverride } from './entities/date-override.entity';
+import * as Entities from './entities';
 
 @Module({
   imports: [
@@ -18,14 +13,7 @@ import { DateOverride } from './entities/date-override.entity';
       driver: PostgreSqlDriver,
       useFactory: (config: ConfigService) => config.getOrThrow('mikroOrm'),
     }),
-    MikroOrmModule.forFeature([
-      User,
-      Account,
-      Event,
-      Schedule,
-      DateOverride,
-      WeeklyHour,
-    ]),
+    MikroOrmModule.forFeature(Object.values(Entities)),
   ],
 })
 export class DatabaseModule {}

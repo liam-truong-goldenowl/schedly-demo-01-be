@@ -5,6 +5,7 @@ import { UserModule } from './user/user.module';
 import { UUIDModule } from './uuid/uuid.module';
 import { EventModule } from './event/event.module';
 import { SharingModule } from './sharing/sharing.module';
+import { BookingModule } from './booking/booking.module';
 import { ScheduleModule } from './schedule/schedule.module';
 
 @Module({
@@ -15,6 +16,7 @@ import { ScheduleModule } from './schedule/schedule.module';
     EventModule,
     SharingModule,
     ScheduleModule,
+    BookingModule,
   ],
 })
 export class ModuleRegistry {}

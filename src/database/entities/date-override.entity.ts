@@ -10,10 +10,10 @@ export class DateOverride extends BaseEntity {
   date: Date;
 
   @Property({ type: 'time', nullable: true })
-  startTime?: string;
+  startTime: string | null;
 
   @Property({ type: 'time', nullable: true })
-  endTime?: string;
+  endTime: string | null;
 
   @ManyToOne({
     entity: () => Schedule,
