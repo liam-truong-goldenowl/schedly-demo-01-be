@@ -1,23 +1,25 @@
-import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
-import { Injectable, ExecutionContext } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { TokenExpiredError, JsonWebTokenError } from '@nestjs/jwt';
 
-import { IS_PUBLIC_KEY } from '@/utils/constants/auth';
+import { InvalidTokenException } from '../exceptions/invalid-token';
+import { TokenExpiredException } from '../exceptions/token-expired';
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
-  constructor(private reflector: Reflector) {
-    super();
-  }
+  handleRequest(_: unknown, user: any, error: Error) {
+    if (error || !user) {
+      if (error instanceof TokenExpiredError) {
+        throw new TokenExpiredException();
+      }
 
-  canActivate(context: ExecutionContext) {
-    const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
-      context.getHandler(),
-      context.getClass(),
-    ]);
-    if (isPublic) {
-      return true;
+      if (error instanceof JsonWebTokenError) {
+        throw new InvalidTokenException();
+      }
+
+      throw new UnauthorizedException();
     }
-    return super.canActivate(context);
+
+    return user;
   }
 }

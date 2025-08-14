@@ -1,39 +1,25 @@
-import { ConfigService } from '@nestjs/config';
-import {
-  SwaggerModule,
-  DocumentBuilder,
-  SwaggerCustomOptions,
-  SwaggerDocumentOptions,
-} from '@nestjs/swagger';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
 import type { INestApplication } from '@nestjs/common';
 
-import type { TSwaggerConfig } from '@/config/swagger';
+import { ConfigService } from '@/config';
 
 export const genAPIDocument = (app: INestApplication) => {
   const configService = app.get(ConfigService);
-  const config = configService.get<TSwaggerConfig>('swagger')!;
 
-  const documentConfig = new DocumentBuilder()
-    .setTitle(config.title)
-    .setVersion(config.version)
-    .setDescription(config.description)
+  const swaggerConfig = configService.getOrThrow('swagger');
+
+  const docPath = swaggerConfig.path;
+  const docConfig = new DocumentBuilder()
+    .setTitle(swaggerConfig.title)
+    .setVersion(swaggerConfig.version)
+    .setDescription(swaggerConfig.description)
     .addBearerAuth()
     .build();
 
-  const documentOptions: SwaggerDocumentOptions = {
+  const doc = SwaggerModule.createDocument(app, docConfig, {
     deepScanRoutes: true,
-  };
+  });
 
-  const document = SwaggerModule.createDocument(
-    app,
-    documentConfig,
-    documentOptions,
-  );
-
-  const customOptions: SwaggerCustomOptions = {
-    customSiteTitle: config.siteTitle,
-  };
-
-  SwaggerModule.setup('api/documentation', app, document, customOptions);
+  SwaggerModule.setup(docPath, app, doc);
 };

@@ -9,22 +9,10 @@ import {
 export class AppController {
   @Get('/health')
   @ApiOkResponse({
-    description: 'Health check endpoint',
-    content: {
-      'text/plain': {
-        schema: {
-          type: 'string',
-          example: 'Ok!',
-        },
-      },
-    },
+    content: { 'text/plain': { schema: { type: 'string', example: 'Ok!' } } },
   })
-  @ApiInternalServerErrorResponse({
-    description: 'Internal server error',
-  })
-  @ApiServiceUnavailableResponse({
-    description: 'Service unavailable',
-  })
+  @ApiInternalServerErrorResponse({ description: 'Internal server error' })
+  @ApiServiceUnavailableResponse({ description: 'Service unavailable' })
   getHealth(): string {
     return 'Ok!';
   }
