@@ -1,29 +1,24 @@
-import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { EventEmitterModule } from '@nestjs/event-emitter';
+import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 
-import { appConfig } from '@/config/app';
-import { jwtConfig } from '@/config/jwt';
-import { MikroOrm } from '@/config/mikro-orm';
-import { EnvSchema } from '@/config/env.schema';
-import { swaggerConfig } from '@/config/swagger';
-import { AuthModule } from '@/modules/auth/auth.module';
-// import { DatabaseModule } from '@/database/database.module';
-import { UsersModule } from '@/modules/users/users.module';
+import { LoggerMiddleware } from '@/middleware';
+import { ConfigModule } from '@/config/config.module';
+import { ModuleRegistry } from '@/modules/module.registry';
+import { DatabaseModule } from '@/database/database.module';
 
 import { AppController } from './app.controller';
 
 @Module({
-  imports: [
-    ConfigModule.forRoot({
-      load: [appConfig, MikroOrm, swaggerConfig, jwtConfig],
-      validationSchema: EnvSchema,
-      isGlobal: true,
-    }),
-    // DatabaseModule,
-    AuthModule,
-    UsersModule,
-  ],
   controllers: [AppController],
-  providers: [],
+  imports: [
+    ConfigModule,
+    DatabaseModule,
+    ModuleRegistry,
+    EventEmitterModule.forRoot(),
+  ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(LoggerMiddleware).forRoutes('/');
+  }
+}

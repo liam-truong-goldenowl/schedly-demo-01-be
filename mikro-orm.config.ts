@@ -1,48 +1,47 @@
-import { Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { config as dotenvConfig } from 'dotenv';
-import { SeedManager } from '@mikro-orm/seeder';
-import { Migrator } from '@mikro-orm/migrations';
-import { SqlHighlighter } from '@mikro-orm/sql-highlighter';
+import 'dotenv/config';
+
 import {
   defineConfig,
   PostgreSqlDriver,
   UnderscoreNamingStrategy,
 } from '@mikro-orm/postgresql';
+import { Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { SeedManager } from '@mikro-orm/seeder';
+import { Migrator } from '@mikro-orm/migrations';
+import { SqlHighlighter } from '@mikro-orm/sql-highlighter';
 
-dotenvConfig();
-
-const configService = new ConfigService();
+const conf = new ConfigService();
 const logger = new Logger('MikroORM');
+const sqlHighlighter = new SqlHighlighter();
 
 export default defineConfig({
   debug: true,
   logger: logger.log.bind(logger),
-  highlighter: new SqlHighlighter(),
+
+  driver: PostgreSqlDriver,
+  driverOptions: {
+    connection: {
+      ssl: conf.getOrThrow<string>('DB_SSL') == 'true',
+    },
+  },
+  port: conf.getOrThrow<number>('DB_PORT'),
+  host: conf.getOrThrow<string>('DB_HOST'),
+  dbName: conf.getOrThrow<string>('DB_NAME'),
+  user: conf.getOrThrow<string>('DB_USER'),
+  password: conf.getOrThrow<string>('DB_PASSWORD'),
+
+  highlighter: sqlHighlighter,
+  namingStrategy: UnderscoreNamingStrategy,
 
   entities: ['dist/**/*.entity.js'],
   entitiesTs: ['src/**/*.entity.ts'],
-
-  namingStrategy: UnderscoreNamingStrategy,
-
-  driver: PostgreSqlDriver,
-  port: configService.getOrThrow<number>('DB_PORT'),
-  host: configService.getOrThrow<string>('DB_HOST'),
-  dbName: configService.getOrThrow<string>('DB_NAME'),
-  user: configService.getOrThrow<string>('DB_USERNAME'),
-  password: configService.getOrThrow<string>('DB_PASSWORD'),
-
-  driverOptions: {
-    connection: {
-      ssl: configService.getOrThrow<string>('DB_SSL') == 'true',
-    },
-  },
   migrations: {
-    path: 'src/database/migrations',
+    path: 'dist/database/migrations',
     pathTs: 'src/database/migrations',
   },
   seeder: {
-    path: 'src/database/seeders',
+    path: 'dist/database/seeders',
     pathTs: 'src/database/seeders',
   },
 

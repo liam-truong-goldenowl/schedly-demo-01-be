@@ -9,5 +9,12 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+  maildev:
+    image: soulteary/maildev
+    container_name: schedly-maildev
+    ports:
+      - '1080:1080'
+      - '1025:1025'
+
 volumes:
   postgres_data:

@@ -5,8 +5,10 @@ import tseslint from 'typescript-eslint';
 import perfectionist from 'eslint-plugin-perfectionist';
 import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
 
-export default tseslint.config(
-  { ignores: ['eslint.config.mjs', './scripts/*.js'] },
+const config = tseslint.config(
+  {
+    ignores: ['*.config.*{ts,js}'],
+  },
   eslint.configs.recommended,
   ...tseslint.configs.recommendedTypeChecked,
   eslintPluginPrettierRecommended,
@@ -25,14 +27,14 @@ export default tseslint.config(
   },
   {
     rules: {
+      '@typescript-eslint/require-await': 'off',
+      '@typescript-eslint/no-unsafe-call': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
-      '@typescript-eslint/no-floating-promises': 'warn',
+      '@typescript-eslint/no-unsafe-return': 'off',
       '@typescript-eslint/no-unsafe-argument': 'off',
       '@typescript-eslint/no-unsafe-assignment': 'off',
-      '@typescript-eslint/no-unsafe-call': 'off',
-      '@typescript-eslint/no-unsafe-return': 'off',
+      '@typescript-eslint/no-floating-promises': 'warn',
       '@typescript-eslint/no-unsafe-member-access': 'off',
-      '@typescript-eslint/require-await': 'off',
     },
   },
   {
@@ -77,3 +79,5 @@ export default tseslint.config(
     },
   },
 );
+
+export default config;
