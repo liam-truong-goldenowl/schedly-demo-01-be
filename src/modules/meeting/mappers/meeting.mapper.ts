@@ -5,7 +5,7 @@ import { Meeting } from '@/database/entities';
 import { formatDateString } from '@/utils/helpers/time';
 
 import { MeetingResDto } from '../dto/res/meeting-res.dto';
-import { ListMeetingResDto } from '../dto/res/list-meeting-res.dto';
+import { ListMeetingsResDto } from '../dto/res/list-meetings-res.dto';
 
 export class MeetingMapper {
   static toResponse(entity: Meeting): MeetingResDto {
@@ -26,11 +26,13 @@ export class MeetingMapper {
     return entities.map((entity) => this.toResponse(entity));
   }
 
-  static toCursorPaginatedResponse(cursor: Cursor<Meeting>): ListMeetingResDto {
+  static toCursorPaginatedResponse(
+    cursor: Cursor<Meeting>,
+  ): ListMeetingsResDto {
     const { items, endCursor: nextCursor, hasNextPage, totalCount } = cursor;
 
     return plainToInstance(
-      ListMeetingResDto,
+      ListMeetingsResDto,
       {
         items: items.map((item) => this.toResponse(item)),
         nextCursor,

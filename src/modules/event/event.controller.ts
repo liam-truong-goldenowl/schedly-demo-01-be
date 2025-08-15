@@ -18,8 +18,8 @@ import { CurrentUser } from '@/decorators';
 import { JwtAuthGuard } from '@/modules/auth/guards';
 
 import { DEFAULT_EVENT_LIMIT } from './event.config';
-import { EventResDto, CreateEventDto, ListEventResDto } from './dto';
 import { UserOwnsEventGuard, UserOwnsScheduleGuard } from './guards';
+import { EventResDto, CreateEventDto, ListEventsResDto } from './dto';
 import {
   ListEventsUseCase,
   CreateEventUseCase,
@@ -52,7 +52,7 @@ export class EventController {
 
   @Get()
   @UseGuards(JwtAuthGuard)
-  @ApiResponse({ type: ListEventResDto })
+  @ApiResponse({ type: ListEventsResDto })
   @ApiQuery({ name: 'cursor', required: false, type: String })
   @ApiQuery({
     name: 'limit',

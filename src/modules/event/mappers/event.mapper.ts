@@ -3,7 +3,7 @@ import { plainToInstance } from 'class-transformer';
 
 import { Event } from '@/database/entities';
 
-import { EventResDto, ListEventResDto } from '../dto';
+import { EventResDto, ListEventsResDto } from '../dto';
 import { ReadEventDetailsDto } from '../dto/read-event-details.dto';
 
 export class EventMapper {
@@ -24,11 +24,11 @@ export class EventMapper {
     return events.map((event) => this.toResponse(event));
   }
 
-  static toCursorPaginatedResponse(cursor: Cursor<Event>): ListEventResDto {
+  static toCursorPaginatedResponse(cursor: Cursor<Event>): ListEventsResDto {
     const { items, endCursor: nextCursor, hasNextPage, totalCount } = cursor;
 
     return plainToInstance(
-      ListEventResDto,
+      ListEventsResDto,
       {
         items: items.map((item) => this.toResponse(item)),
         nextCursor,
