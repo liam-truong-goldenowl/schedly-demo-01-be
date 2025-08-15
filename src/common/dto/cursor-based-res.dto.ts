@@ -1,5 +1,5 @@
-import { Expose } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
+import { Type, Expose } from 'class-transformer';
 
 export class CursorBasedResDto {
   @Expose()
@@ -19,4 +19,17 @@ export class CursorBasedResDto {
     example: 100,
   })
   totalCount: number;
+}
+
+export function createCursorBasedResDto<T>(
+  ItemClass: new (...args: any[]) => T,
+) {
+  class GenericCursorBasedResDto extends CursorBasedResDto {
+    @Expose()
+    @Type(() => ItemClass)
+    @ApiProperty({ type: [ItemClass] })
+    items: T[];
+  }
+
+  return GenericCursorBasedResDto;
 }

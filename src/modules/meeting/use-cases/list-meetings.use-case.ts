@@ -37,6 +37,8 @@ export class ListMeetingsUseCase {
         break;
       }
       case Period.FIXED: {
+        const doesNotHaveRange = !input.startDate || !input.endDate;
+        if (doesNotHaveRange) break;
         const start = DateTime.fromISO(input.startDate!).toISODate();
         const end = DateTime.fromISO(input.endDate!).toISODate();
         filters.startDate = { $gte: start, $lt: end };
@@ -44,11 +46,14 @@ export class ListMeetingsUseCase {
       }
     }
 
-    const meetings = await this.em.find(Meeting, filters, {
+    const currentCursor = await this.em.findByCursor(Meeting, filters, {
+      first: 10,
+      after: undefined,
+      orderBy: { createdAt: 'DESC' },
       populate: ['event', 'invitees'],
     });
 
-    return MeetingMapper.toResponseList(meetings);
+    return MeetingMapper.toCursorPaginatedResponse(currentCursor);
   }
 }
 
