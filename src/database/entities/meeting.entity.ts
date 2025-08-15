@@ -1,7 +1,13 @@
-import { Entity, Property, ManyToOne } from '@mikro-orm/core';
+import {
+  Entity,
+  Property,
+  ManyToOne,
+  OneToMany,
+  Collection,
+} from '@mikro-orm/core';
 
-import { Event } from '@/database/entities';
 import { BaseEntity } from '@/common/entities/base.entity';
+import { Event, MeetingInvitee } from '@/database/entities';
 
 @Entity()
 export class Meeting extends BaseEntity {
@@ -19,4 +25,11 @@ export class Meeting extends BaseEntity {
 
   @ManyToOne({ entity: () => Event, serializedName: 'eventId' })
   event: Event;
+
+  @OneToMany({
+    entity: () => MeetingInvitee,
+    mappedBy: (invitee) => invitee.meeting,
+    orphanRemoval: true,
+  })
+  invitees = new Collection<MeetingInvitee>(this);
 }
