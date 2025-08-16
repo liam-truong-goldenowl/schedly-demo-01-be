@@ -1,6 +1,6 @@
 import { MeetingResDto } from '@/modules/booking/dto';
-import { createCursorBasedResDto } from '@/common/dto';
+import { createCursorPaginationResDto } from '@/common/dtos';
 
-export class ListMeetingsResDto extends createCursorBasedResDto(
+export class ListMeetingsResDto extends createCursorPaginationResDto(
   MeetingResDto,
 ) {}

@@ -7,6 +7,7 @@ export interface Config {
   swagger: SwaggerConfig;
   mikroOrm: MikroOrmConfig;
   mail: MailConfig;
+  cookies: CookiesConfig;
 }
 
 export interface AppConfig {
@@ -38,3 +39,10 @@ export type MikroOrmConfig = MikroOrmModuleOptions;
 export type MailConfig = SmtpConfig & {
   sender: string;
 };
+
+export interface CookiesConfig {
+  accessTokenKey: string;
+  refreshTokenKey: string;
+  accessTokenExpiresIn: number;
+  refreshTokenExpiresIn: number;
+}

@@ -1,42 +1,24 @@
 import { Injectable } from '@nestjs/common';
-import { EntityManager } from '@mikro-orm/core';
 
-import { Schedule, WeeklyHour } from '@/database/entities';
-
-import { CreateWeeklyHourDto } from '../dto';
 import { WeeklyHourMapper } from '../mappers/weekly-hour.mapper';
-import { WeeklyHourService } from '../services/weekly-hour.service';
+import { CreateWeeklyHourDto } from '../dto/req/create-weekly-hour.dto';
+import { ScheduleRepository } from '../repositories/schedule.repository';
+import { WeeklyHourRepository } from '../repositories/weekly-hour.repository';
 
 @Injectable()
 export class CreateWeeklyHourUseCase {
   constructor(
-    private em: EntityManager,
-    private weeklyHourService: WeeklyHourService,
+    private readonly scheduleRepo: ScheduleRepository,
+    private readonly weeklyHourRepo: WeeklyHourRepository,
   ) {}
 
-  async execute({
-    scheduleId,
-    weeklyHourData,
-  }: {
-    scheduleId: number;
-    weeklyHourData: CreateWeeklyHourDto;
-  }) {
-    await this.weeklyHourService.checkOverlapping({
-      scheduleId,
-      startTime: weeklyHourData.startTime,
-      endTime: weeklyHourData.endTime,
-      weekday: weeklyHourData.weekday,
+  async execute(scheduleId: number, weeklyHourData: CreateWeeklyHourDto) {
+    const schedule = this.scheduleRepo.getReference(scheduleId);
+    await this.weeklyHourRepo.ensureNoOverlap({ schedule, ...weeklyHourData });
+    const weeklyHour = await this.weeklyHourRepo.createEntity({
+      schedule,
+      ...weeklyHourData,
     });
-
-    const weeklyHour = this.em.create(WeeklyHour, {
-      schedule: this.em.getReference(Schedule, scheduleId),
-      weekday: weeklyHourData.weekday,
-      endTime: weeklyHourData.endTime,
-      startTime: weeklyHourData.startTime,
-    });
-
-    await this.em.flush();
-
     return WeeklyHourMapper.toResponse(weeklyHour);
   }
 }

@@ -3,18 +3,19 @@ services:
     image: postgres
     container_name: schedly-postgres
     env_file:
-      - docker.env
+      - .env.docker
     ports:
       - '5432:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
-  maildev:
-    image: soulteary/maildev
-    container_name: schedly-maildev
+  mailpit:
+    image: axllent/mailpit
+    container_name: mailpit
+    restart: unless-stopped
     ports:
-      - '1080:1080'
-      - '1025:1025'
+      - 8025:8025
+      - 1025:1025
 
 volumes:
   postgres_data:

@@ -2,7 +2,7 @@ import { createMessage } from '@upyo/core';
 import { SmtpTransport } from '@upyo/smtp';
 import { Logger, Injectable } from '@nestjs/common';
 
-import { ConfigService } from '@/config';
+import { ConfigService } from '@/config/config.service';
 
 @Injectable()
 export class MailService {

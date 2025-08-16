@@ -37,12 +37,12 @@ export default defineConfig({
   entities: ['dist/**/*.entity.js'],
   entitiesTs: ['src/**/*.entity.ts'],
   migrations: {
-    path: 'dist/database/migrations',
-    pathTs: 'src/database/migrations',
+    path: 'dist/migrations',
+    pathTs: 'src/migrations',
   },
   seeder: {
-    path: 'dist/database/seeders',
-    pathTs: 'src/database/seeders',
+    path: 'dist/seeders',
+    pathTs: 'src/seeders',
   },
 
   extensions: [Migrator, SeedManager],

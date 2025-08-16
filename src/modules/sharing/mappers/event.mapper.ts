@@ -1,6 +1,6 @@
 import { plainToInstance } from 'class-transformer';
 
-import { Event } from '@/database/entities/event.entity';
+import { Event } from '@/modules/event/entities/event.entity';
 
 import { SharingEventResDto } from '../dto/sharing-event-res.dto';
 

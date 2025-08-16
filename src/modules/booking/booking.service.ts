@@ -5,7 +5,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 
-import { Schedule } from '@/database/entities/schedule.entity';
+import { Schedule } from '@/modules/schedule/entities/schedule.entity';
 import { Event, Meeting, WeeklyHour, DateOverride } from '@/database/entities';
 import {
   getWeekday,

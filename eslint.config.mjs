@@ -78,6 +78,13 @@ const config = tseslint.config(
       ],
     },
   },
+  {
+    rules: {
+      '@typescript-eslint/explicit-module-boundary-types': 'off',
+      '@typescript-eslint/no-unused-vars': 'off',
+      '@typescript-eslint/unbound-method': 'off',
+    },
+  },
 );
 
 export default config;

@@ -5,8 +5,8 @@ import {
   BaseEntity as MikroOrmBase,
 } from '@mikro-orm/core';
 
-export abstract class BaseEntity<Optional = never> extends MikroOrmBase {
-  [OptionalProps]?: 'createdAt' | 'updatedAt' | Optional;
+export abstract class BaseEntity extends MikroOrmBase {
+  [OptionalProps]?: 'createdAt' | 'updatedAt';
 
   @PrimaryKey()
   id: number;
