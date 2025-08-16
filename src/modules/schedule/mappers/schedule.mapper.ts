@@ -1,17 +1,16 @@
 import { plainToInstance } from 'class-transformer';
 
-import { Schedule } from '@/database/entities';
-
-import { ScheduleResDto } from '../dto';
+import { Schedule } from '../entities/schedule.entity';
+import { ScheduleResDto } from '../dto/res/schedule-res.dto';
 
 export class ScheduleMapper {
-  static toResponse(schedule: Schedule): ScheduleResDto {
+  static toResponse(entity: Schedule): ScheduleResDto {
     return plainToInstance(
       ScheduleResDto,
       {
-        ...schedule,
-        dateOverrides: schedule.dateOverrides.getItems(),
-        weeklyHours: schedule.weeklyHours.getItems(),
+        ...entity,
+        dateOverrides: entity.dateOverrides.getItems(),
+        weeklyHours: entity.weeklyHours.getItems(),
       },
       {
         excludeExtraneousValues: true,
@@ -19,7 +18,7 @@ export class ScheduleMapper {
     );
   }
 
-  static toResponseList(schedules: Schedule[]): ScheduleResDto[] {
-    return schedules.map((schedule) => this.toResponse(schedule));
+  static toResponseList(entities: Schedule[]): ScheduleResDto[] {
+    return entities.map((entity) => this.toResponse(entity));
   }
 }

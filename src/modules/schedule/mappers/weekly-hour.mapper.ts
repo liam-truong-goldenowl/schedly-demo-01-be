@@ -1,8 +1,7 @@
 import { plainToInstance } from 'class-transformer';
 
-import { WeeklyHour } from '@/database/entities';
-
-import { WeeklyHourResDto } from '../dto';
+import { WeeklyHour } from '../entities/weekly-hour.entity';
+import { WeeklyHourResDto } from '../dto/res/weekly-hour-res.dto';
 
 export class WeeklyHourMapper {
   static toResponse(weeklyHour: WeeklyHour): WeeklyHourResDto {

@@ -1,18 +1,16 @@
 import { Injectable } from '@nestjs/common';
 
-import { UseCase } from '@/common/interfaces/';
 import { UserService } from '@/modules/user/user.service';
 
-import { SignUpDto } from '../dto/signup.dto';
-import { SignUpResDto } from '../dto/signup-res.dto';
+import { SignUpDto } from '../dto/req/signup.dto';
 import { SignUpMapper } from '../mappers/signup.mapper';
 
 @Injectable()
-export class SignUpUseCase implements UseCase<SignUpDto, SignUpResDto> {
+export class SignUpUseCase {
   constructor(private userService: UserService) {}
 
-  async execute(input: SignUpDto): Promise<SignUpResDto> {
-    const user = await this.userService.create(input);
+  async execute(input: SignUpDto) {
+    const user = await this.userService.createUser(input);
     return SignUpMapper.toResponse(user);
   }
 }

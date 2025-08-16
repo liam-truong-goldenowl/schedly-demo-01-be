@@ -1,72 +1,69 @@
 import { Injectable } from '@nestjs/common';
-import { EntityManager } from '@mikro-orm/core';
 
 import { Interval } from '@/common/interfaces';
-import { isOverlapping } from '@/utils/helpers/time';
-import { Schedule, DateOverride } from '@/database/entities';
+import { ArrayHelper } from '@/common/utils/helpers/array.helper';
+import { DateTimeHelper } from '@/common/utils/helpers/datetime.helper';
 
-import { OverlappingIntervalsException } from '../exceptions';
+import { ScheduleRepository } from '../repositories/schedule.repository';
+import { DateOverrideRepository } from '../repositories/date-override.repository';
+import { OverlappingIntervalsException } from '../exceptions/overlapping-intervals.exception';
 
 @Injectable()
 export class DateOverrideService {
-  constructor(private em: EntityManager) {}
+  constructor(
+    private readonly scheduleRepo: ScheduleRepository,
+    private readonly dateOverrideRepo: DateOverrideRepository,
+  ) {}
 
-  async checkOverlappingIntervals(intervals: Interval[]) {
-    for (const [idx, currentInterval] of intervals.entries()) {
-      for (const comparingInterval of intervals.slice(idx + 1)) {
-        if (isOverlapping(currentInterval, comparingInterval)) {
-          throw new OverlappingIntervalsException(
-            currentInterval,
-            comparingInterval,
-          );
-        }
-      }
+  async detectOverlappingIntervals(intervals: Interval[]) {
+    const combinations = ArrayHelper.getCombinations(intervals, 2);
+    const overlap = combinations.some(([current, comparing]) =>
+      DateTimeHelper.timeRangesOverlap(current, comparing),
+    );
+    if (overlap) {
+      throw new OverlappingIntervalsException();
     }
   }
 
-  async removeExistingOverrides(scheduleId: number, dates: string[]) {
-    const existingOverrides = await this.em.find(DateOverride, {
-      schedule: { id: scheduleId },
+  async removeExistingOverrides(scheduleId: number, dates: Date[]) {
+    const schedule = this.scheduleRepo.getReference(scheduleId);
+    await this.dateOverrideRepo.deleteEntity({
+      schedule,
       date: { $in: dates },
     });
-
-    if (existingOverrides.length > 0) {
-      this.em.remove(existingOverrides);
-    }
-
-    await this.em.flush();
   }
 
-  async createUnavailableOverrides(scheduleId: number, dates: string[]) {
-    const scheduleRef = this.em.getReference(Schedule, scheduleId);
-    const newOverrides = dates.map((date) =>
-      this.em.create(DateOverride, {
-        schedule: scheduleRef,
-        date: new Date(date),
-        startTime: null,
-        endTime: null,
-      }),
+  async createDateOverrides(
+    scheduleId: number,
+    { dates, intervals }: { dates: Date[]; intervals: Interval[] },
+  ) {
+    const newOverrides =
+      intervals.length > 0
+        ? await this.createAvailableOverrides(scheduleId, { dates, intervals })
+        : await this.createUnavailableOverrides(scheduleId, { dates });
+    return newOverrides;
+  }
+
+  async createUnavailableOverrides(
+    scheduleId: number,
+    { dates }: { dates: Date[] },
+  ) {
+    const schedule = this.scheduleRepo.getReference(scheduleId);
+    const newOverrides = await this.dateOverrideRepo.createManyEntities(
+      dates.map((date) => ({ schedule, date })),
     );
-    await this.em.flush();
     return newOverrides;
   }
 
   async createAvailableOverrides(
     scheduleId: number,
-    { dates, intervals }: { dates: string[]; intervals: Interval[] },
+    { dates, intervals }: { dates: Date[]; intervals: Interval[] },
   ) {
-    const scheduleRef = this.em.getReference(Schedule, scheduleId);
-    const newOverrides = intervals.flatMap((interval) => {
-      return dates.map((date) =>
-        this.em.create(DateOverride, {
-          date: new Date(date),
-          schedule: scheduleRef,
-          startTime: interval.startTime,
-          endTime: interval.endTime,
-        }),
-      );
-    });
-    await this.em.flush();
+    const schedule = this.scheduleRepo.getReference(scheduleId);
+    const data = dates.flatMap((date) =>
+      intervals.map((interval) => ({ date, schedule, ...interval })),
+    );
+    const newOverrides = await this.dateOverrideRepo.createManyEntities(data);
     return newOverrides;
   }
 }

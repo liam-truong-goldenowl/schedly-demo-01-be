@@ -1,4 +1,3 @@
-import { ApiBody, ApiResponse } from '@nestjs/swagger';
 import {
   Body,
   Post,
@@ -12,40 +11,31 @@ import {
   ParseIntPipe,
 } from '@nestjs/common';
 
-import { JwtAuthGuard } from '@/modules/auth/guards';
+import { JwtAccessAuthGuard } from '@/modules/auth/guards/jwt-access-auth.guard';
 
-import { UserOwnsScheduleGuard } from '../guards';
-import {
-  DateOverrideResDto,
-  CreateDateOverrideDto,
-  UpdateDateOverrideDto,
-} from '../dto';
-import {
-  CreateDateOverrideUseCase,
-  DeleteDateOverrideUseCase,
-  UpdateDateOverrideUseCase,
-} from '../use-cases';
+import { DateOverrideResDto } from '../dto/res/date-override-res.dto';
+import { UserOwnsScheduleGuard } from '../guards/user-owns-schedule.guard';
+import { CreateDateOverrideDto } from '../dto/req/create-date-override.dto';
+import { UpdateDateOverrideDto } from '../dto/req/update-date-override.dto';
+import { CreateDateOverrideUseCase } from '../use-cases/create-date-override.use-case';
+import { DeleteDateOverrideUseCase } from '../use-cases/delete-date-override.use-case';
+import { UpdateDateOverrideUseCase } from '../use-cases/update-date-override.use-case';
 
 @Controller('schedules/:scheduleId/date-overrides')
-@UseGuards(JwtAuthGuard, UserOwnsScheduleGuard)
+@UseGuards(JwtAccessAuthGuard, UserOwnsScheduleGuard)
 export class DateOverrideController {
   constructor(
-    private createOverrideUseCase: CreateDateOverrideUseCase,
-    private updateOverrideUseCase: UpdateDateOverrideUseCase,
-    private deleteOverrideUseCase: DeleteDateOverrideUseCase,
+    private createOverrideUC: CreateDateOverrideUseCase,
+    private updateOverrideUC: UpdateDateOverrideUseCase,
+    private deleteOverrideUC: DeleteDateOverrideUseCase,
   ) {}
 
   @Post()
-  @ApiBody({ type: CreateDateOverrideDto })
-  @ApiResponse({ type: [DateOverrideResDto] })
   create(
     @Param('scheduleId', ParseIntPipe) scheduleId: number,
     @Body() dateOverrideData: CreateDateOverrideDto,
-  ) {
-    return this.createOverrideUseCase.execute({
-      scheduleId,
-      dateOverrideData,
-    });
+  ): Promise<DateOverrideResDto[]> {
+    return this.createOverrideUC.execute(scheduleId, dateOverrideData);
   }
 
   @Delete(':id')
@@ -54,24 +44,19 @@ export class DateOverrideController {
     @Param('scheduleId', ParseIntPipe) scheduleId: number,
     @Param('id', ParseIntPipe) dateOverrideId: number,
   ) {
-    return this.deleteOverrideUseCase.execute({
-      scheduleId,
-      dateOverrideId,
-    });
+    return this.deleteOverrideUC.execute(scheduleId, dateOverrideId);
   }
 
   @Patch(':id')
-  @ApiBody({ type: UpdateDateOverrideDto })
-  @ApiResponse({ type: DateOverrideResDto })
   update(
     @Param('scheduleId', ParseIntPipe) scheduleId: number,
     @Param('id', ParseIntPipe) dateOverrideId: number,
     @Body() dateOverrideData: UpdateDateOverrideDto,
-  ) {
-    return this.updateOverrideUseCase.execute({
+  ): Promise<DateOverrideResDto> {
+    return this.updateOverrideUC.execute(
       scheduleId,
       dateOverrideId,
       dateOverrideData,
-    });
+    );
   }
 }

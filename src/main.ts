@@ -1,18 +1,57 @@
-import { initApplication } from './app';
+import helmet from 'helmet';
+import { NestFactory } from '@nestjs/core';
+import * as compression from 'compression';
+import * as cookieParser from 'cookie-parser';
+import { ValidationPipe } from '@nestjs/common';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+
+import { AppModule } from './app.module';
 import { ConfigService } from './config/config.service';
+import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
 
 async function bootstrap() {
-  const app = await initApplication();
+  const app = await NestFactory.create(AppModule);
 
   const configService = app.get(ConfigService);
+  const appConfig = configService.getOrThrow('app');
 
-  const { port } = configService.getOrThrow('app');
+  if (appConfig.isDev) {
+    const swaggerConfig = configService.getOrThrow('swagger');
+    const docConfig = new DocumentBuilder()
+      .setTitle(swaggerConfig.title)
+      .setVersion(swaggerConfig.version)
+      .setDescription(swaggerConfig.description)
+      .addBearerAuth()
+      .build();
+    const doc = SwaggerModule.createDocument(app, docConfig);
+    SwaggerModule.setup(swaggerConfig.path, app, doc);
+  }
 
-  await app.listen(port, () => {
-    console.log('\n');
-    console.log(`Application is running on: http://localhost:${port}/v1/api`);
-    console.log('\n');
-  });
+  app.setGlobalPrefix('v1/api');
+
+  app.use(helmet());
+  app.use(compression());
+  app.use(cookieParser());
+  app.enableCors({ origin: appConfig.corsOrigins, credentials: true });
+  app.useGlobalFilters(new GlobalExceptionFilter());
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+      transformOptions: {
+        enableImplicitConversion: false,
+      },
+    }),
+  );
+
+  /**
+   * Enables graceful shutdown for the application to let Mikro ORM perform cleanup.
+   * See: https://mikro-orm.io/docs/usage-with-nestjs#app-shutdown-and-cleanup
+   */
+  app.enableShutdownHooks();
+
+  await app.listen(appConfig.port);
 }
 
 void bootstrap();

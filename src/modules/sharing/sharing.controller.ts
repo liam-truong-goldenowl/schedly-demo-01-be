@@ -1,32 +1,28 @@
-import { Get, Controller } from '@nestjs/common';
-import { ApiParam, ApiResponse } from '@nestjs/swagger';
+import { Get, Param, Controller } from '@nestjs/common';
 
-import { User } from '@/database/entities';
+import { HostResDto } from './dto/res/host-res.dto';
+import { GetHostParamsDto } from './dto/req/get-host-params.dto';
+import { GetEventsParamsDto } from './dto/req/get-events-params.dto';
+import { SharingEventResDto } from './dto/res/sharing-event-res.dto';
+import { GetSharingHostUseCase } from './use-cases/get-sharing-host.use-case';
+import { GetSharingEventsUseCase } from './use-cases/get-sharing-events.use-case';
 
-import { EventResDto } from '../event/dto';
-
-import { HostResDto } from './dto';
-import { SharingUser } from './decorators';
-import { USER_SLUG_PARAM } from './sharing.config';
-import { GetSharingHostUseCase, GetSharingEventsUseCase } from './use-cases';
-
-@Controller(`sharing/:${USER_SLUG_PARAM}`)
-@ApiParam({ name: USER_SLUG_PARAM, example: 'john-doe', type: String })
+@Controller(`sharing/:userSlug`)
 export class SharingController {
   constructor(
-    private getHostUseCase: GetSharingHostUseCase,
-    private getEventsUseCase: GetSharingEventsUseCase,
+    private readonly getHostUC: GetSharingHostUseCase,
+    private readonly getEventsUC: GetSharingEventsUseCase,
   ) {}
 
   @Get('host')
-  @ApiResponse({ type: HostResDto })
-  getHost(@SharingUser() user: User) {
-    return this.getHostUseCase.execute(user);
+  getHost(@Param() { userSlug }: GetHostParamsDto): Promise<HostResDto> {
+    return this.getHostUC.execute(userSlug);
   }
 
   @Get('events')
-  @ApiResponse({ type: [EventResDto] })
-  getEvents(@SharingUser() user: User) {
-    return this.getEventsUseCase.execute(user);
+  getEvents(
+    @Param() { userSlug }: GetEventsParamsDto,
+  ): Promise<SharingEventResDto[]> {
+    return this.getEventsUC.execute(userSlug);
   }
 }

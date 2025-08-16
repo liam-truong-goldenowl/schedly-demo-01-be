@@ -1,15 +1,14 @@
 import { Injectable } from '@nestjs/common';
 
-import { UseCase } from '@/common/interfaces/';
 import { RequestUser } from '@/common/interfaces';
 
 import { AuthService } from '../auth.service';
 
 @Injectable()
-export class LogoutUseCase implements UseCase<RequestUser, void> {
+export class LogoutUseCase {
   constructor(private authService: AuthService) {}
 
   async execute(user: RequestUser) {
-    await this.authService.unsetRefreshToken(user.id);
+    await this.authService.unsetToken(user.id);
   }
 }

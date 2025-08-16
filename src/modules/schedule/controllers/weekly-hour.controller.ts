@@ -1,4 +1,3 @@
-import { ApiBody, ApiResponse } from '@nestjs/swagger';
 import {
   Body,
   Post,
@@ -12,68 +11,52 @@ import {
   ParseIntPipe,
 } from '@nestjs/common';
 
-import { JwtAuthGuard } from '@/modules/auth/guards';
+import { JwtAccessAuthGuard } from '@/modules/auth/guards/jwt-access-auth.guard';
 
-import { UserOwnsScheduleGuard, ScheduleOwnsWeeklyHourGuard } from '../guards';
-import {
-  WeeklyHourResDto,
-  CreateWeeklyHourDto,
-  UpdateWeeklyHourDto,
-} from '../dto';
-import {
-  CreateWeeklyHourUseCase,
-  DeleteWeeklyHourUseCase,
-  UpdateWeeklyHourUseCase,
-} from '../use-cases';
+import { WeeklyHourResDto } from '../dto/res/weekly-hour-res.dto';
+import { CreateWeeklyHourDto } from '../dto/req/create-weekly-hour.dto';
+import { UpdateWeeklyHourDto } from '../dto/req/update-weekly-hour.dto';
+import { UserOwnsScheduleGuard } from '../guards/user-owns-schedule.guard';
+import { CreateWeeklyHourUseCase } from '../use-cases/create-weekly-hour.use-case';
+import { DeleteWeeklyHourUseCase } from '../use-cases/delete-weekly-hour.use-case';
+import { UpdateWeeklyHourUseCase } from '../use-cases/update-weekly-hour.use-case';
 
 @Controller('schedules/:scheduleId/weekly-hours')
-@UseGuards(JwtAuthGuard, UserOwnsScheduleGuard)
+@UseGuards(JwtAccessAuthGuard, UserOwnsScheduleGuard)
 export class WeeklyHourController {
   constructor(
-    private createWeeklyHourUseCase: CreateWeeklyHourUseCase,
-    private updateWeeklyHourUseCase: UpdateWeeklyHourUseCase,
-    private deleteWeeklyHourUseCase: DeleteWeeklyHourUseCase,
+    private createWeeklyHourUC: CreateWeeklyHourUseCase,
+    private updateWeeklyHourUC: UpdateWeeklyHourUseCase,
+    private deleteWeeklyHourUC: DeleteWeeklyHourUseCase,
   ) {}
 
   @Post()
-  @ApiBody({ type: CreateWeeklyHourDto })
-  @ApiResponse({ type: WeeklyHourResDto })
   createWeeklyHour(
     @Param('scheduleId', ParseIntPipe) scheduleId: number,
     @Body() weeklyHourData: CreateWeeklyHourDto,
-  ) {
-    return this.createWeeklyHourUseCase.execute({
-      scheduleId,
-      weeklyHourData,
-    });
+  ): Promise<WeeklyHourResDto> {
+    return this.createWeeklyHourUC.execute(scheduleId, weeklyHourData);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @UseGuards(ScheduleOwnsWeeklyHourGuard)
   delete(
     @Param('scheduleId', ParseIntPipe) scheduleId: number,
     @Param('id', ParseIntPipe) weeklyHourId: number,
   ) {
-    return this.deleteWeeklyHourUseCase.execute({
-      scheduleId,
-      weeklyHourId,
-    });
+    return this.deleteWeeklyHourUC.execute(scheduleId, weeklyHourId);
   }
 
   @Patch(':id')
-  @ApiBody({ type: UpdateWeeklyHourDto })
-  @ApiResponse({ type: WeeklyHourResDto })
-  @UseGuards(ScheduleOwnsWeeklyHourGuard)
   update(
     @Param('scheduleId', ParseIntPipe) scheduleId: number,
     @Param('id', ParseIntPipe) weeklyHourId: number,
     @Body() weeklyHourData: UpdateWeeklyHourDto,
-  ) {
-    return this.updateWeeklyHourUseCase.execute({
+  ): Promise<WeeklyHourResDto> {
+    return this.updateWeeklyHourUC.execute(
       scheduleId,
       weeklyHourId,
       weeklyHourData,
-    });
+    );
   }
 }

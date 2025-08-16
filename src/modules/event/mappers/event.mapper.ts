@@ -1,27 +1,22 @@
 import { Cursor } from '@mikro-orm/core';
 import { plainToInstance } from 'class-transformer';
 
-import { Event } from '@/database/entities';
-
-import { EventResDto, ListEventsResDto } from '../dto';
-import { ReadEventDetailsDto } from '../dto/read-event-details.dto';
+import { Event } from '../entities/event.entity';
+import { EventResDto } from '../dto/res/event-res.dto';
+import { ListEventsResDto } from '../dto/res/list-events-res.dto';
+import { ReadEventDetailsResDto } from '../dto/res/read-event-details-res.dto';
 
 export class EventMapper {
-  static toResponse(event: Event): EventResDto {
+  static toResponse(entity: Event): EventResDto {
     return plainToInstance(
       EventResDto,
-      {
-        ...event,
-        scheduleId: event.schedule.id,
-      },
-      {
-        excludeExtraneousValues: true,
-      },
+      { ...entity, scheduleId: entity.schedule.id },
+      { excludeExtraneousValues: true },
     );
   }
 
-  static toResponseList(events: Event[]): EventResDto[] {
-    return events.map((event) => this.toResponse(event));
+  static toResponseList(entities: Event[]): EventResDto[] {
+    return entities.map((event) => this.toResponse(event));
   }
 
   static toCursorPaginatedResponse(cursor: Cursor<Event>): ListEventsResDto {
@@ -39,19 +34,19 @@ export class EventMapper {
     );
   }
 
-  static toDetailsResponse(event: Event): ReadEventDetailsDto {
+  static toDetailsResponse(entity: Event): ReadEventDetailsResDto {
     return plainToInstance(
-      ReadEventDetailsDto,
+      ReadEventDetailsResDto,
       {
-        ...event,
+        ...entity,
         host: {
-          name: event.user.name,
+          name: entity.user.name,
         },
         location: {
-          type: event.locationType,
-          details: event.locationDetails,
+          type: entity.locationType,
+          details: entity.locationDetails,
         },
-        timezone: event.schedule.timezone,
+        timezone: entity.schedule.timezone,
       },
       { excludeExtraneousValues: true },
     );

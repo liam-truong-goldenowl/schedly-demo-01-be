@@ -10,22 +10,14 @@ import { BookingCreatedEvent } from '../events/booking-created.event';
 export class BookingCreatedListener {
   private logger = new Logger(BookingCreatedListener.name);
 
-  constructor(private mailService: MailService) {}
+  constructor(private readonly mailService: MailService) {}
 
   @OnEvent(BookingCreatedEvent.name)
   async handleBookingCreatedEvent(event: BookingCreatedEvent) {
-    try {
-      await Promise.all([
-        this.sendMailToHost(event),
-        this.sendMailToInvitee(event),
-      ]);
-    } catch (error) {
-      this.logger.error(
-        `Error sending booking created emails: ${error.message}`,
-      );
-
-      throw error;
-    }
+    await Promise.all([
+      this.sendMailToHost(event),
+      this.sendMailToInvitee(event),
+    ]);
   }
 
   async sendMailToHost({ payload }: BookingCreatedEvent) {

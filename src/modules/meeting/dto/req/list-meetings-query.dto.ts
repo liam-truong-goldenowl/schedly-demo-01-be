@@ -8,11 +8,7 @@ import {
   ValidationArguments,
 } from 'class-validator';
 
-export enum Period {
-  PAST = 'past',
-  UPCOMING = 'upcoming',
-  FIXED = 'fixed',
-}
+import { Period } from '../../enums/period.enum';
 
 export class ListMeetingsQueryDto {
   @IsOptional()

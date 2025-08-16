@@ -1,0 +1,1323 @@
+{
+  "namespaces": ["public"],
+  "name": "public",
+  "tables": [
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "unsigned": false,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "email": {
+          "name": "email",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "avatar_url": {
+          "name": "avatar_url",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "slug": {
+          "name": "slug",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        }
+      },
+      "name": "user",
+      "schema": "public",
+      "indexes": [
+        {
+          "columnNames": ["email"],
+          "composite": false,
+          "keyName": "user_email_unique",
+          "constraint": true,
+          "primary": false,
+          "unique": true
+        },
+        {
+          "columnNames": ["slug"],
+          "composite": false,
+          "keyName": "user_slug_unique",
+          "constraint": true,
+          "primary": false,
+          "unique": true
+        },
+        {
+          "keyName": "user_pkey",
+          "columnNames": ["id"],
+          "composite": false,
+          "constraint": true,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {},
+      "nativeEnums": {
+        "event_type": {
+          "name": "event_type",
+          "schema": "public",
+          "items": ["one_on_one", "group"]
+        },
+        "location_type": {
+          "name": "location_type",
+          "schema": "public",
+          "items": ["phone", "in_person", "online"]
+        },
+        "weekday": {
+          "name": "weekday",
+          "schema": "public",
+          "items": [
+            "sunday",
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday"
+          ]
+        }
+      }
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "unsigned": false,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "timezone": {
+          "name": "timezone",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "is_default": {
+          "name": "is_default",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "false",
+          "mappedType": "boolean"
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        }
+      },
+      "name": "schedule",
+      "schema": "public",
+      "indexes": [
+        {
+          "keyName": "schedule_pkey",
+          "columnNames": ["id"],
+          "composite": false,
+          "constraint": true,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "schedule_user_id_foreign": {
+          "constraintName": "schedule_user_id_foreign",
+          "columnNames": ["user_id"],
+          "localTableName": "public.schedule",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "public.user",
+          "updateRule": "cascade"
+        }
+      },
+      "nativeEnums": {
+        "event_type": {
+          "name": "event_type",
+          "schema": "public",
+          "items": ["one_on_one", "group"]
+        },
+        "location_type": {
+          "name": "location_type",
+          "schema": "public",
+          "items": ["phone", "in_person", "online"]
+        },
+        "weekday": {
+          "name": "weekday",
+          "schema": "public",
+          "items": [
+            "sunday",
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday"
+          ]
+        }
+      }
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "unsigned": false,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "date": {
+          "name": "date",
+          "type": "date",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 0,
+          "mappedType": "date"
+        },
+        "start_time": {
+          "name": "start_time",
+          "type": "time(0)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 0,
+          "mappedType": "time"
+        },
+        "end_time": {
+          "name": "end_time",
+          "type": "time(0)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 0,
+          "mappedType": "time"
+        },
+        "schedule_id": {
+          "name": "schedule_id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        }
+      },
+      "name": "date_override",
+      "schema": "public",
+      "indexes": [
+        {
+          "keyName": "date_override_pkey",
+          "columnNames": ["id"],
+          "composite": false,
+          "constraint": true,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "date_override_schedule_id_foreign": {
+          "constraintName": "date_override_schedule_id_foreign",
+          "columnNames": ["schedule_id"],
+          "localTableName": "public.date_override",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "public.schedule",
+          "deleteRule": "cascade",
+          "updateRule": "cascade"
+        }
+      },
+      "nativeEnums": {
+        "event_type": {
+          "name": "event_type",
+          "schema": "public",
+          "items": ["one_on_one", "group"]
+        },
+        "location_type": {
+          "name": "location_type",
+          "schema": "public",
+          "items": ["phone", "in_person", "online"]
+        },
+        "weekday": {
+          "name": "weekday",
+          "schema": "public",
+          "items": [
+            "sunday",
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday"
+          ]
+        }
+      }
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "unsigned": false,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "slug": {
+          "name": "slug",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "description": {
+          "name": "description",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "duration": {
+          "name": "duration",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "type": {
+          "name": "type",
+          "type": "event_type",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "nativeEnumName": "event_type",
+          "enumItems": ["one_on_one", "group"],
+          "mappedType": "enum"
+        },
+        "location_type": {
+          "name": "location_type",
+          "type": "location_type",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "nativeEnumName": "location_type",
+          "enumItems": ["phone", "in_person", "online"],
+          "mappedType": "enum"
+        },
+        "location_details": {
+          "name": "location_details",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "invitee_limit": {
+          "name": "invitee_limit",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "1",
+          "mappedType": "integer"
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "schedule_id": {
+          "name": "schedule_id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        }
+      },
+      "name": "event",
+      "schema": "public",
+      "indexes": [
+        {
+          "keyName": "event_slug_user_id_unique",
+          "columnNames": ["slug", "user_id"],
+          "composite": true,
+          "constraint": true,
+          "primary": false,
+          "unique": true
+        },
+        {
+          "keyName": "event_pkey",
+          "columnNames": ["id"],
+          "composite": false,
+          "constraint": true,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [
+        {
+          "name": "event_check",
+          "expression": "duration > 0",
+          "definition": "check ((duration > 0))"
+        }
+      ],
+      "foreignKeys": {
+        "event_user_id_foreign": {
+          "constraintName": "event_user_id_foreign",
+          "columnNames": ["user_id"],
+          "localTableName": "public.event",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "public.user",
+          "deleteRule": "cascade",
+          "updateRule": "cascade"
+        },
+        "event_schedule_id_foreign": {
+          "constraintName": "event_schedule_id_foreign",
+          "columnNames": ["schedule_id"],
+          "localTableName": "public.event",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "public.schedule",
+          "deleteRule": "cascade",
+          "updateRule": "cascade"
+        }
+      },
+      "nativeEnums": {
+        "event_type": {
+          "name": "event_type",
+          "schema": "public",
+          "items": ["one_on_one", "group"]
+        },
+        "location_type": {
+          "name": "location_type",
+          "schema": "public",
+          "items": ["phone", "in_person", "online"]
+        },
+        "weekday": {
+          "name": "weekday",
+          "schema": "public",
+          "items": [
+            "sunday",
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday"
+          ]
+        }
+      }
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "unsigned": false,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "note": {
+          "name": "note",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "start_date": {
+          "name": "start_date",
+          "type": "date",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 0,
+          "mappedType": "date"
+        },
+        "start_time": {
+          "name": "start_time",
+          "type": "time(0)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 0,
+          "mappedType": "time"
+        },
+        "timezone": {
+          "name": "timezone",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "event_id": {
+          "name": "event_id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        }
+      },
+      "name": "meeting",
+      "schema": "public",
+      "indexes": [
+        {
+          "keyName": "meeting_pkey",
+          "columnNames": ["id"],
+          "composite": false,
+          "constraint": true,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "meeting_event_id_foreign": {
+          "constraintName": "meeting_event_id_foreign",
+          "columnNames": ["event_id"],
+          "localTableName": "public.meeting",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "public.event",
+          "updateRule": "cascade"
+        }
+      },
+      "nativeEnums": {
+        "event_type": {
+          "name": "event_type",
+          "schema": "public",
+          "items": ["one_on_one", "group"]
+        },
+        "location_type": {
+          "name": "location_type",
+          "schema": "public",
+          "items": ["phone", "in_person", "online"]
+        },
+        "weekday": {
+          "name": "weekday",
+          "schema": "public",
+          "items": [
+            "sunday",
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday"
+          ]
+        }
+      }
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "unsigned": false,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "meeting_id": {
+          "name": "meeting_id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "email": {
+          "name": "email",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        }
+      },
+      "name": "meeting_invitee",
+      "schema": "public",
+      "indexes": [
+        {
+          "keyName": "meeting_invitee_meeting_id_email_unique",
+          "columnNames": ["meeting_id", "email"],
+          "composite": true,
+          "constraint": true,
+          "primary": false,
+          "unique": true
+        },
+        {
+          "keyName": "meeting_invitee_pkey",
+          "columnNames": ["id"],
+          "composite": false,
+          "constraint": true,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "meeting_invitee_meeting_id_foreign": {
+          "constraintName": "meeting_invitee_meeting_id_foreign",
+          "columnNames": ["meeting_id"],
+          "localTableName": "public.meeting_invitee",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "public.meeting",
+          "updateRule": "cascade"
+        }
+      },
+      "nativeEnums": {
+        "event_type": {
+          "name": "event_type",
+          "schema": "public",
+          "items": ["one_on_one", "group"]
+        },
+        "location_type": {
+          "name": "location_type",
+          "schema": "public",
+          "items": ["phone", "in_person", "online"]
+        },
+        "weekday": {
+          "name": "weekday",
+          "schema": "public",
+          "items": [
+            "sunday",
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday"
+          ]
+        }
+      }
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "unsigned": false,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "meeting_id": {
+          "name": "meeting_id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "host_id": {
+          "name": "host_id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        }
+      },
+      "name": "meeting_host",
+      "schema": "public",
+      "indexes": [
+        {
+          "keyName": "meeting_host_meeting_id_host_id_unique",
+          "columnNames": ["meeting_id", "host_id"],
+          "composite": true,
+          "constraint": true,
+          "primary": false,
+          "unique": true
+        },
+        {
+          "keyName": "meeting_host_pkey",
+          "columnNames": ["id"],
+          "composite": false,
+          "constraint": true,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "meeting_host_meeting_id_foreign": {
+          "constraintName": "meeting_host_meeting_id_foreign",
+          "columnNames": ["meeting_id"],
+          "localTableName": "public.meeting_host",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "public.meeting",
+          "updateRule": "cascade"
+        },
+        "meeting_host_host_id_foreign": {
+          "constraintName": "meeting_host_host_id_foreign",
+          "columnNames": ["host_id"],
+          "localTableName": "public.meeting_host",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "public.user",
+          "updateRule": "cascade"
+        }
+      },
+      "nativeEnums": {
+        "event_type": {
+          "name": "event_type",
+          "schema": "public",
+          "items": ["one_on_one", "group"]
+        },
+        "location_type": {
+          "name": "location_type",
+          "schema": "public",
+          "items": ["phone", "in_person", "online"]
+        },
+        "weekday": {
+          "name": "weekday",
+          "schema": "public",
+          "items": [
+            "sunday",
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday"
+          ]
+        }
+      }
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "unsigned": false,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "meeting_id": {
+          "name": "meeting_id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "email": {
+          "name": "email",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        }
+      },
+      "name": "meeting_guest",
+      "schema": "public",
+      "indexes": [
+        {
+          "keyName": "meeting_guest_meeting_id_email_unique",
+          "columnNames": ["meeting_id", "email"],
+          "composite": true,
+          "constraint": true,
+          "primary": false,
+          "unique": true
+        },
+        {
+          "keyName": "meeting_guest_pkey",
+          "columnNames": ["id"],
+          "composite": false,
+          "constraint": true,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "meeting_guest_meeting_id_foreign": {
+          "constraintName": "meeting_guest_meeting_id_foreign",
+          "columnNames": ["meeting_id"],
+          "localTableName": "public.meeting_guest",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "public.meeting",
+          "updateRule": "cascade"
+        }
+      },
+      "nativeEnums": {
+        "event_type": {
+          "name": "event_type",
+          "schema": "public",
+          "items": ["one_on_one", "group"]
+        },
+        "location_type": {
+          "name": "location_type",
+          "schema": "public",
+          "items": ["phone", "in_person", "online"]
+        },
+        "weekday": {
+          "name": "weekday",
+          "schema": "public",
+          "items": [
+            "sunday",
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday"
+          ]
+        }
+      }
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "unsigned": false,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "password_hash": {
+          "name": "password_hash",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "refresh_token_hash": {
+          "name": "refresh_token_hash",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 255,
+          "mappedType": "string"
+        }
+      },
+      "name": "account",
+      "schema": "public",
+      "indexes": [
+        {
+          "columnNames": ["user_id"],
+          "composite": false,
+          "keyName": "account_user_id_unique",
+          "constraint": true,
+          "primary": false,
+          "unique": true
+        },
+        {
+          "keyName": "account_pkey",
+          "columnNames": ["id"],
+          "composite": false,
+          "constraint": true,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "account_user_id_foreign": {
+          "constraintName": "account_user_id_foreign",
+          "columnNames": ["user_id"],
+          "localTableName": "public.account",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "public.user",
+          "updateRule": "cascade"
+        }
+      },
+      "nativeEnums": {
+        "event_type": {
+          "name": "event_type",
+          "schema": "public",
+          "items": ["one_on_one", "group"]
+        },
+        "location_type": {
+          "name": "location_type",
+          "schema": "public",
+          "items": ["phone", "in_person", "online"]
+        },
+        "weekday": {
+          "name": "weekday",
+          "schema": "public",
+          "items": [
+            "sunday",
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday"
+          ]
+        }
+      }
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "unsigned": false,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "weekday": {
+          "name": "weekday",
+          "type": "weekday",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "nativeEnumName": "weekday",
+          "enumItems": [
+            "sunday",
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday"
+          ],
+          "mappedType": "enum"
+        },
+        "start_time": {
+          "name": "start_time",
+          "type": "time(0)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 0,
+          "mappedType": "time"
+        },
+        "end_time": {
+          "name": "end_time",
+          "type": "time(0)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 0,
+          "mappedType": "time"
+        },
+        "schedule_id": {
+          "name": "schedule_id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        }
+      },
+      "name": "weekly_hour",
+      "schema": "public",
+      "indexes": [
+        {
+          "keyName": "weekly_hour_pkey",
+          "columnNames": ["id"],
+          "composite": false,
+          "constraint": true,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "weekly_hour_schedule_id_foreign": {
+          "constraintName": "weekly_hour_schedule_id_foreign",
+          "columnNames": ["schedule_id"],
+          "localTableName": "public.weekly_hour",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "public.schedule",
+          "deleteRule": "cascade",
+          "updateRule": "cascade"
+        }
+      },
+      "nativeEnums": {
+        "event_type": {
+          "name": "event_type",
+          "schema": "public",
+          "items": ["one_on_one", "group"]
+        },
+        "location_type": {
+          "name": "location_type",
+          "schema": "public",
+          "items": ["phone", "in_person", "online"]
+        },
+        "weekday": {
+          "name": "weekday",
+          "schema": "public",
+          "items": [
+            "sunday",
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday"
+          ]
+        }
+      }
+    }
+  ],
+  "nativeEnums": {
+    "event_type": {
+      "name": "event_type",
+      "schema": "public",
+      "items": ["one_on_one", "group"]
+    },
+    "location_type": {
+      "name": "location_type",
+      "schema": "public",
+      "items": ["phone", "in_person", "online"]
+    },
+    "weekday": {
+      "name": "weekday",
+      "schema": "public",
+      "items": [
+        "sunday",
+        "monday",
+        "tuesday",
+        "wednesday",
+        "thursday",
+        "friday",
+        "saturday"
+      ]
+    }
+  }
+}

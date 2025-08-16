@@ -1,13 +1,11 @@
-import { ApiBody, ApiResponse } from '@nestjs/swagger';
 import { Get, Body, Post, Query, Controller } from '@nestjs/common';
 
-import { CreateBookingUseCase, ListTimeSlotsUseCase } from './use-cases';
-import {
-  MeetingResDto,
-  TimeSlotResDto,
-  CreateBookingDto,
-  ListTimeSlotsQueryDto,
-} from './dto';
+import { MeetingResDto } from './dto/res/meeting-res.dto';
+import { TimeSlotResDto } from './dto/res/time-slots-res.dto';
+import { CreateBookingDto } from './dto/req/create-booking.dto';
+import { CreateBookingUseCase } from './use-cases/create-booking.use-case';
+import { ListTimeSlotsQueryDto } from './dto/res/list-time-slots-query.dto';
+import { ListTimeSlotsUseCase } from './use-cases/list-time-slots.use-case';
 
 @Controller('bookings')
 export class BookingController {
@@ -17,15 +15,14 @@ export class BookingController {
   ) {}
 
   @Post()
-  @ApiBody({ type: CreateBookingDto })
-  @ApiResponse({ type: MeetingResDto })
-  async createBooking(@Body() body: CreateBookingDto) {
+  async createBooking(@Body() body: CreateBookingDto): Promise<MeetingResDto> {
     return this.createBookingUC.execute(body);
   }
 
   @Get('time-slots')
-  @ApiResponse({ type: [TimeSlotResDto] })
-  async listAvailableTimeSlots(@Query() query: ListTimeSlotsQueryDto) {
+  async listTimeSlots(
+    @Query() query: ListTimeSlotsQueryDto,
+  ): Promise<TimeSlotResDto[]> {
     return this.listTimeSlotsUC.execute(query);
   }
 }

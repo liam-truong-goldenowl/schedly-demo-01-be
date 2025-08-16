@@ -1,9 +1,9 @@
 import { Cursor } from '@mikro-orm/core';
 import { plainToInstance } from 'class-transformer';
 
-import { Meeting } from '@/database/entities';
-import { formatDateString } from '@/utils/helpers/time';
+import { DateTimeHelper } from '@/common/utils/helpers/datetime.helper';
 
+import { Meeting } from '../entities/meeting.entity';
 import { MeetingResDto } from '../dto/res/meeting-res.dto';
 import { ListMeetingsResDto } from '../dto/res/list-meetings-res.dto';
 
@@ -13,12 +13,10 @@ export class MeetingMapper {
       MeetingResDto,
       {
         ...entity,
-        startDate: formatDateString(entity.startDate),
+        startDate: DateTimeHelper.formatDateString(entity.startDate),
         invitees: entity.invitees.getItems(),
       },
-      {
-        excludeExtraneousValues: true,
-      },
+      { excludeExtraneousValues: true },
     );
   }
 

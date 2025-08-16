@@ -1,15 +1,32 @@
 import { Module } from '@nestjs/common';
-import { EntityRepository } from '@mikro-orm/postgresql';
+import { MikroOrmModule } from '@mikro-orm/nestjs';
 
-import * as UseCases from './use-cases';
-import { ScheduleService } from './services/schedule.service';
-import { WeeklyHourService } from './services/weekly-hour.service';
+import { AuthModule } from '../auth/auth.module';
+import { User } from '../user/entities/user.entity';
+import { UtilsModule } from '../utils/utils.module';
+
+import { Schedule } from './entities/schedule.entity';
+import { WeeklyHour } from './entities/weekly-hour.entity';
+import { DateOverride } from './entities/date-override.entity';
 import { ScheduleController } from './controllers/schedule.controller';
 import { DateOverrideService } from './services/date-override.service';
 import { UserCreatedListener } from './listeners/user-created.listener';
+import { ScheduleRepository } from './repositories/schedule.repository';
+import { ListSchedulesUseCase } from './use-cases/list-schedules.use-case';
 import { WeeklyHourController } from './controllers/weekly-hour.controller';
-import { ScheduleCreatedListener } from './listeners/schedule-created.listener';
+import { WeeklyHourRepository } from './repositories/weekly-hour.repository';
+import { CreateScheduleUseCase } from './use-cases/create-schedule.use-case';
+import { DeleteScheduleUseCase } from './use-cases/delete-schedule.use-case';
+import { UpdateScheduleUseCase } from './use-cases/update-schedule.use-case';
 import { DateOverrideController } from './controllers/date-override.controller';
+import { ScheduleCreatedListener } from './listeners/schedule-created.listener';
+import { DateOverrideRepository } from './repositories/date-override.repository';
+import { CreateWeeklyHourUseCase } from './use-cases/create-weekly-hour.use-case';
+import { DeleteWeeklyHourUseCase } from './use-cases/delete-weekly-hour.use-case';
+import { UpdateWeeklyHourUseCase } from './use-cases/update-weekly-hour.use-case';
+import { CreateDateOverrideUseCase } from './use-cases/create-date-override.use-case';
+import { DeleteDateOverrideUseCase } from './use-cases/delete-date-override.use-case';
+import { UpdateDateOverrideUseCase } from './use-cases/update-date-override.use-case';
 
 @Module({
   controllers: [
@@ -17,15 +34,29 @@ import { DateOverrideController } from './controllers/date-override.controller';
     WeeklyHourController,
     DateOverrideController,
   ],
-  imports: [],
+  imports: [
+    MikroOrmModule.forFeature([Schedule, DateOverride, WeeklyHour, User]),
+    UtilsModule,
+    AuthModule,
+  ],
+  exports: [ScheduleRepository, DateOverrideRepository, WeeklyHourRepository],
   providers: [
-    ScheduleService,
-    EntityRepository,
     UserCreatedListener,
     ScheduleCreatedListener,
-    WeeklyHourService,
     DateOverrideService,
-    ...Object.values(UseCases),
+    ScheduleRepository,
+    DateOverrideRepository,
+    WeeklyHourRepository,
+    ListSchedulesUseCase,
+    CreateScheduleUseCase,
+    UpdateScheduleUseCase,
+    DeleteScheduleUseCase,
+    CreateWeeklyHourUseCase,
+    DeleteWeeklyHourUseCase,
+    UpdateWeeklyHourUseCase,
+    CreateDateOverrideUseCase,
+    UpdateDateOverrideUseCase,
+    DeleteDateOverrideUseCase,
   ],
 })
 export class ScheduleModule {}

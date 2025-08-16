@@ -1,42 +1,34 @@
 import { JwtService } from '@nestjs/jwt';
-import { Injectable } from '@nestjs/common';
-import { EntityManager, NotFoundError } from '@mikro-orm/core';
+import { InjectRepository } from '@mikro-orm/nestjs';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 
-import { ConfigService } from '@/config';
-import { User } from '@/database/entities/user.entity';
-import { Account } from '@/database/entities/account.entity';
+import { ConfigService } from '@/config/config.service';
+import { User } from '@/modules/user/entities/user.entity';
 
-import { WrongCredentialsException } from './exceptions/wrong-credentials';
+import { UserRepository } from '../user/repositories/user.repository';
 
-import type { TokenPayload } from './auth.interface';
+import { TokenDto } from './dto/req/token.dto';
+import { Account } from './entities/account.entity';
+import { TokenPayload } from './interfaces/token-payload.interface';
+import { AccountRepository } from './repositories/account.repository';
+import { WrongCredentialsException } from './exceptions/wrong-credentials.exception';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private em: EntityManager,
-    private jwtService: JwtService,
-    private configService: ConfigService,
+    @InjectRepository(Account)
+    private readonly accountRepo: AccountRepository,
+    @InjectRepository(User)
+    private readonly userRepo: UserRepository,
+    private readonly jwtService: JwtService,
+    private readonly configService: ConfigService,
   ) {}
 
-  async validateUser({
-    email,
-    password,
-  }: {
-    email: string;
-    password: string;
-  }): Promise<User> {
-    const user = await this.em.findOne(User, { email });
+  async validateUser(email: string, password: string): Promise<User> {
+    const user = await this.userRepo.findOneOrThrow({ email });
+    const account = await this.accountRepo.findOneOrThrow({ user });
 
-    if (!user) {
-      throw new WrongCredentialsException();
-    }
-
-    const account = await this.em.findOne(Account, {
-      user: { id: user.id },
-    });
-
-    const isCorrectPassword = await account?.verifyPassword(password);
-
+    const isCorrectPassword = await account.verifyPassword(password);
     if (!isCorrectPassword) {
       throw new WrongCredentialsException();
     }
@@ -45,85 +37,44 @@ export class AuthService {
   }
 
   async validateJwtUser(userId: number): Promise<User> {
-    const user = await this.em.findOne(User, { id: userId });
+    return await this.userRepo.findOneOrThrow({ id: userId });
+  }
 
-    if (!user) {
-      throw new WrongCredentialsException();
+  async validateJwtRefreshUser(
+    userId: number,
+    refreshToken: string,
+  ): Promise<User> {
+    const [user, account] = await Promise.all([
+      this.userRepo.findOneOrThrow({ id: userId }),
+      this.accountRepo.findOneOrThrow({ user: { id: userId } }),
+    ]);
+
+    const isCorrectToken = await account.verifyRefreshToken(refreshToken);
+    if (!isCorrectToken) {
+      throw new UnauthorizedException();
     }
 
     return user;
   }
 
-  async validateJwtRefreshUser({
-    userId,
-    refreshToken,
-  }: {
-    userId: number;
-    refreshToken: string;
-  }): Promise<User> {
-    try {
-      const [user, account] = await Promise.all([
-        this.em.findOneOrFail(User, { id: userId }),
-        this.em.findOneOrFail(Account, { user: { id: userId } }),
-      ]);
-
-      const isCorrectToken = await account.verifyRefreshToken(refreshToken);
-
-      if (!isCorrectToken) {
-        throw new WrongCredentialsException();
-      }
-
-      return user;
-    } catch (error) {
-      if (error instanceof NotFoundError) {
-        throw new WrongCredentialsException();
-      }
-
-      throw error;
-    }
-  }
-
-  async generateTokens(payload: TokenPayload) {
-    const {
-      secret: accessTokenSecret,
-      expiresIn: accessTokenExpiresIn,
-      refreshSecret: refreshTokenSecret,
-      refreshExpiresIn: refreshTokenExpiresIn,
-    } = this.configService.getOrThrow('jwt');
-
+  async generateTokens(payload: TokenPayload): Promise<TokenDto> {
+    const { secret, expiresIn, refreshSecret, refreshExpiresIn } =
+      this.configService.getOrThrow('jwt');
     const [accessToken, refreshToken] = await Promise.all([
+      this.jwtService.signAsync(payload, { secret, expiresIn }),
       this.jwtService.signAsync(payload, {
-        secret: accessTokenSecret,
-        expiresIn: accessTokenExpiresIn,
-      }),
-      this.jwtService.signAsync(payload, {
-        secret: refreshTokenSecret,
-        expiresIn: refreshTokenExpiresIn,
+        secret: refreshSecret,
+        expiresIn: refreshExpiresIn,
       }),
     ]);
-
     return { accessToken, refreshToken };
   }
 
-  async updateAccountRefreshToken({
-    userId,
-    refreshToken,
-  }: {
-    userId: number;
-    refreshToken: string;
-  }) {
-    const account = await this.em.findOneOrFail(Account, {
-      user: { id: userId },
-    });
-    await account.setRefreshToken(refreshToken);
-    await this.em.flush();
+  async resetToken(userId: number, refreshToken: string) {
+    await this.accountRepo.setRefreshToken(userId, refreshToken);
   }
 
-  async unsetRefreshToken(userId: number) {
-    const account = await this.em.findOneOrFail(Account, {
-      user: { id: userId },
-    });
-    await account.revokeRefreshToken();
-    await this.em.flush();
+  async unsetToken(userId: number) {
+    await this.accountRepo.unsetRefreshToken(userId);
   }
 }

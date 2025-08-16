@@ -1,27 +1,17 @@
-import { EntityManager } from '@mikro-orm/core';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 
-import { Event } from '@/database/entities';
-
-import { EventMapper } from '../mappers';
+import { EventMapper } from '../mappers/event.mapper';
+import { EventRepository } from '../repositories/event.repository';
 
 @Injectable()
 export class ReadEventDetailsUseCase {
-  constructor(private em: EntityManager) {}
+  constructor(private readonly eventRepo: EventRepository) {}
 
-  async execute(eventSlug: string) {
-    const event = await this.em.findOne(
-      Event,
-      { slug: eventSlug },
-      {
-        populate: ['user', 'schedule'],
-      },
+  async execute(slug: string) {
+    const event = await this.eventRepo.findOneOrThrow(
+      { slug },
+      { populate: ['user', 'schedule'] },
     );
-
-    if (!event) {
-      throw new NotFoundException('Event not found');
-    }
-
     return EventMapper.toDetailsResponse(event);
   }
 }

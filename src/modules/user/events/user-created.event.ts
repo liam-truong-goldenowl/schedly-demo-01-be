@@ -1,9 +1,10 @@
-export interface UserCreatedPayload {
-  id: number;
-  timezone: string;
-  password: string;
-}
-
 export class UserCreatedEvent {
-  constructor(public payload: UserCreatedPayload) {}
+  static readonly name = Symbol.for('user.created');
+  constructor(
+    public payload: {
+      id: number;
+      timezone: string;
+      password: string;
+    },
+  ) {}
 }

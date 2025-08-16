@@ -1,14 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { EntityManager } from '@mikro-orm/core';
 
-import { Event } from '@/database/entities';
+import { EventRepository } from '../repositories/event.repository';
 
 @Injectable()
 export class DeleteEventUseCase {
-  constructor(private em: EntityManager) {}
+  constructor(private readonly eventRepo: EventRepository) {}
 
-  async execute(eventId: number) {
-    const event = await this.em.findOneOrFail(Event, { id: eventId });
-    await this.em.removeAndFlush(event);
+  async execute(userId: number, eventId: number) {
+    await this.eventRepo.deleteEntity({ id: eventId, user: userId });
   }
 }

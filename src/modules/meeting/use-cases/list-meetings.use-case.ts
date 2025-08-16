@@ -1,62 +1,49 @@
 import { DateTime } from 'luxon';
 import { Injectable } from '@nestjs/common';
-import { EntityManager } from '@mikro-orm/core';
 
-import { Meeting } from '@/database/entities';
-
+import { Period } from '../enums/period.enum';
 import { MeetingMapper } from '../mappers/meeting.mapper';
-import {
-  Period,
-  ListMeetingsQueryDto,
-} from '../dto/req/list-meetings-query.dto';
+import { MeetingRepository } from '../repositories/meeting.repository';
+import { ListMeetingsQueryDto } from '../dto/req/list-meetings-query.dto';
 
 @Injectable()
 export class ListMeetingsUseCase {
-  constructor(private em: EntityManager) {}
+  constructor(private readonly meetingRepo: MeetingRepository) {}
 
-  async execute(input: Input) {
+  async execute(userId: number, query: ListMeetingsQueryDto) {
     const filters: Record<string, any> = {
-      event: {
-        user: input.userId,
+      event: { user: userId },
+    };
+
+    if (query.eventSlug) {
+      filters.event.slug = query.eventSlug;
+    }
+
+    const today = DateTime.now().toISODate();
+
+    const periodFilters: Record<Period, () => void> = {
+      [Period.UPCOMING]: () => {
+        filters.startDate = { $gte: today };
+      },
+      [Period.PAST]: () => {
+        filters.startDate = { $lt: today };
+      },
+      [Period.FIXED]: () => {
+        if (query.startDate && query.endDate) {
+          filters.startDate = { $gte: query.startDate, $lt: query.endDate };
+        }
       },
     };
 
-    if (input.eventSlug) {
-      filters.event.slug = input.eventSlug;
-    }
+    periodFilters[query.period]?.();
 
-    switch (input.period) {
-      case Period.UPCOMING: {
-        const today = DateTime.fromISO(new Date().toISOString()).toISODate();
-        filters.startDate = { $gte: today };
-        break;
-      }
-      case Period.PAST: {
-        const today = DateTime.fromISO(new Date().toISOString()).toISODate();
-        filters.startDate = { $lt: today };
-        break;
-      }
-      case Period.FIXED: {
-        const doesNotHaveRange = !input.startDate || !input.endDate;
-        if (doesNotHaveRange) break;
-        const start = DateTime.fromISO(input.startDate!).toISODate();
-        const end = DateTime.fromISO(input.endDate!).toISODate();
-        filters.startDate = { $gte: start, $lt: end };
-        break;
-      }
-    }
-
-    const currentCursor = await this.em.findByCursor(Meeting, filters, {
+    const cursor = await this.meetingRepo.findByCursor(filters, {
       first: 10,
       after: undefined,
       orderBy: { createdAt: 'DESC' },
       populate: ['event', 'invitees'],
     });
 
-    return MeetingMapper.toCursorPaginatedResponse(currentCursor);
+    return MeetingMapper.toCursorPaginatedResponse(cursor);
   }
-}
-
-interface Input extends ListMeetingsQueryDto {
-  userId: number;
 }

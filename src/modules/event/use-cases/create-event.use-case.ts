@@ -1,34 +1,19 @@
 import { Injectable } from '@nestjs/common';
-import { EntityManager } from '@mikro-orm/core';
 
-import { Event } from '@/database/entities';
-
-import { CreateEventDto } from '../dto';
-import { EventMapper } from '../mappers';
-import { EventService } from '../event.service';
+import { EventMapper } from '../mappers/event.mapper';
+import { CreateEventDto } from '../dto/req/create-event.dto';
+import { EventRepository } from '../repositories/event.repository';
 
 @Injectable()
 export class CreateEventUseCase {
-  constructor(
-    private em: EntityManager,
-    private eventService: EventService,
-  ) {}
+  constructor(private readonly eventRepo: EventRepository) {}
 
-  async execute(data: CreateEventDto & { userId: number }) {
-    const slug = await this.eventService.generateUniqueSlugForUser({
-      name: data.name,
-      userId: data.userId,
-    });
-
-    const event = this.em.create(Event, {
-      slug,
-      user: data.userId,
-      schedule: data.scheduleId,
+  async execute(userId: number, data: CreateEventDto) {
+    const event = await this.eventRepo.createEntity({
       ...data,
+      user: userId,
+      schedule: data.scheduleId,
     });
-
-    await this.em.flush();
-
     return EventMapper.toResponse(event);
   }
 }
