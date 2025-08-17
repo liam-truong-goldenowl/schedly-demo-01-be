@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
-import { RequestUser } from '@/common/interfaces';
+import { RequestUser } from '@/common/interfaces/request-user.interface';
 
 import { AuthService } from '../auth.service';
 import { TokenMapper } from '../mappers/token.mapper';

@@ -1,7 +1,7 @@
 import { Request } from 'express';
 import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 
-import { RequestUser } from '@/common/interfaces';
+import { RequestUser } from '@/common/interfaces/request-user.interface';
 
 import { ScheduleRepository } from '../repositories/schedule.repository';
 

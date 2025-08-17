@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
-import { Interval } from '@/common/interfaces';
+import { Interval } from '@/common/interfaces/interval.interface';
 import { ArrayHelper } from '@/common/utils/helpers/array.helper';
 import { DateTimeHelper } from '@/common/utils/helpers/datetime.helper';
 
