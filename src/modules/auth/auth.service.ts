@@ -25,19 +25,21 @@ export class AuthService {
   ) {}
 
   async validateUser(email: string, password: string): Promise<User> {
-    const user = await this.userRepo.findOneOrThrow({ email });
-    const account = await this.accountRepo.findOneOrThrow({ user });
-
-    const isCorrectPassword = await account.verifyPassword(password);
-    if (!isCorrectPassword) {
+    const user = await this.userRepo.findOne({ email });
+    const account = await this.accountRepo.findOne({ user });
+    const isCorrectPassword = await account?.verifyPassword(password);
+    if (!user || !account || !isCorrectPassword) {
       throw new WrongCredentialsException();
     }
-
     return user;
   }
 
   async validateJwtUser(userId: number): Promise<User> {
-    return await this.userRepo.findOneOrThrow({ id: userId });
+    const user = await this.userRepo.findOne({ id: userId });
+    if (!user) {
+      throw new UnauthorizedException();
+    }
+    return user;
   }
 
   async validateJwtRefreshUser(
@@ -45,15 +47,13 @@ export class AuthService {
     refreshToken: string,
   ): Promise<User> {
     const [user, account] = await Promise.all([
-      this.userRepo.findOneOrThrow({ id: userId }),
-      this.accountRepo.findOneOrThrow({ user: { id: userId } }),
+      this.userRepo.findOne({ id: userId }),
+      this.accountRepo.findOne({ user: { id: userId } }),
     ]);
-
-    const isCorrectToken = await account.verifyRefreshToken(refreshToken);
-    if (!isCorrectToken) {
+    const isCorrectToken = await account?.verifyRefreshToken(refreshToken);
+    if (!user || !account || !isCorrectToken) {
       throw new UnauthorizedException();
     }
-
     return user;
   }
 
