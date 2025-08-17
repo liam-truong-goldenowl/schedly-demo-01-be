@@ -52,4 +52,9 @@ export class BaseRepository<E extends AnyEntity> extends EntityRepository<E> {
     const entity = await this.findOneOrThrow(filter);
     await this.em.removeAndFlush(entity);
   }
+
+  async safeDeleteManyEntities(filter: FilterQuery<E>): Promise<void> {
+    const entities = await this.find(filter);
+    await this.em.removeAndFlush(entities);
+  }
 }

@@ -15,17 +15,10 @@ export function IsTodayOrLater(options?: ValidationOptions) {
       validator: {
         validate(value: unknown) {
           if (!value || typeof value !== 'string') return false;
-
-          try {
-            const today = DateTime.utc().startOf('day');
-            const date = DateTime.fromISO(value, { zone: 'utc' });
-
-            if (!date.isValid) return false;
-
-            return date >= today;
-          } catch {
-            return false;
-          }
+          const today = DateTime.utc().startOf('day');
+          const date = DateTime.fromISO(value, { zone: 'utc' });
+          if (!date.isValid) return true;
+          return date >= today;
         },
         defaultMessage(args: ValidationArguments) {
           return `${args.property} must be today or in the future`;

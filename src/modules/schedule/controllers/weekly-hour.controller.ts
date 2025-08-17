@@ -1,3 +1,4 @@
+import { ApiResponse } from '@nestjs/swagger';
 import {
   Body,
   Post,
@@ -31,10 +32,11 @@ export class WeeklyHourController {
   ) {}
 
   @Post()
+  @ApiResponse({ type: WeeklyHourResDto })
   createWeeklyHour(
     @Param('scheduleId', ParseIntPipe) scheduleId: number,
     @Body() weeklyHourData: CreateWeeklyHourDto,
-  ): Promise<WeeklyHourResDto> {
+  ) {
     return this.createWeeklyHourUC.execute(scheduleId, weeklyHourData);
   }
 
@@ -48,11 +50,12 @@ export class WeeklyHourController {
   }
 
   @Patch(':id')
+  @ApiResponse({ type: WeeklyHourResDto })
   update(
     @Param('scheduleId', ParseIntPipe) scheduleId: number,
     @Param('id', ParseIntPipe) weeklyHourId: number,
     @Body() weeklyHourData: UpdateWeeklyHourDto,
-  ): Promise<WeeklyHourResDto> {
+  ) {
     return this.updateWeeklyHourUC.execute(
       scheduleId,
       weeklyHourId,

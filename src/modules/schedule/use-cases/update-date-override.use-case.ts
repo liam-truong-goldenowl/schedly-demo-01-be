@@ -1,12 +1,17 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@mikro-orm/nestjs';
 
+import { DateOverride } from '../entities/date-override.entity';
 import { DateOverrideMapper } from '../mappers/date-override.mapper';
 import { UpdateDateOverrideDto } from '../dto/req/update-date-override.dto';
 import { DateOverrideRepository } from '../repositories/date-override.repository';
 
 @Injectable()
 export class UpdateDateOverrideUseCase {
-  constructor(private readonly dateOverrideRepo: DateOverrideRepository) {}
+  constructor(
+    @InjectRepository(DateOverride)
+    private readonly dateOverrideRepo: DateOverrideRepository,
+  ) {}
 
   async execute(
     scheduleId: number,

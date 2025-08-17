@@ -41,19 +41,21 @@ export class ScheduleController {
   }
 
   @Post()
+  @ApiResponse({ type: ScheduleResDto })
   create(
     @CurrentUser('id') userId: number,
     @Body() scheduleData: CreateScheduleDto,
-  ): Promise<ScheduleResDto> {
+  ) {
     return this.createScheduleUC.execute(userId, scheduleData);
   }
 
   @Patch(':id')
+  @ApiResponse({ type: ScheduleResDto })
   update(
     @CurrentUser() userId: number,
     @Body() scheduleData: UpdateScheduleDto,
     @Param('id', ParseIntPipe) scheduleId: number,
-  ): Promise<ScheduleResDto> {
+  ) {
     return this.updateScheduleUC.execute(userId, scheduleId, scheduleData);
   }
 

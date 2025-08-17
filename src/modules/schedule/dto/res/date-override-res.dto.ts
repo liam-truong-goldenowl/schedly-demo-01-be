@@ -7,8 +7,8 @@ export class DateOverrideResDto {
   id: number;
 
   @Expose()
-  @ApiProperty({ example: new Date() })
-  date: Date;
+  @ApiProperty({ example: new Date().toISOString().split('T')[0] })
+  date: string;
 
   @Expose()
   @ApiProperty({ example: '10:00' })

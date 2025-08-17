@@ -1,9 +1,12 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@mikro-orm/nestjs';
 
 import { Interval } from '@/common/interfaces/interval.interface';
 import { ArrayHelper } from '@/common/utils/helpers/array.helper';
 import { DateTimeHelper } from '@/common/utils/helpers/datetime.helper';
 
+import { Schedule } from '../entities/schedule.entity';
+import { DateOverride } from '../entities/date-override.entity';
 import { ScheduleRepository } from '../repositories/schedule.repository';
 import { DateOverrideRepository } from '../repositories/date-override.repository';
 import { OverlappingIntervalsException } from '../exceptions/overlapping-intervals.exception';
@@ -11,7 +14,9 @@ import { OverlappingIntervalsException } from '../exceptions/overlapping-interva
 @Injectable()
 export class DateOverrideService {
   constructor(
+    @InjectRepository(Schedule)
     private readonly scheduleRepo: ScheduleRepository,
+    @InjectRepository(DateOverride)
     private readonly dateOverrideRepo: DateOverrideRepository,
   ) {}
 
@@ -25,9 +30,9 @@ export class DateOverrideService {
     }
   }
 
-  async removeExistingOverrides(scheduleId: number, dates: Date[]) {
+  async removeExistingOverrides(scheduleId: number, dates: string[]) {
     const schedule = this.scheduleRepo.getReference(scheduleId);
-    await this.dateOverrideRepo.deleteEntity({
+    await this.dateOverrideRepo.safeDeleteManyEntities({
       schedule,
       date: { $in: dates },
     });
@@ -35,7 +40,7 @@ export class DateOverrideService {
 
   async createDateOverrides(
     scheduleId: number,
-    { dates, intervals }: { dates: Date[]; intervals: Interval[] },
+    { dates, intervals }: { dates: string[]; intervals: Interval[] },
   ) {
     const newOverrides =
       intervals.length > 0
@@ -46,7 +51,7 @@ export class DateOverrideService {
 
   async createUnavailableOverrides(
     scheduleId: number,
-    { dates }: { dates: Date[] },
+    { dates }: { dates: string[] },
   ) {
     const schedule = this.scheduleRepo.getReference(scheduleId);
     const newOverrides = await this.dateOverrideRepo.createManyEntities(
@@ -57,7 +62,7 @@ export class DateOverrideService {
 
   async createAvailableOverrides(
     scheduleId: number,
-    { dates, intervals }: { dates: Date[]; intervals: Interval[] },
+    { dates, intervals }: { dates: string[]; intervals: Interval[] },
   ) {
     const schedule = this.scheduleRepo.getReference(scheduleId);
     const data = dates.flatMap((date) =>

@@ -16,7 +16,7 @@ export class DateOverride extends BaseEntity {
   [EntityRepositoryType]? = DateOverrideRepository;
 
   @Property({ type: 'date' })
-  date: Date;
+  date: string;
 
   @Property({ type: 'time', nullable: true })
   startTime?: string;

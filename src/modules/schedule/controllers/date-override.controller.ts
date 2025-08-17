@@ -1,3 +1,4 @@
+import { ApiResponse } from '@nestjs/swagger';
 import {
   Body,
   Post,
@@ -31,10 +32,11 @@ export class DateOverrideController {
   ) {}
 
   @Post()
+  @ApiResponse({ type: [DateOverrideResDto] })
   create(
     @Param('scheduleId', ParseIntPipe) scheduleId: number,
     @Body() dateOverrideData: CreateDateOverrideDto,
-  ): Promise<DateOverrideResDto[]> {
+  ) {
     return this.createOverrideUC.execute(scheduleId, dateOverrideData);
   }
 
@@ -48,11 +50,12 @@ export class DateOverrideController {
   }
 
   @Patch(':id')
+  @ApiResponse({ type: DateOverrideResDto })
   update(
     @Param('scheduleId', ParseIntPipe) scheduleId: number,
     @Param('id', ParseIntPipe) dateOverrideId: number,
     @Body() dateOverrideData: UpdateDateOverrideDto,
-  ): Promise<DateOverrideResDto> {
+  ) {
     return this.updateOverrideUC.execute(
       scheduleId,
       dateOverrideId,
