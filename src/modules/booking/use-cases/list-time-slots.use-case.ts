@@ -1,203 +1,153 @@
 import { Injectable } from '@nestjs/common';
-import { EntityManager } from '@mikro-orm/core';
+import { InjectRepository } from '@mikro-orm/nestjs';
 
+import { Event } from '@/modules/event/entities/event.entity';
+import { Meeting } from '@/modules/meeting/entities/meeting.entity';
+import { Schedule } from '@/modules/schedule/entities/schedule.entity';
+import { DateTimeHelper } from '@/common/utils/helpers/datetime.helper';
+import { WeeklyHour } from '@/modules/schedule/entities/weekly-hour.entity';
 import { EventRepository } from '@/modules/event/repositories/event.repository';
+import { DateOverride } from '@/modules/schedule/entities/date-override.entity';
+import { MeetingRepository } from '@/modules/meeting/repositories/meeting.repository';
+import { ScheduleRepository } from '@/modules/schedule/repositories/schedule.repository';
 import { WeeklyHourRepository } from '@/modules/schedule/repositories/weekly-hour.repository';
 import { DateOverrideRepository } from '@/modules/schedule/repositories/date-override.repository';
 
-interface ListTimeSlotsUseCaseBody {
-  eventId: number;
-  month: string;
-  timezone: string;
-}
+import { ListTimeSlotsQueryDto } from '../dto/res/list-time-slots-query.dto';
 
 @Injectable()
 export class ListTimeSlotsUseCase {
   constructor(
-    private em: EntityManager,
+    @InjectRepository(Event)
     private readonly eventRepo: EventRepository,
+    @InjectRepository(WeeklyHour)
     private readonly weeklyHourRepo: WeeklyHourRepository,
+    @InjectRepository(DateOverride)
     private readonly dateOverrideRepo: DateOverrideRepository,
+    @InjectRepository(Meeting)
+    private readonly meetingRepo: MeetingRepository,
+    @InjectRepository(Schedule)
+    private readonly scheduleRepo: ScheduleRepository,
   ) {}
 
-  async execute({ eventId, month, timezone }: ListTimeSlotsUseCaseBody) {
-    console.debug('Executing ListTimeSlotsUseCase with:', {
-      eventId,
-      month,
-      timezone,
+  async execute({ eventId, month }: ListTimeSlotsQueryDto) {
+    const allDatesInMonth = DateTimeHelper.getAllMonthDates(month);
+    const startOfMonth = DateTimeHelper.getMonthStartDate(month);
+    const endOfMonth = DateTimeHelper.getMonthEndDate(month);
+
+    const timeSlotsMap = new Map<string, { slot: string; remaining: number }[]>(
+      allDatesInMonth.map((date) => [date, []]),
+    );
+
+    const event = await this.eventRepo.findOneOrThrow(eventId, {
+      populate: ['schedule', 'schedule.user'],
     });
-    // const targetEvent = await this.eventRepo.findOneOrThrow(eventId);
+    const [weeklyHours, dateOverrides, unavailableOverrides] =
+      await Promise.all([
+        this.weeklyHourRepo.find({ schedule: event.schedule }),
+        this.dateOverrideRepo.find({
+          schedule: event.schedule,
+          date: { $gte: startOfMonth, $lte: endOfMonth },
+          startTime: { $ne: null },
+          endTime: { $ne: null },
+        }),
+        this.dateOverrideRepo.find({
+          schedule: event.schedule,
+          date: { $gte: startOfMonth, $lte: endOfMonth },
+          startTime: null,
+          endTime: null,
+        }),
+      ]);
 
-    // const baseTz = targetEvent.schedule.timezone;
-    // const otherTz = timezone;
-    // const duration = targetEvent.duration;
+    const weeklyHourDates = weeklyHours.flatMap(
+      ({ weekday, startTime, endTime }) => {
+        const dates = DateTimeHelper.getMonthDatesByWeekday(month, weekday);
+        return dates.map((date) => ({ date, startTime, endTime }));
+      },
+    );
+    weeklyHourDates.forEach(({ date, startTime, endTime }) => {
+      const startTimes = DateTimeHelper.generatePossibleStartTimes(
+        startTime,
+        endTime,
+        event.duration,
+      );
+      const slots = startTimes.map((time) => ({
+        slot: time,
+        remaining: event.inviteeLimit,
+      }));
+      timeSlotsMap.set(date, slots);
+    });
 
-    // const startOfMonth = DateTimeHelper.getMonthStartDate(month, timezone);
-    // const endOfMonth = DateTimeHelper.getMonthEndDate(month, timezone);
+    const overriddenDates = [
+      ...dateOverrides.map(({ date }) => date),
+      ...unavailableOverrides.map(({ date }) => date),
+    ];
+    overriddenDates.forEach((date) => timeSlotsMap.set(date, []));
 
-    // const [weeklyHours, dateOverrides] = await Promise.all([
-    //   this.weeklyHourRepo.find({ schedule: { id: targetEvent.schedule.id } }),
-    //   this.dateOverrideRepo.find({
-    //     schedule: { id: targetEvent.schedule.id },
-    //     date: { $gte: startOfMonth, $lte: endOfMonth },
-    //   }),
-    // ]);
+    dateOverrides.forEach(({ date, startTime, endTime }) => {
+      const startTimes = DateTimeHelper.generatePossibleStartTimes(
+        startTime!,
+        endTime!,
+        event.duration,
+      );
+      const slots = startTimes.map((time) => ({
+        slot: time,
+        remaining: event.inviteeLimit,
+      }));
+      timeSlotsMap.get(date)?.push(...slots);
+    });
+    unavailableOverrides.forEach(({ date }) => timeSlotsMap.set(date, []));
 
-    // const overriddenDates = dateOverrides
-    //   .map(({ date, startTime, endTime }) => {
-    //     const isAvailable = startTime && endTime;
-    //     return isAvailable
-    //       ? {
-    //           date: DateTimeHelper.formatDateString(date),
-    //           startTime: startTime,
-    //           endTime: endTime,
-    //         }
-    //       : null;
-    //   })
-    //   .filter((d) => d != null);
-    // const overriddenDatesMap = new Map<
-    //   string,
-    //   { date: string; startTime: string; endTime: string }[]
-    // >();
+    const hostSchedules = await this.scheduleRepo.find(
+      { user: event.user },
+      { fields: ['id'] },
+    );
+    const otherEvents = await this.eventRepo.find(
+      {
+        schedule: { $in: hostSchedules.map((s) => s.id) },
+        id: { $ne: event.id },
+      },
+      { fields: ['id'] },
+    );
 
-    // overriddenDates.forEach((rd) => {
-    //   if (overriddenDatesMap.has(rd.date)) {
-    //     overriddenDatesMap.get(rd.date)!.push(rd);
-    //   } else {
-    //     overriddenDatesMap.set(rd.date, [rd]);
-    //   }
-    // });
+    const otherMeetings = await this.meetingRepo.find(
+      {
+        startDate: { $gte: startOfMonth, $lte: endOfMonth },
+        event: { $in: otherEvents.map((e) => e.id) },
+      },
+      { populate: ['invitees:ref'] },
+    );
+    otherMeetings.forEach(({ startTime, startDate }) => {
+      const dateKey = DateTimeHelper.formatDateString(startDate);
+      const slotKey = DateTimeHelper.formatTimeString(startTime);
+      const slots = timeSlotsMap.get(dateKey) || [];
+      timeSlotsMap.set(
+        dateKey,
+        slots.filter((slot) => slot.slot !== slotKey),
+      );
+    });
 
-    // const weeklyHourDates = weeklyHours.flatMap(
-    //   ({ weekday, startTime, endTime }) => {
-    //     const dates = DateTimeHelper.getMonthDatesByWeekday(
-    //       month,
-    //       weekday,
-    //       otherTz,
-    //     );
-    //     return dates.map((date) => ({ date, startTime, endTime }));
-    //   },
-    // );
-    // const weeklyHourDatesMap = new Map<
-    //   string,
-    //   { date: string; startTime: string; endTime: string }[]
-    // >();
+    const meetings = await this.meetingRepo.find(
+      {
+        event,
+        startDate: { $gte: startOfMonth, $lte: endOfMonth },
+      },
+      { populate: ['invitees:ref'] },
+    );
+    meetings.forEach(({ startTime, startDate, invitees }) => {
+      const dateKey = DateTimeHelper.formatDateString(startDate);
+      const slotKey = DateTimeHelper.formatTimeString(startTime);
+      const slots = timeSlotsMap.get(dateKey) || [];
+      const slot = slots.find((s) => s.slot === slotKey);
+      if (slot) {
+        slot.remaining -= Math.min(0, slot.remaining - invitees.length);
+      }
+    });
 
-    // weeklyHourDates.forEach((wh) => {
-    //   if (weeklyHourDatesMap.has(wh.date)) {
-    //     weeklyHourDatesMap.get(wh.date)!.push(wh);
-    //   } else {
-    //     weeklyHourDatesMap.set(wh.date, [wh]);
-    //   }
-    // });
+    const timeSlots = Array.from(timeSlotsMap.entries()).map(
+      ([date, slots]) => ({ date, slots }),
+    );
 
-    // const timeSlotsMap = new Map<string, string[]>();
-    // const allDatesInMonth = DateTimeHelper.getAllMonthDates(month, timezone);
-
-    // allDatesInMonth.forEach((date) => {
-    //   if (!timeSlotsMap.has(date)) {
-    //     timeSlotsMap.set(date, []);
-    //   }
-
-    //   const overridden = overriddenDatesMap.get(date);
-    //   const weeklyHour = weeklyHourDatesMap.get(date);
-
-    //   const currentDateItems = overridden || weeklyHour;
-
-    //   if (!currentDateItems) {
-    //     timeSlotsMap.set(date, []);
-    //     return;
-    //   }
-
-    //   const zonedDates = currentDateItems.flatMap((item) =>
-    //     transformTimeZoneDates({ baseTz, otherTz, ...item }),
-    //   );
-    //   const timeSlots = zonedDates.map(({ date, startTime, endTime }) => ({
-    //     date,
-    //     slots: generateTimeSlots({ startTime, endTime, duration }),
-    //   }));
-
-    //   timeSlots.forEach((timeSlot) => {
-    //     if (timeSlotsMap.has(timeSlot.date)) {
-    //       timeSlotsMap.get(timeSlot.date)!.push(...timeSlot.slots);
-    //     } else {
-    //       timeSlotsMap.set(timeSlot.date, timeSlot.slots);
-    //     }
-    //   });
-    // });
-
-    // const unavailableDates = dateOverrides
-    //   .map(({ date, ...rest }) => ({ ...rest, date: formatDateString(date) }))
-    //   .filter(({ startTime, endTime }) => !startTime && !endTime)
-    //   .flatMap(({ date }) =>
-    //     transformTimeZoneDates({
-    //       baseTz,
-    //       otherTz,
-    //       date,
-    //       startTime: '00:00',
-    //       endTime: '23:59',
-    //     }),
-    //   );
-    // unavailableDates.forEach(({ date, startTime, endTime }) => {
-    //   const slots = timeSlotsMap.get(date);
-    //   if (slots) {
-    //     const newSlots = slots.filter(
-    //       (slot) => slot < startTime || slot > endTime,
-    //     );
-    //     timeSlotsMap.set(date, newSlots);
-    //   }
-    // });
-
-    // const meetings = await this.em.findAll(Meeting, {
-    //   where: {
-    //     event: { id: targetEvent.id },
-    //     startDate: { $gte: startOfMonth, $lte: endOfMonth },
-    //   },
-    //   fields: ['startDate', 'startTime', 'timezone'],
-    // });
-
-    // const remainingInviteesMap = new Map<string, number>();
-
-    // meetings.forEach((meeting) => {
-    //   const date = formatDateString(meeting.startDate);
-    //   const time = formatTimeString(meeting.startTime);
-    //   const key = `${date}T${time}`;
-
-    //   if (remainingInviteesMap.has(key)) {
-    //     const invitees = remainingInviteesMap.get(key)!;
-    //     remainingInviteesMap.set(key, invitees - 1);
-    //   } else {
-    //     remainingInviteesMap.set(key, targetEvent.inviteeLimit - 1);
-    //   }
-    // });
-
-    // const alreadyBookedSlots = meetings
-    //   .map(({ startDate, startTime, ...rest }) => ({
-    //     date: formatDateString(startDate),
-    //     time: formatTimeString(startTime),
-    //     ...rest,
-    //   }))
-    //   .flatMap(({ date, time }) => ({
-    //     date,
-    //     startTime: time,
-    //     time: getOffsetTime({ time, baseTz, otherTz }),
-    //   }));
-
-    // alreadyBookedSlots.forEach(({ date, startTime, time }) => {
-    //   const remainingInviteesKey = `${date}T${startTime}`;
-    //   const remainingInvitees =
-    //     remainingInviteesMap.get(remainingInviteesKey) ?? 1;
-    //   const slots = timeSlotsMap.get(date);
-
-    //   if (slots && remainingInvitees < 1) {
-    //     timeSlotsMap.set(date, difference(slots, [time]));
-    //   }
-    // });
-
-    // const timeSlots = Array.from(timeSlotsMap.entries()).map(
-    //   ([date, slots]) => ({ date, slots }),
-    // );
-
-    return [];
+    return timeSlots;
   }
 }

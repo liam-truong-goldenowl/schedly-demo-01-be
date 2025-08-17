@@ -1,30 +1,33 @@
+import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 import {
-  IsArray,
   IsEmail,
+  IsArray,
   IsNumber,
   IsString,
-  IsTimeZone,
   IsOptional,
+  IsTimeZone,
   IsDateString,
 } from 'class-validator';
 
 import { IsTime } from '@/common/validators/is-time.validator';
 import { IsTodayOrLater } from '@/common/validators/is-today-or-later.validator';
 
-export class CreateBookingDto {
+class Invitee {
   @IsString()
-  @ApiProperty({ example: 'John Doe' })
+  @ApiProperty({ example: 'Jane Smith' })
   name: string;
 
   @IsEmail()
-  @ApiProperty({ example: 'john.doe@example.com' })
+  @ApiProperty({ example: 'jane.smith@example.com' })
   email: string;
+}
 
+export class CreateBookingDto {
   @IsArray()
-  @IsEmail({}, { each: true })
-  @ApiProperty({ example: ['guest1@example.com', 'guest2@example.com'] })
-  guestEmails: string[];
+  @Type(() => Invitee)
+  @ApiProperty({ type: [Invitee] })
+  invitees: Invitee[];
 
   @IsNumber()
   @ApiProperty({ example: 1 })

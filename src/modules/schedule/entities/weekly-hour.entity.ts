@@ -30,6 +30,7 @@ export class WeeklyHour extends BaseEntity {
     entity: () => Schedule,
     serializedName: 'scheduleId',
     deleteRule: 'cascade',
+    lazy: true,
   })
   schedule: Schedule;
 }

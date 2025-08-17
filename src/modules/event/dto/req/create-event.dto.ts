@@ -1,14 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsInt,
-  IsEnum,
   IsString,
   MaxLength,
-  IsPositive,
   IsOptional,
+  IsPositive,
 } from 'class-validator';
-
-import { EventType, LocationType } from '@/common/enums';
 
 export class CreateEventDto {
   @IsString()
@@ -28,20 +25,6 @@ export class CreateEventDto {
   @IsPositive()
   @ApiProperty({ example: 60 })
   duration: number;
-
-  @IsEnum(EventType)
-  @ApiProperty({ enum: EventType, example: EventType.ONE_ON_ONE })
-  type: EventType;
-
-  @IsString()
-  @ApiProperty({
-    example: 'Conference Room A',
-  })
-  locationDetails: string;
-
-  @IsEnum(LocationType)
-  @ApiProperty({ enum: LocationType, example: LocationType.IN_PERSON })
-  locationType: LocationType;
 
   @IsInt()
   @IsPositive()

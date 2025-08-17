@@ -3,6 +3,8 @@ import {
   Entity,
   OneToOne,
   Property,
+  OneToMany,
+  Collection,
   BeforeCreate,
   EntityRepositoryType,
 } from '@mikro-orm/core';
@@ -10,6 +12,7 @@ import {
 import { BaseEntity } from '@/common/entities/base.entity';
 import { SlugHelper } from '@/common/utils/helpers/slug.helper';
 import { Account } from '@/modules/auth/entities/account.entity';
+import { Schedule } from '@/modules/schedule/entities/schedule.entity';
 
 import { UserRepository } from '../repositories/user.repository';
 
@@ -35,6 +38,14 @@ export class User extends BaseEntity {
     lazy: true,
   })
   account: Account & Opt;
+
+  @OneToMany({
+    entity: () => Schedule,
+    mappedBy: (schedule) => schedule.user,
+    lazy: true,
+    orphanRemoval: true,
+  })
+  schedules = new Collection<Schedule>(this);
 
   @BeforeCreate()
   async generateSlug() {

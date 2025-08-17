@@ -20,9 +20,14 @@ export class MeetingInvitee extends BaseEntity {
   @ManyToOne({ entity: () => Meeting, serializedName: 'meetingId' })
   meeting: Meeting;
 
+  note?: string;
+
   @Property({ length: 255 })
   email: string;
 
   @Property({ length: 255 })
   name: string;
+
+  @Property()
+  timezone: string;
 }

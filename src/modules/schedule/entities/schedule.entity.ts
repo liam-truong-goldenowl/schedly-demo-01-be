@@ -11,6 +11,7 @@ import {
 
 import { BaseEntity } from '@/common/entities/base.entity';
 import { User } from '@/modules/user/entities/user.entity';
+import { Event } from '@/modules/event/entities/event.entity';
 
 import { ScheduleRepository } from '../repositories/schedule.repository';
 
@@ -47,4 +48,11 @@ export class Schedule extends BaseEntity {
     orphanRemoval: true,
   })
   dateOverrides = new Collection<DateOverride>(this);
+
+  @OneToMany({
+    entity: () => Event,
+    mappedBy: (event) => event.schedule,
+    orphanRemoval: true,
+  })
+  events = new Collection<Event>(this);
 }

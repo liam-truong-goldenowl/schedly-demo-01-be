@@ -4,12 +4,8 @@ import {
   Post,
   Param,
   Query,
-  Delete,
-  HttpCode,
   UseGuards,
   Controller,
-  HttpStatus,
-  ParseIntPipe,
 } from '@nestjs/common';
 
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
@@ -21,7 +17,6 @@ import { ListEventsResDto } from './dto/res/list-events-res.dto';
 import { ListEventsQueryDto } from './dto/req/list-events-query.dto';
 import { ListEventsUseCase } from './use-cases/list-events.use-case';
 import { CreateEventUseCase } from './use-cases/create-event.use-case';
-import { DeleteEventUseCase } from './use-cases/delete-event.use-case';
 import { ReadEventDetailsUseCase } from './use-cases/read-event-details.use-case';
 
 @Controller('events')
@@ -29,7 +24,6 @@ export class EventController {
   constructor(
     private listEventsUC: ListEventsUseCase,
     private createEventUC: CreateEventUseCase,
-    private deleteEventUC: DeleteEventUseCase,
     private readEventDetailsUC: ReadEventDetailsUseCase,
   ) {}
 
@@ -49,16 +43,6 @@ export class EventController {
     @CurrentUser('id') userId: number,
   ): Promise<ListEventsResDto> {
     return this.listEventsUC.execute(userId, query);
-  }
-
-  @Delete(':id')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @UseGuards(JwtAccessAuthGuard)
-  async delete(
-    @CurrentUser('id') userId: number,
-    @Param('id', ParseIntPipe) eventId: number,
-  ) {
-    return this.deleteEventUC.execute(userId, eventId);
   }
 
   @Get(':slug')

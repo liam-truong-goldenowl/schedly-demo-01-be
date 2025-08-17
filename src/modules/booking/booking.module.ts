@@ -1,13 +1,14 @@
 import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 
-import { EventModule } from '../event/event.module';
 import { UtilsModule } from '../utils/utils.module';
-import { MeetingModule } from '../meeting/meeting.module';
-import { ScheduleModule } from '../schedule/schedule.module';
+import { Event } from '../event/entities/event.entity';
+import { Meeting } from '../meeting/entities/meeting.entity';
 import { Schedule } from '../schedule/entities/schedule.entity';
 import { WeeklyHour } from '../schedule/entities/weekly-hour.entity';
+import { MeetingHost } from '../meeting/entities/meeting-host.entity';
 import { DateOverride } from '../schedule/entities/date-override.entity';
+import { MeetingInvitee } from '../meeting/entities/meeting-invitee.entity';
 
 import { BookingService } from './booking.service';
 import { BookingController } from './booking.controller';
@@ -19,10 +20,15 @@ import { BookingCreatedListener } from './listeners/booking-created.listener';
   controllers: [BookingController],
   imports: [
     UtilsModule,
-    MeetingModule,
-    EventModule,
-    ScheduleModule,
-    MikroOrmModule.forFeature([WeeklyHour, DateOverride, Schedule]),
+    MikroOrmModule.forFeature([
+      WeeklyHour,
+      DateOverride,
+      Schedule,
+      Event,
+      Meeting,
+      MeetingHost,
+      MeetingInvitee,
+    ]),
   ],
   providers: [
     BookingService,

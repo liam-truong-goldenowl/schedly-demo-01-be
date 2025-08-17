@@ -42,10 +42,6 @@ export class EventMapper {
         host: {
           name: entity.user.name,
         },
-        location: {
-          type: entity.locationType,
-          details: entity.locationDetails,
-        },
         timezone: entity.schedule.timezone,
       },
       { excludeExtraneousValues: true },

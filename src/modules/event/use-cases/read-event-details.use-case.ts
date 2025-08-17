@@ -1,11 +1,16 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@mikro-orm/nestjs';
 
+import { Event } from '../entities/event.entity';
 import { EventMapper } from '../mappers/event.mapper';
 import { EventRepository } from '../repositories/event.repository';
 
 @Injectable()
 export class ReadEventDetailsUseCase {
-  constructor(private readonly eventRepo: EventRepository) {}
+  constructor(
+    @InjectRepository(Event)
+    private readonly eventRepo: EventRepository,
+  ) {}
 
   async execute(slug: string) {
     const event = await this.eventRepo.findOneOrThrow(

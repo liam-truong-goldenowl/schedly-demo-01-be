@@ -18,17 +18,11 @@ import { MeetingInvitee } from './meeting-invitee.entity';
 export class Meeting extends BaseEntity {
   [EntityRepositoryType]?: MeetingRepository;
 
-  @Property({ nullable: true })
-  note?: string;
-
   @Property({ type: 'date' })
-  startDate: Date;
+  startDate: string;
 
   @Property({ type: 'time' })
   startTime: string;
-
-  @Property()
-  timezone: string;
 
   @ManyToOne({ entity: () => Event, serializedName: 'eventId' })
   event: Event;

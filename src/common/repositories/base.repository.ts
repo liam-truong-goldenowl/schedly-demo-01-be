@@ -57,4 +57,15 @@ export class BaseRepository<E extends AnyEntity> extends EntityRepository<E> {
     const entities = await this.find(filter);
     await this.em.removeAndFlush(entities);
   }
+
+  async upsertEntity(data: RequiredEntityData<E>): Promise<E> {
+    let entity = await this.findOne(data);
+    if (entity) {
+      entity.assign(data);
+    } else {
+      entity = this.create(data);
+    }
+    await this.em.persistAndFlush(entity);
+    return entity;
+  }
 }

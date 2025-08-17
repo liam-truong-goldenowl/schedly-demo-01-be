@@ -1,24 +1,30 @@
 import {
   Opt,
-  Enum,
   Check,
   Entity,
   Unique,
   Property,
   ManyToOne,
+  OneToMany,
+  Collection,
   BeforeCreate,
+  EntityRepositoryType,
 } from '@mikro-orm/core';
 
-import { EventType, LocationType } from '@/common/enums';
-import { User } from '@/modules/user/entities/user.entity';
 import { BaseEntity } from '@/common/entities/base.entity';
+import { User } from '@/modules/user/entities/user.entity';
 import { SlugHelper } from '@/common/utils/helpers/slug.helper';
+import { Meeting } from '@/modules/meeting/entities/meeting.entity';
 import { Schedule } from '@/modules/schedule/entities/schedule.entity';
 
-@Entity()
+import { EventRepository } from '../repositories/event.repository';
+
+@Entity({ repository: () => EventRepository })
 @Check({ expression: (columns) => `${columns.duration} > 0` })
 @Unique({ properties: ['slug', 'user'] })
 export class Event extends BaseEntity {
+  [EntityRepositoryType]?: EventRepository;
+
   @Property({ length: 255 })
   name: string;
 
@@ -31,23 +37,8 @@ export class Event extends BaseEntity {
   @Property()
   duration: number;
 
-  @Enum({
-    items: () => EventType,
-    nativeEnumName: 'event_type',
-  })
-  type: EventType;
-
-  @Enum({
-    items: () => LocationType,
-    nativeEnumName: 'location_type',
-  })
-  locationType: LocationType;
-
-  @Property()
-  locationDetails: string;
-
   @Property({ default: 1 })
-  inviteeLimit: number & Opt = 1;
+  inviteeLimit: number = 1;
 
   @ManyToOne({
     entity: () => User,
@@ -62,6 +53,13 @@ export class Event extends BaseEntity {
     deleteRule: 'cascade',
   })
   schedule: Schedule;
+
+  @OneToMany({
+    entity: () => Meeting,
+    mappedBy: (meeting) => meeting.event,
+    orphanRemoval: true,
+  })
+  meetings = new Collection<Meeting>(this);
 
   @BeforeCreate()
   async generateSlug() {

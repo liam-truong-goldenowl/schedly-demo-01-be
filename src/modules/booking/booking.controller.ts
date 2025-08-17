@@ -1,3 +1,4 @@
+import { ApiResponse } from '@nestjs/swagger';
 import { Get, Body, Post, Query, Controller } from '@nestjs/common';
 
 import { MeetingResDto } from './dto/res/meeting-res.dto';
@@ -15,14 +16,14 @@ export class BookingController {
   ) {}
 
   @Post()
-  async createBooking(@Body() body: CreateBookingDto): Promise<MeetingResDto> {
+  @ApiResponse({ type: MeetingResDto })
+  async createBooking(@Body() body: CreateBookingDto) {
     return this.createBookingUC.execute(body);
   }
 
   @Get('time-slots')
-  async listTimeSlots(
-    @Query() query: ListTimeSlotsQueryDto,
-  ): Promise<TimeSlotResDto[]> {
+  @ApiResponse({ type: [TimeSlotResDto] })
+  async listTimeSlots(@Query() query: ListTimeSlotsQueryDto) {
     return this.listTimeSlotsUC.execute(query);
   }
 }

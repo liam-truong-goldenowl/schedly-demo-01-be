@@ -1,24 +1,26 @@
 import { Expose } from 'class-transformer';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiResponseProperty } from '@nestjs/swagger';
 
 export class MeetingResDto {
   @Expose()
-  @ApiProperty({ example: 1 })
+  @ApiResponseProperty({ example: 1 })
   id: number;
 
   @Expose()
-  @ApiProperty({ example: '2023-10-01' })
+  @ApiResponseProperty({ example: '2023-10-01' })
   startDate: string;
 
   @Expose()
-  @ApiProperty({ example: '14:30:00' })
+  @ApiResponseProperty({ example: '14:30:00' })
   startTime: string;
 
   @Expose()
-  @ApiProperty({ example: 'America/New_York' })
+  @ApiResponseProperty({ example: 'America/New_York' })
   timezone: string;
 
   @Expose()
-  @ApiProperty({ example: 'Please arrive 15 minutes early.', required: false })
+  @ApiResponseProperty({
+    example: 'Please arrive 15 minutes early.',
+  })
   note?: string;
 }

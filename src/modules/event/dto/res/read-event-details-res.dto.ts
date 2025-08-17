@@ -5,14 +5,6 @@ class HostDto {
   name: string;
 }
 
-class LocationDto {
-  @Expose()
-  type: string;
-
-  @Expose()
-  details: string;
-}
-
 export class ReadEventDetailsResDto {
   @Expose()
   id: number;
@@ -29,10 +21,6 @@ export class ReadEventDetailsResDto {
 
   @Expose()
   duration: number;
-
-  @Expose()
-  @Type(() => LocationDto)
-  location: LocationDto;
 
   @Expose()
   timezone: string;

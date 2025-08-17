@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsTimeZone, IsNumberString } from 'class-validator';
+import { IsNumberString } from 'class-validator';
 
 import { IsYearMonth } from '@/common/validators/is-year-month.validator';
 
@@ -11,8 +11,4 @@ export class ListTimeSlotsQueryDto {
   @IsYearMonth()
   @ApiProperty({ example: '2023-10' })
   month: string;
-
-  @IsTimeZone()
-  @ApiProperty({ example: 'America/New_York' })
-  timezone: string;
 }
