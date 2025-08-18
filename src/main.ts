@@ -9,6 +9,7 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
 import { AppModule } from './app.module';
 import { ConfigService } from './config/config.service';
+import { ValidationException } from './common/exceptions/app.exception';
 import { AllExceptionsFilter } from './common/filters/app-exception.filter';
 
 async function bootstrap() {
@@ -44,6 +45,16 @@ async function bootstrap() {
       transformOptions: {
         enableImplicitConversion: false,
       },
+      exceptionFactory: (errors) => {
+        const result = errors.map((error) => ({
+          property: error.property,
+          message: error.constraints
+            ? error.constraints[Object.keys(error.constraints)[0]]
+            : 'Invalid value',
+        }));
+        return new ValidationException(result);
+      },
+      stopAtFirstError: true,
     }),
   );
 

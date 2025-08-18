@@ -1,4 +1,3 @@
-import { NotFoundException } from '@nestjs/common';
 import {
   AnyEntity,
   EntityDTO,
@@ -8,6 +7,8 @@ import {
   EntityRepository,
   RequiredEntityData,
 } from '@mikro-orm/core';
+
+import { NotFoundException } from '@/common/exceptions/app.exception';
 
 export class BaseRepository<E extends AnyEntity> extends EntityRepository<E> {
   async findOneOrThrow<Populate extends string = never>(

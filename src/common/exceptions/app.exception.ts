@@ -10,8 +10,8 @@ export abstract class AppException extends HttpException {
 }
 
 export class ValidationException extends AppException {
-  constructor(message = 'Validation failed') {
-    super('VALIDATION_ERROR', message, HttpStatus.BAD_REQUEST);
+  constructor(message: any = 'Validation failed') {
+    super('VALIDATION_ERROR', message, HttpStatus.UNPROCESSABLE_ENTITY);
   }
 }
 
