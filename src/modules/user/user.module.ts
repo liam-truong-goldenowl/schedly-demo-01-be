@@ -1,15 +1,17 @@
 import { Module } from '@nestjs/common';
+import { MikroOrmModule } from '@mikro-orm/nestjs';
 
-import { UUIDModule } from '../uuid/uuid.module';
+import { UtilsModule } from '../utils/utils.module';
 
-import * as UseCases from './use-cases';
 import { UserService } from './user.service';
+import { User } from './entities/user.entity';
 import { UserController } from './user.controller';
+import { GetUserProfileUseCase } from './use-cases/get-user-profile.use-case';
 
 @Module({
   controllers: [UserController],
-  imports: [UUIDModule],
+  imports: [UtilsModule, MikroOrmModule.forFeature([User])],
   exports: [UserService],
-  providers: [UserService, ...Object.values(UseCases)],
+  providers: [UserService, GetUserProfileUseCase],
 })
 export class UserModule {}

@@ -3,40 +3,36 @@ import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, ExtractJwt } from 'passport-jwt';
 
-import { ConfigService } from '@/config';
-import { REFRESH_TOKEN_KEY } from '@/utils/constants/cookies';
-
-import type { RequestUser } from '@/common/interfaces';
+import { ConfigService } from '@/config/config.service';
+import { RequestUser } from '@/common/interfaces/request-user.interface';
 
 import { AuthService } from '../auth.service';
-
-import type { TokenPayload } from '../auth.interface';
+import { TokenPayload } from '../interfaces/token-payload.interface';
 
 @Injectable()
 export class JwtRefreshStrategy extends PassportStrategy(
   Strategy,
   'jwt-refresh',
 ) {
+  private token: string;
+
   constructor(
-    private authService: AuthService,
-    private configService: ConfigService,
+    private readonly authService: AuthService,
+    private readonly configService: ConfigService,
   ) {
     const { refreshSecret } = configService.getOrThrow('jwt');
-
+    const { refreshTokenKey } = configService.getOrThrow('cookies');
     const extractTokenFromHeader = (req: Request) => {
       const refreshToken = ExtractJwt.fromAuthHeaderAsBearerToken()(req);
-      this.injectRefreshToken(req, refreshToken);
+      this.token = refreshToken || '';
       return refreshToken;
     };
-
     const extractTokenFromCookie = (req: Request) => {
-      const refreshToken = req.cookies?.[REFRESH_TOKEN_KEY];
-      this.injectRefreshToken(req, refreshToken);
+      const refreshToken = req.cookies ? req.cookies[refreshTokenKey] : null;
+      this.token = refreshToken || '';
       return refreshToken;
     };
-
     super({
-      passReqToCallback: true,
       secretOrKey: refreshSecret,
       jwtFromRequest: ExtractJwt.fromExtractors([
         extractTokenFromHeader,
@@ -45,23 +41,11 @@ export class JwtRefreshStrategy extends PassportStrategy(
     });
   }
 
-  private injectRefreshToken(req: Request, refreshToken: string | null) {
-    req['refreshToken'] = refreshToken;
-  }
-
-  async validate(req: Request, payload: TokenPayload): Promise<RequestUser> {
-    const userId = payload.id;
-    const refreshToken = this.extractRefreshToken(req);
-
-    const user = await this.authService.validateJwtRefreshUser({
+  async validate({ id: userId }: TokenPayload): Promise<RequestUser> {
+    const user = await this.authService.validateJwtRefreshUser(
       userId,
-      refreshToken,
-    });
-
+      this.token,
+    );
     return { id: user.id, email: user.email };
-  }
-
-  private extractRefreshToken(req: Request) {
-    return req['refreshToken'];
   }
 }

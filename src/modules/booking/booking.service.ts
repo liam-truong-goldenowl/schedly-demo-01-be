@@ -1,22 +1,57 @@
-import { EntityManager } from '@mikro-orm/core';
-import {
-  Injectable,
-  NotFoundException,
-  BadRequestException,
-} from '@nestjs/common';
+import { InjectRepository } from '@mikro-orm/nestjs';
+import { Injectable, BadRequestException } from '@nestjs/common';
 
-import { Schedule } from '@/database/entities/schedule.entity';
-import { Event, Meeting, WeeklyHour, DateOverride } from '@/database/entities';
-import {
-  getWeekday,
-  getZonedTime,
-  addMinutesToTime,
-  generateValidTimeStartTimes,
-} from '@/utils/helpers/time';
+import { DateTimeHelper } from '@/common/utils/helpers/datetime.helper';
+
+import { Event } from '../event/entities/event.entity';
+import { Meeting } from '../meeting/entities/meeting.entity';
+import { Schedule } from '../schedule/entities/schedule.entity';
+import { WeeklyHour } from '../schedule/entities/weekly-hour.entity';
+import { DateOverride } from '../schedule/entities/date-override.entity';
+import { EventRepository } from '../event/repositories/event.repository';
+import { MeetingRepository } from '../meeting/repositories/meeting.repository';
+import { ScheduleRepository } from '../schedule/repositories/schedule.repository';
+import { WeeklyHourRepository } from '../schedule/repositories/weekly-hour.repository';
+import { DateOverrideRepository } from '../schedule/repositories/date-override.repository';
 
 @Injectable()
 export class BookingService {
-  constructor(private em: EntityManager) {}
+  constructor(
+    @InjectRepository(Schedule)
+    private readonly scheduleRepo: ScheduleRepository,
+    @InjectRepository(WeeklyHour)
+    private readonly weeklyHourRepo: WeeklyHourRepository,
+    @InjectRepository(DateOverride)
+    private readonly dateOverrideRepo: DateOverrideRepository,
+    @InjectRepository(Event)
+    private readonly eventRepo: EventRepository,
+    @InjectRepository(Meeting)
+    private readonly meetingRepo: MeetingRepository,
+  ) {}
+
+  async validateEventStartTime(
+    userId: number,
+    eventId: number,
+    scheduleId: number,
+    { time, date, duration }: { time: string; date: string; duration: number },
+  ) {
+    const schedule = await this.scheduleRepo.findOneOrThrow(scheduleId);
+    const weekday = DateTimeHelper.getWeekdayEnum(date);
+    const [weeklyHour, overrides, unavailableOverrides] = await Promise.all([
+      this.weeklyHourRepo.findOne({ schedule, weekday }),
+      this.dateOverrideRepo.find({
+        schedule,
+        date,
+        startTime: { $ne: null },
+        endTime: { $ne: null },
+      }),
+      this.dateOverrideRepo.find({
+        schedule,
+        date,
+        startTime: null,
+        endTime: null,
+      }),
+    ]);
 
   async findEventOrThrow(eventId: number) {
     const event = await this.em.findOne(
@@ -27,119 +62,72 @@ export class BookingService {
     if (!event) {
       throw new NotFoundException('Event not found');
     }
-    return event;
-  }
 
-  async validateEventStartTime({
-    eventId,
-    scheduleId,
-    startTime,
-    startDate,
-    timezone,
-  }: {
-    eventId: number;
-    scheduleId: number;
-    startTime: string;
-    startDate: string;
-    timezone: string;
-  }) {
-    const targetSchedule = await this.em.findOneOrFail(
-      Schedule,
-      { id: scheduleId },
-      {
-        fields: ['timezone'],
-      },
-    );
-    const targetEvent = await this.em.findOneOrFail(
-      Event,
-      { id: eventId },
-      { fields: ['duration'] },
+    const overrideTimes = overrides.flatMap(({ startTime, endTime }) =>
+      DateTimeHelper.generatePossibleStartTimes(startTime!, endTime!, duration),
     );
 
-    const inviteeZoneStartTime = getZonedTime(startTime, timezone);
-    const meetingEndTime = addMinutesToTime({
-      timeString: inviteeZoneStartTime,
-      minutes: targetEvent.duration,
-      timezone: targetSchedule.timezone,
-    });
-    const weekday = getWeekday(startDate, timezone);
+    if (overrides.length > 0 && !overrideTimes.includes(time)) {
+      throw new BadRequestException('Invalid start time');
+    }
 
-    const weeklyHours = await this.em.find(
-      WeeklyHour,
-      {
-        schedule: { id: scheduleId },
-        weekday,
-        endTime: { $gte: meetingEndTime },
-      },
-      {
-        fields: ['startTime', 'endTime', 'weekday'],
-      },
-    );
-    const dateOverrides = await this.em.find(
-      DateOverride,
-      {
-        schedule: { id: scheduleId },
-        date: startDate,
-        endTime: { $ne: null, $gte: meetingEndTime },
-      },
-      {
-        fields: ['startTime', 'endTime', 'date'],
-      },
+    const weeklyHourTimes = DateTimeHelper.generatePossibleStartTimes(
+      weeklyHour.startTime,
+      weeklyHour.endTime,
+      duration,
     );
 
-    const validStartTimes =
-      dateOverrides.length > 0
-        ? dateOverrides
-            .filter((override) => override.startTime && override.endTime)
-            .flatMap((override) =>
-              generateValidTimeStartTimes({
-                startTime: override.startTime!,
-                endTime: override.endTime!,
-                duration: targetEvent.duration,
-                timezone,
-              }),
-            )
-        : weeklyHours.flatMap((hour) =>
-            generateValidTimeStartTimes({
-              startTime: hour.startTime,
-              endTime: hour.endTime,
-              duration: targetEvent.duration,
-              timezone,
-            }),
-          );
+    if (!weeklyHourTimes.includes(time)) {
+      throw new BadRequestException('Invalid start time');
+    }
 
-    if (!validStartTimes.includes(startTime)) {
-      throw new BadRequestException(`Invalid start time: ${startTime}`);
+    const hostSchedules = await this.scheduleRepo.find(
+      { user: userId },
+      { fields: ['id'] },
+    );
+    const otherEvents = await this.eventRepo.find(
+      {
+        schedule: { $in: hostSchedules.map((s) => s.id) },
+        id: { $ne: eventId },
+      },
+      { fields: ['id'] },
+    );
+
+    const start = time;
+    const end = DateTimeHelper.addMinutes(time, duration);
+    const otherMeetings = await this.meetingRepo.find(
+      {
+        event: { $in: otherEvents.map((e) => e.id) },
+        startDate: date,
+        startTime: { $gte: start, $lt: end },
+      },
+      { fields: ['id'] },
+    );
+
+    if (otherMeetings.length > 0) {
+      throw new BadRequestException('Time slot is unavailable');
     }
   }
 
-  async validateEventLimit({
-    eventId,
-    startTime,
-    startDate,
-  }: {
-    eventId: number;
-    startTime: string;
-    startDate: string;
-  }) {
-    const event = await this.em.findOneOrFail(
-      Event,
-      { id: eventId },
-      { fields: ['id', 'inviteeLimit'] },
-    );
-    const currentParticipants = await this.em.count(Meeting, {
-      event: { id: eventId },
+  async validateEventLimit(
+    eventId: number,
+    inviteeLimit: number,
+    {
       startTime,
       startDate,
-    });
-
-    console.log(currentParticipants);
-    // console.log(event);
-
-    if (currentParticipants >= event.inviteeLimit) {
-      throw new BadRequestException(
-        `Event invitee limit reached: ${event.inviteeLimit}`,
-      );
+      invitees,
+    }: {
+      startTime: string;
+      startDate: string;
+      invitees: number;
+    },
+  ) {
+    const meeting = await this.meetingRepo.findOne(
+      { event: eventId, startDate, startTime },
+      { populate: ['invitees:ref'] },
+    );
+    if (meeting && meeting.invitees.length + invitees > inviteeLimit) {
+      throw new BadRequestException('Event limit reached');
     }
   }
 }

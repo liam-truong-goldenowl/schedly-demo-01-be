@@ -1,8 +1,7 @@
 import { plainToInstance } from 'class-transformer';
 
-import { DateOverride } from '@/database/entities';
-
-import { DateOverrideResDto } from '../dto';
+import { DateOverride } from '../entities/date-override.entity';
+import { DateOverrideResDto } from '../dto/res/date-override-res.dto';
 
 export class DateOverrideMapper {
   static toResponse(dateOverride: DateOverride): DateOverrideResDto {

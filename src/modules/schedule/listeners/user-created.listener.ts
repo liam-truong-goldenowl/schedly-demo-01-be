@@ -1,37 +1,29 @@
 import { Injectable } from '@nestjs/common';
-import { EntityManager } from '@mikro-orm/postgresql';
+import { InjectRepository } from '@mikro-orm/nestjs';
 import { OnEvent, EventEmitter2 } from '@nestjs/event-emitter';
 
-import { User } from '@/database/entities/user.entity';
-import { Schedule } from '@/database/entities/schedule.entity';
 import { UserCreatedEvent } from '@/modules/user/events/user-created.event';
 
+import { Schedule } from '../entities/schedule.entity';
 import { ScheduleCreatedEvent } from '../events/schedule-created.event';
+import { ScheduleRepository } from '../repositories/schedule.repository';
 
 @Injectable()
 export class UserCreatedListener {
   constructor(
-    private em: EntityManager,
-    private eventEmitter: EventEmitter2,
+    @InjectRepository(Schedule)
+    private readonly scheduleRepo: ScheduleRepository,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
-  @OnEvent('user.created')
-  async handleUserCreatedEvent(event: UserCreatedEvent) {
-    const schedule = this.em.create(Schedule, {
-      isDefault: true,
-      name: 'Working hours',
-      timezone: event.payload.timezone,
-      user: this.em.getReference(User, event.payload.id),
-    });
-
-    /**
-     * Do not use Promise.all here.
-     * The `id` of schedule is `undefined` before persistAndFlush call.
-     */
-    await this.em.persistAndFlush(schedule);
-
+  @OnEvent(UserCreatedEvent.name)
+  async handleUserCreatedEvent({ payload }: UserCreatedEvent) {
+    const schedule = await this.scheduleRepo.createDefaultEntity(
+      payload.id,
+      payload.timezone,
+    );
     await this.eventEmitter.emitAsync(
-      'schedule.created',
+      ScheduleCreatedEvent.name,
       new ScheduleCreatedEvent({ id: schedule.id }),
     );
   }

@@ -2,24 +2,21 @@ import { ConfigFactory } from '@nestjs/config';
 import { PostgreSqlDriver } from '@mikro-orm/postgresql';
 import { UnderscoreNamingStrategy } from '@mikro-orm/core';
 
-import { validateEnv } from './env.validator';
+import { DAY } from '@/common/utils/constants/time';
 
-import type { Config } from './config.interface';
+import { Config } from './config.interface';
+import { getEnvOrThrow } from './config.env';
 
 export const loadConfig: ConfigFactory<Config> = () => {
-  const env = validateEnv();
-
-  const isDev = env.NODE_ENV === 'development';
-  const isProd = env.NODE_ENV === 'production';
-  const isStaging = env.NODE_ENV === 'staging';
+  const env = getEnvOrThrow();
 
   return {
     app: {
-      isDev,
-      isProd,
-      isStaging,
       port: env.PORT,
       env: env.NODE_ENV,
+      isDev: env.NODE_ENV === 'development',
+      isProd: env.NODE_ENV === 'production',
+      isStaging: env.NODE_ENV === 'staging',
       corsOrigins: env.CORS_ORIGINS,
     },
 
@@ -39,6 +36,8 @@ export const loadConfig: ConfigFactory<Config> = () => {
     },
 
     mikroOrm: {
+      ignoreUndefinedInQuery: true,
+
       host: env.DB_HOST,
       port: env.DB_PORT,
       user: env.DB_USER,
@@ -58,14 +57,22 @@ export const loadConfig: ConfigFactory<Config> = () => {
     mail: {
       host: env.MAIL_HOST,
       port: env.MAIL_PORT,
-      secure: isProd || isStaging,
-      auth: isDev
-        ? undefined
-        : {
-            user: env.MAIL_USER,
-            pass: env.MAIL_PASS,
-          },
+      secure: env.NODE_ENV !== 'development',
+      auth:
+        env.NODE_ENV === 'development'
+          ? undefined
+          : {
+              user: env.MAIL_USER,
+              pass: env.MAIL_PASS,
+            },
       sender: env.MAIL_SENDER,
+    },
+
+    cookies: {
+      accessTokenKey: '__schedly__accessToken',
+      refreshTokenKey: '__schedly__refreshToken',
+      accessTokenExpiresIn: 7 * DAY,
+      refreshTokenExpiresIn: 30 * DAY,
     },
   };
 };

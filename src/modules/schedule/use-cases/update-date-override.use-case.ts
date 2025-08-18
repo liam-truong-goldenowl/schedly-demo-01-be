@@ -1,36 +1,27 @@
 import { Injectable } from '@nestjs/common';
-import { EntityManager } from '@mikro-orm/core';
+import { InjectRepository } from '@mikro-orm/nestjs';
 
-import { DateOverride } from '@/database/entities';
-
-import { UpdateDateOverrideDto } from '../dto';
-import { DateOverrideMapper } from '../mappers';
+import { DateOverride } from '../entities/date-override.entity';
+import { DateOverrideMapper } from '../mappers/date-override.mapper';
+import { UpdateDateOverrideDto } from '../dto/req/update-date-override.dto';
+import { DateOverrideRepository } from '../repositories/date-override.repository';
 
 @Injectable()
 export class UpdateDateOverrideUseCase {
-  constructor(private em: EntityManager) {}
+  constructor(
+    @InjectRepository(DateOverride)
+    private readonly dateOverrideRepo: DateOverrideRepository,
+  ) {}
 
-  async execute({
-    scheduleId,
-    dateOverrideId,
-    dateOverrideData,
-  }: {
-    scheduleId: number;
-    dateOverrideId: number;
-    dateOverrideData: UpdateDateOverrideDto;
-  }) {
-    const dateOverride = await this.em.findOneOrFail(DateOverride, {
-      id: dateOverrideId,
-      schedule: { id: scheduleId },
-    });
-
-    this.em.assign(dateOverride, {
-      startTime: dateOverrideData.startTime,
-      endTime: dateOverrideData.endTime,
-    });
-
-    await this.em.flush();
-
+  async execute(
+    scheduleId: number,
+    dateOverrideId: number,
+    dateOverrideData: UpdateDateOverrideDto,
+  ) {
+    const dateOverride = await this.dateOverrideRepo.updateEntity(
+      { id: dateOverrideId, schedule: { id: scheduleId } },
+      dateOverrideData,
+    );
     return DateOverrideMapper.toResponse(dateOverride);
   }
 }

@@ -1,33 +1,23 @@
 import { Injectable } from '@nestjs/common';
-import { EntityManager } from '@mikro-orm/core';
+import { InjectRepository } from '@mikro-orm/nestjs';
 
-import { Schedule } from '@/database/entities';
+import { User } from '@/modules/user/entities/user.entity';
+import { UserRepository } from '@/modules/user/repositories/user.repository';
 
-import { ScheduleService } from '../services/schedule.service';
+import { Schedule } from '../entities/schedule.entity';
+import { ScheduleRepository } from '../repositories/schedule.repository';
 
 @Injectable()
 export class DeleteScheduleUseCase {
   constructor(
-    private em: EntityManager,
-    private scheduleService: ScheduleService,
+    @InjectRepository(Schedule)
+    private scheduleRepo: ScheduleRepository,
+    @InjectRepository(User)
+    private userRepo: UserRepository,
   ) {}
 
-  async execute({
-    userId,
-    scheduleId,
-  }: {
-    userId: number;
-    scheduleId: number;
-  }) {
-    const schedule = await this.em.findOneOrFail(Schedule, {
-      id: scheduleId,
-      user: { id: userId },
-    });
-
-    if (schedule.isDefault) {
-      await this.scheduleService.changeDefaultSchedule(userId);
-    }
-
-    await this.em.removeAndFlush(schedule);
+  async execute(userId: number, scheduleId: number) {
+    const user = this.userRepo.getReference(userId);
+    await this.scheduleRepo.deleteEntity({ id: scheduleId, user });
   }
 }

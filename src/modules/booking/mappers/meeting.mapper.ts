@@ -1,8 +1,8 @@
 import { plainToInstance } from 'class-transformer';
 
-import { Meeting } from '@/database/entities';
+import { Meeting } from '@/modules/meeting/entities/meeting.entity';
 
-import { MeetingResDto } from '../dto';
+import { MeetingResDto } from '../dto/res/meeting-res.dto';
 
 export class MeetingMapper {
   static toResponse(meeting: Meeting): MeetingResDto {

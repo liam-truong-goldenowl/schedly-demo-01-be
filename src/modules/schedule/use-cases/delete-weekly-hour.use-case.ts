@@ -1,24 +1,22 @@
 import { Injectable } from '@nestjs/common';
-import { EntityManager } from '@mikro-orm/core';
+import { InjectRepository } from '@mikro-orm/nestjs';
 
-import { WeeklyHour } from '@/database/entities';
+import { Schedule } from '../entities/schedule.entity';
+import { WeeklyHour } from '../entities/weekly-hour.entity';
+import { ScheduleRepository } from '../repositories/schedule.repository';
+import { WeeklyHourRepository } from '../repositories/weekly-hour.repository';
 
 @Injectable()
 export class DeleteWeeklyHourUseCase {
-  constructor(private em: EntityManager) {}
+  constructor(
+    @InjectRepository(Schedule)
+    private readonly scheduleRepo: ScheduleRepository,
+    @InjectRepository(WeeklyHour)
+    private readonly weeklyHourRepo: WeeklyHourRepository,
+  ) {}
 
-  async execute({
-    scheduleId,
-    weeklyHourId,
-  }: {
-    scheduleId: number;
-    weeklyHourId: number;
-  }) {
-    const weeklyHour = await this.em.findOneOrFail(WeeklyHour, {
-      id: weeklyHourId,
-      schedule: { id: scheduleId },
-    });
-
-    await this.em.removeAndFlush(weeklyHour);
+  async execute(scheduleId: number, weeklyHourId: number) {
+    const schedule = this.scheduleRepo.getReference(scheduleId);
+    await this.weeklyHourRepo.deleteEntity({ id: weeklyHourId, schedule });
   }
 }

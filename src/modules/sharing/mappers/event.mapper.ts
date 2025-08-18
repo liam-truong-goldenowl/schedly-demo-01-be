@@ -1,8 +1,8 @@
 import { plainToInstance } from 'class-transformer';
 
-import { Event } from '@/database/entities/event.entity';
+import { Event } from '@/modules/event/entities/event.entity';
 
-import { SharingEventResDto } from '../dto/sharing-event-res.dto';
+import { SharingEventResDto } from '../dto/res/sharing-event-res.dto';
 
 export class EventMapper {
   static toResponse(event: Event): SharingEventResDto {
