@@ -1,3 +1,5 @@
+import './instrument';
+
 import helmet from 'helmet';
 import { NestFactory } from '@nestjs/core';
 import * as compression from 'compression';
@@ -7,7 +9,8 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
 import { AppModule } from './app.module';
 import { ConfigService } from './config/config.service';
-import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
+import { ValidationException } from './common/exceptions/app.exception';
+import { AllExceptionsFilter } from './common/filters/app-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -33,7 +36,7 @@ async function bootstrap() {
   app.use(compression());
   app.use(cookieParser());
   app.enableCors({ origin: appConfig.corsOrigins, credentials: true });
-  app.useGlobalFilters(new GlobalExceptionFilter());
+  app.useGlobalFilters(new AllExceptionsFilter());
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -42,6 +45,16 @@ async function bootstrap() {
       transformOptions: {
         enableImplicitConversion: false,
       },
+      exceptionFactory: (errors) => {
+        const result = errors.map((error) => ({
+          property: error.property,
+          message: error.constraints
+            ? error.constraints[Object.keys(error.constraints)[0]]
+            : 'Invalid value',
+        }));
+        return new ValidationException(result);
+      },
+      stopAtFirstError: true,
     }),
   );
 
