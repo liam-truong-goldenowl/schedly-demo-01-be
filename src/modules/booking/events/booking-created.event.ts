@@ -3,20 +3,22 @@ export class BookingCreatedEvent {
 
   constructor(
     public readonly payload: {
-      hostMail: string;
-      hostName: string;
-      hostTimezone: string;
-      inviteeMail: string;
-      inviteeName: string;
+      host: {
+        email: string;
+        name: string;
+        timezone: string;
+      };
+      invitees: {
+        email: string;
+        name: string;
+      }[];
       inviteeTimezone: string;
-      guestMails: string[];
       startDate: string;
       startTime: string;
       event: {
         id: number;
         name: string;
         duration: number;
-        location: string;
       };
     },
   ) {}

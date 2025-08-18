@@ -87,11 +87,13 @@ export class BookingService {
       { fields: ['id'] },
     );
 
+    const start = time;
+    const end = DateTimeHelper.addMinutes(time, duration);
     const otherMeetings = await this.meetingRepo.find(
       {
         event: { $in: otherEvents.map((e) => e.id) },
         startDate: date,
-        startTime: time,
+        startTime: { $gte: start, $lt: end },
       },
       { fields: ['id'] },
     );
@@ -118,7 +120,7 @@ export class BookingService {
       { event: eventId, startDate, startTime },
       { populate: ['invitees:ref'] },
     );
-    if (meeting && meeting.invitees.length + invitees >= inviteeLimit) {
+    if (meeting && meeting.invitees.length + invitees > inviteeLimit) {
       throw new BadRequestException('Event limit reached');
     }
   }

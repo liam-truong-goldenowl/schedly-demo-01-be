@@ -12,7 +12,9 @@ import { MeetingHostRepository } from '@/modules/meeting/repositories/meeting-ho
 import { MeetingInviteeRepository } from '@/modules/meeting/repositories/meeting-invitee.repository';
 
 import { BookingService } from '../booking.service';
+import { MeetingMapper } from '../mappers/meeting.mapper';
 import { CreateBookingDto } from '../dto/req/create-booking.dto';
+import { BookingCreatedEvent } from '../events/booking-created.event';
 
 @Injectable()
 export class CreateBookingUseCase {
@@ -29,7 +31,14 @@ export class CreateBookingUseCase {
     private readonly bookingService: BookingService,
   ) {}
 
-  async execute({ invitees, startDate, startTime, eventId }: CreateBookingDto) {
+  async execute({
+    invitees,
+    startDate,
+    startTime,
+    eventId,
+    timezone,
+    note,
+  }: CreateBookingDto) {
     const event = await this.eventRepository.findOneOrThrow(eventId, {
       populate: ['schedule', 'schedule.user'],
     });
@@ -50,44 +59,44 @@ export class CreateBookingUseCase {
       invitees: invitees.length,
     });
 
-    await this.meetingRepo.upsertEntity({
-      event: event.id,
-      startDate,
-      startTime,
-    });
-    // const host = await this.meetingHostRepo.createEntity({
-    //   meeting,
-    //   host: event.user.id,
-    // });
-    // const invitee = await this.meetingInviteeRepo.createEntity({
-    //   meeting,
-    //   ...dto,
-    // });
+    const host = event.user;
+    const meeting = await this.meetingRepo.upsertEntity(
+      { event, startDate, startTime },
+      { event, startDate, startTime },
+    );
+    await this.meetingHostRepo.upsertEntity(
+      { meeting, host },
+      { meeting, host },
+    );
+    await Promise.all(
+      invitees.map(({ email, name }) =>
+        this.meetingInviteeRepo.upsertEntity(
+          { meeting, email, name },
+          { name, timezone, email, meeting, note },
+        ),
+      ),
+    );
 
-    // await host.populate(['host']);
+    this.eventEmitter.emit(
+      BookingCreatedEvent.name,
+      new BookingCreatedEvent({
+        host: {
+          email: host.email,
+          name: host.name,
+          timezone: event.schedule.timezone,
+        },
+        invitees,
+        inviteeTimezone: timezone,
+        startDate,
+        startTime,
+        event: {
+          id: event.id,
+          duration: event.duration,
+          name: event.name,
+        },
+      }),
+    );
 
-    // this.eventEmitter.emit(
-    //   BookingCreatedEvent.name,
-    //   new BookingCreatedEvent({
-    //     hostName: host.host.name,
-    //     hostMail: host.host.email,
-    //     guestMails: dto.guestEmails,
-    //     inviteeName: invitee.name,
-    //     inviteeMail: invitee.email,
-    //     hostTimezone: event.schedule.timezone,
-    //     inviteeTimezone: dto.timezone,
-    //     startDate: dto.startDate,
-    //     startTime: dto.startTime,
-    //     event: {
-    //       id: event.id,
-    //       duration: event.duration,
-    //       name: event.name,
-    //       location: 'ahsakjh',
-    //     },
-    //   }),
-    // );
-
-    // return MeetingMapper.toResponse(meeting);
-    return [];
+    return MeetingMapper.toResponse(meeting);
   }
 }

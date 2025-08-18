@@ -8,6 +8,7 @@ import {
   IsOptional,
   IsTimeZone,
   IsDateString,
+  ValidateNested,
 } from 'class-validator';
 
 import { IsTime } from '@/common/validators/is-time.validator';
@@ -26,6 +27,7 @@ class Invitee {
 export class CreateBookingDto {
   @IsArray()
   @Type(() => Invitee)
+  @ValidateNested({ each: true })
   @ApiProperty({ type: [Invitee] })
   invitees: Invitee[];
 

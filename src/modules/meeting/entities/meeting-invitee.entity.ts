@@ -1,6 +1,5 @@
 import {
   Entity,
-  Unique,
   Property,
   ManyToOne,
   EntityRepositoryType,
@@ -13,13 +12,13 @@ import { MeetingInviteeRepository } from '../repositories/meeting-invitee.reposi
 import { Meeting } from './meeting.entity';
 
 @Entity({ repository: () => MeetingInviteeRepository })
-@Unique({ properties: ['meeting', 'email'] })
 export class MeetingInvitee extends BaseEntity {
   [EntityRepositoryType]?: MeetingInviteeRepository;
 
   @ManyToOne({ entity: () => Meeting, serializedName: 'meetingId' })
   meeting: Meeting;
 
+  @Property({ length: 255, nullable: true })
   note?: string;
 
   @Property({ length: 255 })

@@ -115,15 +115,18 @@ export class ListTimeSlotsUseCase {
         startDate: { $gte: startOfMonth, $lte: endOfMonth },
         event: { $in: otherEvents.map((e) => e.id) },
       },
-      { populate: ['invitees:ref'] },
+      { populate: ['invitees:ref', 'event.duration'] },
     );
-    otherMeetings.forEach(({ startTime, startDate }) => {
+    otherMeetings.forEach(({ startTime, startDate, event: { duration } }) => {
       const dateKey = DateTimeHelper.formatDateString(startDate);
-      const slotKey = DateTimeHelper.formatTimeString(startTime);
+      const start = DateTimeHelper.formatTimeString(startTime);
+      const end = DateTimeHelper.formatTimeString(
+        DateTimeHelper.addMinutes(startTime, duration),
+      );
       const slots = timeSlotsMap.get(dateKey) || [];
       timeSlotsMap.set(
         dateKey,
-        slots.filter((slot) => slot.slot !== slotKey),
+        slots.filter((slot) => slot.slot < start || slot.slot >= end),
       );
     });
 
@@ -134,18 +137,22 @@ export class ListTimeSlotsUseCase {
       },
       { populate: ['invitees:ref'] },
     );
+
     meetings.forEach(({ startTime, startDate, invitees }) => {
       const dateKey = DateTimeHelper.formatDateString(startDate);
       const slotKey = DateTimeHelper.formatTimeString(startTime);
       const slots = timeSlotsMap.get(dateKey) || [];
       const slot = slots.find((s) => s.slot === slotKey);
       if (slot) {
-        slot.remaining -= Math.min(0, slot.remaining - invitees.length);
+        slot.remaining = Math.max(0, slot.remaining - invitees.length);
       }
     });
 
     const timeSlots = Array.from(timeSlotsMap.entries()).map(
-      ([date, slots]) => ({ date, slots }),
+      ([date, slots]) => ({
+        date,
+        slots: slots.filter((s) => s.remaining > 0),
+      }),
     );
 
     return timeSlots;
