@@ -53,8 +53,14 @@ export class BookingService {
       }),
     ]);
 
-    if (unavailableOverrides.length > 0 || !weeklyHour) {
-      throw new BadRequestException('Date is unavailable');
+  async findEventOrThrow(eventId: number) {
+    const event = await this.em.findOne(
+      Event,
+      { id: eventId },
+      { populate: ['schedule'] },
+    );
+    if (!event) {
+      throw new NotFoundException('Event not found');
     }
 
     const overrideTimes = overrides.flatMap(({ startTime, endTime }) =>
