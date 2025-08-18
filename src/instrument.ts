@@ -4,6 +4,7 @@ import { nodeProfilingIntegration } from '@sentry/profiling-node';
 
 Sentry.init({
   dsn: process.env.SENTRY_DSN,
+  enabled: process.env.SENTRY_ENABLED === 'true',
   integrations: [
     nodeProfilingIntegration(),
     Sentry.consoleLoggingIntegration({ levels: ['log', 'warn', 'error'] }),
