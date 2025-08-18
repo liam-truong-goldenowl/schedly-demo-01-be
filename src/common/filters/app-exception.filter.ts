@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { SentryExceptionCaptured } from '@sentry/nestjs';
+import { captureException, SentryExceptionCaptured } from '@sentry/nestjs';
 import {
   Catch,
   Logger,
@@ -34,6 +34,8 @@ export class AllExceptionsFilter implements ExceptionFilter {
       code = 'HTTP_ERROR';
       const res = exception.getResponse();
       message = typeof res === 'string' ? res : (res as any).message || res;
+    } else {
+      captureException(exception);
     }
 
     this.logger.error(
