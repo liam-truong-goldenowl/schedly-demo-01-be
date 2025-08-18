@@ -41,8 +41,8 @@ export default defineConfig({
     pathTs: 'migrations',
   },
   seeder: {
-    path: 'seeders',
-    pathTs: 'seeders',
+    path: 'seeds',
+    pathTs: 'seeds',
   },
 
   extensions: [Migrator, SeedManager],

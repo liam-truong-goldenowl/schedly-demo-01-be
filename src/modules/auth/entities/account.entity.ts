@@ -2,6 +2,8 @@ import {
   Entity,
   OneToOne,
   Property,
+  BeforeUpdate,
+  BeforeCreate,
   EntityRepositoryType,
 } from '@mikro-orm/core';
 
@@ -26,6 +28,14 @@ export class Account extends BaseEntity {
 
   @Property({ nullable: true })
   private refreshTokenHash?: string;
+
+  @BeforeUpdate()
+  @BeforeCreate()
+  private async hashPassword() {
+    if (this.password) {
+      this.passwordHash = await HashHelper.generate(this.password);
+    }
+  }
 
   async setPassword(raw: string) {
     this.passwordHash = await HashHelper.generate(raw);
