@@ -1,5 +1,5 @@
 import { MikroOrmModule } from '@mikro-orm/nestjs';
-import { EntityRepository } from '@mikro-orm/core';
+import { SentryModule } from '@sentry/nestjs/setup';
 import { PostgreSqlDriver } from '@mikro-orm/postgresql';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
@@ -11,6 +11,7 @@ import { LoggerMiddleware } from './common/middleware/logger.middleware';
 
 @Module({
   imports: [
+    SentryModule.forRoot(),
     ConfigModule,
     ModuleRegistry,
     EventEmitterModule.forRoot(),
@@ -20,7 +21,6 @@ import { LoggerMiddleware } from './common/middleware/logger.middleware';
       useFactory: (config: ConfigService) => config.getOrThrow('mikroOrm'),
     }),
   ],
-  providers: [EntityRepository],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
