@@ -2,6 +2,7 @@ import {
   IsEnum,
   IsString,
   IsOptional,
+  ValidateIf,
   IsDateString,
   registerDecorator,
   ValidationOptions,
@@ -16,12 +17,12 @@ export class ListMeetingsQueryDto {
   @DatesRequiredWhenFixed()
   period: Period = Period.UPCOMING;
 
-  @IsOptional()
   @IsDateString()
+  @ValidateIf((o) => o.period === Period.FIXED)
   startDate?: string;
 
-  @IsOptional()
   @IsDateString()
+  @ValidateIf((o) => o.period === Period.FIXED)
   endDate?: string;
 
   @IsOptional()

@@ -30,7 +30,7 @@ export class ListMeetingsUseCase {
       },
       [Period.FIXED]: () => {
         if (query.startDate && query.endDate) {
-          filters.startDate = { $gte: query.startDate, $lt: query.endDate };
+          filters.startDate = { $gte: query.startDate, $lte: query.endDate };
         }
       },
     };
@@ -40,7 +40,7 @@ export class ListMeetingsUseCase {
     const cursor = await this.meetingRepo.findByCursor(filters, {
       first: 10,
       after: undefined,
-      orderBy: { createdAt: 'DESC' },
+      orderBy: { startDate: 'ASC' },
       populate: ['event', 'invitees'],
     });
 

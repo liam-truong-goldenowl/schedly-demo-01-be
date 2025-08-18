@@ -7,9 +7,7 @@ import { Meeting } from './entities/meeting.entity';
 import { MeetingController } from './meeting.controller';
 import { MeetingHost } from './entities/meeting-host.entity';
 import { MeetingInvitee } from './entities/meeting-invitee.entity';
-import { MeetingRepository } from './repositories/meeting.repository';
 import { ListMeetingsUseCase } from './use-cases/list-meetings.use-case';
-import { MeetingHostRepository } from './repositories/meeting-host.repository';
 
 @Module({
   controllers: [MeetingController],
@@ -17,7 +15,6 @@ import { MeetingHostRepository } from './repositories/meeting-host.repository';
     MikroOrmModule.forFeature([Meeting, MeetingHost, MeetingInvitee]),
     AuthModule,
   ],
-
-  providers: [ListMeetingsUseCase, MeetingRepository, MeetingHostRepository],
+  providers: [ListMeetingsUseCase],
 })
 export class MeetingModule {}
