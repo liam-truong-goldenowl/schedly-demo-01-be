@@ -39,7 +39,7 @@ export class ListMeetingsUseCase {
 
     const cursor = await this.meetingRepo.findByCursor(filters, {
       first: 10,
-      after: undefined,
+      after: query.cursor,
       orderBy: { startDate: 'ASC' },
       populate: ['event', 'invitees'],
     });

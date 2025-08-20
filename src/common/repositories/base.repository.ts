@@ -17,7 +17,7 @@ export class BaseRepository<E extends AnyEntity> extends EntityRepository<E> {
   ): Promise<E> {
     const entity = await this.findOne(filterQuery, options);
     if (!entity) {
-      throw new NotFoundException(`${this.getEntityName()} not found`);
+      throw new NotFoundException(`${this.getEntityName()}`);
     }
     return entity;
   }

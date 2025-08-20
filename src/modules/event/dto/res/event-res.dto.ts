@@ -1,5 +1,15 @@
-import { Expose } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
+import { Type, Expose } from 'class-transformer';
+
+class Schedule {
+  @ApiProperty({ example: 1 })
+  @Expose()
+  id: number;
+
+  @Expose()
+  @ApiProperty({ example: 'Daily Standup' })
+  name: string;
+}
 
 export class EventResDto {
   @Expose()
@@ -30,6 +40,6 @@ export class EventResDto {
   inviteeLimit: number;
 
   @Expose()
-  @ApiProperty({ example: 1 })
-  scheduleId: number;
+  @Type(() => Schedule)
+  schedule: Schedule;
 }

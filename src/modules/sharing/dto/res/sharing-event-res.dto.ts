@@ -20,5 +20,9 @@ export class SharingEventResDto {
     nullable: true,
     example: 'Prepare for the next TOEIC test',
   })
-  description?: string | null;
+  description?: string;
+
+  @Expose()
+  @ApiProperty({ example: 10 })
+  inviteeLimit: number;
 }

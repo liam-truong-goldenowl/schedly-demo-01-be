@@ -24,4 +24,7 @@ export class ReadEventDetailsResDto {
 
   @Expose()
   timezone: string;
+
+  @Expose()
+  inviteeLimit: number;
 }

@@ -12,6 +12,9 @@ class Event {
 
   @Expose()
   inviteeLimit: number;
+
+  @Expose()
+  duration: number;
 }
 
 class Invitee {
@@ -20,6 +23,9 @@ class Invitee {
 
   @Expose()
   email: string;
+
+  @Expose()
+  timezone: string;
 }
 
 export class MeetingResDto {

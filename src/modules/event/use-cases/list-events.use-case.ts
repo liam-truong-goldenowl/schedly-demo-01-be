@@ -13,16 +13,19 @@ export class ListEventsUseCase {
     private readonly eventRepo: EventRepository,
   ) {}
 
-  async execute(userId: number, { cursor, limit }: ListEventsQueryDto) {
-    const currentCursor = await this.eventRepo.findByCursor(
-      { user: userId },
-      {
-        first: limit,
-        after: cursor,
-        orderBy: { createdAt: 'DESC' },
-        populate: ['schedule'],
-      },
-    );
+  async execute(userId: number, { cursor, limit, search }: ListEventsQueryDto) {
+    const filters = { user: userId };
+
+    if (search) {
+      filters['name'] = new RegExp(search, 'i');
+    }
+
+    const currentCursor = await this.eventRepo.findByCursor(filters, {
+      first: limit,
+      after: cursor,
+      orderBy: { createdAt: 'DESC' },
+      populate: ['schedule'],
+    });
     return EventMapper.toCursorPaginatedResponse(currentCursor);
   }
 }
