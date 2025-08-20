@@ -151,7 +151,9 @@ export class ListTimeSlotsUseCase {
     const timeSlots = Array.from(timeSlotsMap.entries()).map(
       ([date, slots]) => ({
         date,
-        slots: slots.filter((s) => s.remaining > 0),
+        slots: slots
+          .filter((s) => s.remaining > 0)
+          .toSorted((a, b) => a.slot.localeCompare(b.slot)),
       }),
     );
 

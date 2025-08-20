@@ -48,21 +48,32 @@ export class BookingService {
       this.dateOverrideRepo.find({
         schedule,
         date,
-        startTime: null,
-        endTime: null,
+        startTime: { $eq: null },
+        endTime: { $eq: null },
       }),
     ]);
 
-    if (unavailableOverrides.length > 0 || !weeklyHour) {
+    if (unavailableOverrides.length > 0) {
       throw new BadRequestException('Date is unavailable');
     }
 
-    const overrideTimes = overrides.flatMap(({ startTime, endTime }) =>
-      DateTimeHelper.generatePossibleStartTimes(startTime!, endTime!, duration),
-    );
+    if (overrides.length > 0) {
+      const overrideTimes = overrides.flatMap(({ startTime, endTime }) =>
+        DateTimeHelper.generatePossibleStartTimes(
+          startTime!,
+          endTime!,
+          duration,
+        ),
+      );
 
-    if (overrides.length > 0 && !overrideTimes.includes(time)) {
-      throw new BadRequestException('Invalid start time');
+      if (!overrideTimes.includes(time)) {
+        throw new BadRequestException('Invalid start time');
+      }
+      return;
+    }
+
+    if (!weeklyHour) {
+      throw new BadRequestException('Date is unavailable');
     }
 
     const weeklyHourTimes = DateTimeHelper.generatePossibleStartTimes(

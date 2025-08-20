@@ -28,6 +28,10 @@ export class ListMeetingsQueryDto {
   @IsOptional()
   @IsString()
   eventSlug?: string;
+
+  @IsOptional()
+  @IsString()
+  cursor?: string;
 }
 
 function DatesRequiredWhenFixed(validationOptions?: ValidationOptions) {

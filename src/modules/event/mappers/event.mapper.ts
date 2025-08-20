@@ -4,6 +4,7 @@ import { plainToInstance } from 'class-transformer';
 import { Event } from '../entities/event.entity';
 import { EventResDto } from '../dto/res/event-res.dto';
 import { ListEventsResDto } from '../dto/res/list-events-res.dto';
+import { ListEventSelectResDto } from '../dto/res/list-event-select-res.dto';
 import { ReadEventDetailsResDto } from '../dto/res/read-event-details-res.dto';
 
 export class EventMapper {
@@ -46,5 +47,13 @@ export class EventMapper {
       },
       { excludeExtraneousValues: true },
     );
+  }
+
+  static toSelectResponse(entities: Event[]): ListEventSelectResDto[] {
+    return entities.map((event) => {
+      return plainToInstance(ListEventSelectResDto, event, {
+        excludeExtraneousValues: true,
+      });
+    });
   }
 }

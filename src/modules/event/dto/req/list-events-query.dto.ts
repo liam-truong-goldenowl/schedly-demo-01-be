@@ -4,18 +4,17 @@ import { IsString, IsNumber, IsOptional, IsPositive } from 'class-validator';
 export class ListEventsQueryDto {
   @IsOptional()
   @IsString()
-  @ApiProperty({
-    type: String,
-    required: false,
-  })
+  @ApiProperty({ required: false })
   cursor?: string;
 
   @IsOptional()
   @IsNumber()
   @IsPositive()
-  @ApiProperty({
-    type: Number,
-    default: 5,
-  })
+  @ApiProperty({ default: 5 })
   limit: number = 5;
+
+  @IsOptional()
+  @IsString()
+  @ApiProperty({ required: false })
+  search?: string;
 }

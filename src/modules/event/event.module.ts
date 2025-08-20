@@ -9,6 +9,7 @@ import { Event } from './entities/event.entity';
 import { EventController } from './event.controller';
 import { ListEventsUseCase } from './use-cases/list-events.use-case';
 import { CreateEventUseCase } from './use-cases/create-event.use-case';
+import { ListEventSelectUseCase } from './use-cases/list-event-select.use-case';
 import { ReadEventDetailsUseCase } from './use-cases/read-event-details.use-case';
 
 @Module({
@@ -18,6 +19,11 @@ import { ReadEventDetailsUseCase } from './use-cases/read-event-details.use-case
     UtilsModule,
     AuthModule,
   ],
-  providers: [ListEventsUseCase, CreateEventUseCase, ReadEventDetailsUseCase],
+  providers: [
+    ListEventsUseCase,
+    CreateEventUseCase,
+    ReadEventDetailsUseCase,
+    ListEventSelectUseCase,
+  ],
 })
 export class EventModule {}
