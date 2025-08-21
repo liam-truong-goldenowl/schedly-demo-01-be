@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "build": "nest build && npm run sentry:sourcemaps",
+    "build": "nest build",
     "start": "nest start",
     "start:prod": "NODE_ENV=production node dist/src/main",
     "start:dev": "nest start --watch",
@@ -16,8 +16,7 @@
     "migration:up": "mikro-orm migration:up",
     "migration:down": "mikro-orm migration:down",
     "seeder:create": "mikro-orm seeder:create",
-    "seeder:run": "mikro-orm seeder:run",
-    "sentry:sourcemaps": "sentry-cli sourcemaps inject --org liam-truong --project schedly-demo-01 dist && sentry-cli sourcemaps upload --org liam-truong --project schedly-demo-01 dist"
+    "seeder:run": "mikro-orm seeder:run"
   },
   "dependencies": {
     "@mikro-orm/core": "^6.4.16",
