@@ -1,18 +1,24 @@
 import { Injectable } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
-import { EntityManager } from '@mikro-orm/postgresql';
+import { InjectRepository } from '@mikro-orm/nestjs';
 
-import { Account } from '@/database/entities/account.entity';
 import { UserCreatedEvent } from '@/modules/user/events/user-created.event';
+
+import { Account } from '../entities/account.entity';
+import { AccountRepository } from '../repositories/account.repository';
 
 @Injectable()
 export class UserCreatedListener {
-  constructor(private em: EntityManager) {}
+  constructor(
+    @InjectRepository(Account)
+    private readonly accountRepo: AccountRepository,
+  ) {}
 
-  @OnEvent('user.created')
-  async handleUserCreatedEvent(event: UserCreatedEvent) {
-    const account = this.em.create(Account, { user: event.payload.id });
-    account.setPassword(event.payload.password);
-    await this.em.flush();
+  @OnEvent(UserCreatedEvent.name)
+  async handleUserCreatedEvent({ payload }: UserCreatedEvent) {
+    await this.accountRepo.createEntity({
+      user: payload.id,
+      password: payload.password,
+    });
   }
 }

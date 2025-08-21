@@ -76,17 +76,17 @@ npm run test:e2e
 
 ## Architecture
 
-### Deployment view
+### Logical & Deployment view (Architecture Diagram)
 
-placeholder
-
-### Logical view
-
-placeholder
+![image](./docs/architecture-diagram.png)
 
 ### Storage view (DB Diagram)
 
 Visit [Schedly DB Diagram](https://dbdiagram.io/d/Schedly-demo-01-686e3a7df413ba3508049fc6) for interactive DB Diagram.
+
+Static diagram:
+
+![image](./docs/db-diagram.png)
 
 ## Folder Structure
 

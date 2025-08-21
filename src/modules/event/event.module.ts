@@ -1,14 +1,29 @@
 import { Module } from '@nestjs/common';
+import { MikroOrmModule } from '@mikro-orm/nestjs';
 
-import { UUIDModule } from '../uuid/uuid.module';
+import { AuthModule } from '../auth/auth.module';
+import { UtilsModule } from '../utils/utils.module';
+import { Schedule } from '../schedule/entities/schedule.entity';
 
-import * as UseCases from './use-cases';
-import { EventService } from './event.service';
+import { Event } from './entities/event.entity';
 import { EventController } from './event.controller';
+import { ListEventsUseCase } from './use-cases/list-events.use-case';
+import { CreateEventUseCase } from './use-cases/create-event.use-case';
+import { ListEventSelectUseCase } from './use-cases/list-event-select.use-case';
+import { ReadEventDetailsUseCase } from './use-cases/read-event-details.use-case';
 
 @Module({
   controllers: [EventController],
-  imports: [UUIDModule],
-  providers: [EventService, ...Object.values(UseCases)],
+  imports: [
+    MikroOrmModule.forFeature([Event, Schedule]),
+    UtilsModule,
+    AuthModule,
+  ],
+  providers: [
+    ListEventsUseCase,
+    CreateEventUseCase,
+    ReadEventDetailsUseCase,
+    ListEventSelectUseCase,
+  ],
 })
 export class EventModule {}

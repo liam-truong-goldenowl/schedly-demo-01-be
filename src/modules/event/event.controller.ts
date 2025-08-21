@@ -1,81 +1,65 @@
-import { ApiBody, ApiQuery, ApiResponse } from '@nestjs/swagger';
+import { ApiResponse } from '@nestjs/swagger';
 import {
   Get,
   Body,
   Post,
   Param,
   Query,
-  Delete,
-  HttpCode,
   UseGuards,
   Controller,
-  HttpStatus,
-  ParseIntPipe,
 } from '@nestjs/common';
 
-import { LimitPipe } from '@/pipes';
-import { CurrentUser } from '@/decorators';
-import { JwtAuthGuard } from '@/modules/auth/guards';
+import { CurrentUser } from '@/common/decorators/current-user.decorator';
+import { JwtAccessAuthGuard } from '@/modules/auth/guards/jwt-access-auth.guard';
 
-import { DEFAULT_EVENT_LIMIT } from './event.config';
-import { EventResDto, CreateEventDto, ListEventResDto } from './dto';
-import { UserOwnsEventGuard, UserOwnsScheduleGuard } from './guards';
-import {
-  ListEventsUseCase,
-  CreateEventUseCase,
-  DeleteEventUseCase,
-  ReadEventDetailsUseCase,
-} from './use-cases';
+import { EventResDto } from './dto/res/event-res.dto';
+import { CreateEventDto } from './dto/req/create-event.dto';
+import { ListEventsResDto } from './dto/res/list-events-res.dto';
+import { ListEventsQueryDto } from './dto/req/list-events-query.dto';
+import { ListEventsUseCase } from './use-cases/list-events.use-case';
+import { CreateEventUseCase } from './use-cases/create-event.use-case';
+import { ListEventSelectResDto } from './dto/res/list-event-select-res.dto';
+import { ListEventSelectUseCase } from './use-cases/list-event-select.use-case';
+import { ReadEventDetailsUseCase } from './use-cases/read-event-details.use-case';
 
 @Controller('events')
 export class EventController {
   constructor(
     private listEventsUC: ListEventsUseCase,
     private createEventUC: CreateEventUseCase,
-    private deleteEventUC: DeleteEventUseCase,
     private readEventDetailsUC: ReadEventDetailsUseCase,
+    private listEventSelectUC: ListEventSelectUseCase,
   ) {}
 
   @Post()
-  @ApiBody({ type: CreateEventDto })
+  @UseGuards(JwtAccessAuthGuard)
   @ApiResponse({ type: EventResDto })
-  @UseGuards(JwtAuthGuard, UserOwnsScheduleGuard)
   async create(
     @CurrentUser('id') userId: number,
     @Body() body: CreateEventDto,
-  ) {
-    return this.createEventUC.execute({
-      ...body,
-      userId,
-    });
+  ): Promise<EventResDto> {
+    return this.createEventUC.execute(userId, body);
   }
 
   @Get()
-  @UseGuards(JwtAuthGuard)
-  @ApiResponse({ type: ListEventResDto })
-  @ApiQuery({ name: 'cursor', required: false, type: String })
-  @ApiQuery({
-    name: 'limit',
-    required: false,
-    type: Number,
-    example: DEFAULT_EVENT_LIMIT,
-  })
+  @UseGuards(JwtAccessAuthGuard)
+  @ApiResponse({ type: ListEventsResDto })
   async findAll(
+    @Query() query: ListEventsQueryDto,
     @CurrentUser('id') userId: number,
-    @Query('cursor') cursor: string | undefined,
-    @Query('limit', new LimitPipe(DEFAULT_EVENT_LIMIT)) limit: number,
-  ) {
-    return this.listEventsUC.execute({ userId, limit, cursor });
+  ): Promise<ListEventsResDto> {
+    return this.listEventsUC.execute(userId, query);
   }
 
-  @Delete(':id')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @UseGuards(JwtAuthGuard, UserOwnsEventGuard)
-  async delete(@Param('id', ParseIntPipe) eventId: number) {
-    return this.deleteEventUC.execute(eventId);
+  @Get('select')
+  @ApiResponse({ type: [ListEventSelectResDto] })
+  @UseGuards(JwtAccessAuthGuard)
+  async findSelect(@CurrentUser('id') userId: number) {
+    return this.listEventSelectUC.execute(userId);
   }
 
   @Get(':slug')
+  @ApiResponse({ type: EventResDto })
   async findOne(@Param('slug') eventSlug: string) {
     return this.readEventDetailsUC.execute(eventSlug);
   }

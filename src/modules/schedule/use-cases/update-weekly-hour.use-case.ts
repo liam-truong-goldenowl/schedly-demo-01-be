@@ -1,33 +1,32 @@
 import { Injectable } from '@nestjs/common';
-import { EntityManager } from '@mikro-orm/core';
+import { InjectRepository } from '@mikro-orm/nestjs';
 
-import { WeeklyHour } from '@/database/entities';
-
-import { UpdateWeeklyHourDto } from '../dto';
-import { WeeklyHourMapper } from '../mappers';
+import { Schedule } from '../entities/schedule.entity';
+import { WeeklyHour } from '../entities/weekly-hour.entity';
+import { WeeklyHourMapper } from '../mappers/weekly-hour.mapper';
+import { UpdateWeeklyHourDto } from '../dto/req/update-weekly-hour.dto';
+import { ScheduleRepository } from '../repositories/schedule.repository';
+import { WeeklyHourRepository } from '../repositories/weekly-hour.repository';
 
 @Injectable()
 export class UpdateWeeklyHourUseCase {
-  constructor(private em: EntityManager) {}
+  constructor(
+    @InjectRepository(Schedule)
+    private readonly scheduleRepo: ScheduleRepository,
+    @InjectRepository(WeeklyHour)
+    private readonly weeklyHourRepo: WeeklyHourRepository,
+  ) {}
 
-  async execute({
-    scheduleId,
-    weeklyHourId,
-    weeklyHourData,
-  }: {
-    scheduleId: number;
-    weeklyHourId: number;
-    weeklyHourData: UpdateWeeklyHourDto;
-  }) {
-    const weeklyHour = await this.em.findOneOrFail(WeeklyHour, {
-      id: weeklyHourId,
-      schedule: { id: scheduleId },
-    });
-
-    weeklyHour.assign(weeklyHourData);
-
-    await this.em.flush();
-
+  async execute(
+    scheduleId: number,
+    weeklyHourId: number,
+    weeklyHourData: UpdateWeeklyHourDto,
+  ) {
+    const schedule = this.scheduleRepo.getReference(scheduleId);
+    const weeklyHour = await this.weeklyHourRepo.updateEntity(
+      { schedule, id: weeklyHourId },
+      weeklyHourData,
+    );
     return WeeklyHourMapper.toResponse(weeklyHour);
   }
 }

@@ -1,77 +1,98 @@
 import { Injectable } from '@nestjs/common';
-import { EntityManager } from '@mikro-orm/core';
+import { InjectRepository } from '@mikro-orm/nestjs';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
-import {
-  User,
-  Event,
-  Meeting,
-  MeetingHost,
-  MeetingGuest,
-  MeetingInvitee,
-} from '@/database/entities';
+import { Event } from '@/modules/event/entities/event.entity';
+import { Meeting } from '@/modules/meeting/entities/meeting.entity';
+import { MeetingHost } from '@/modules/meeting/entities/meeting-host.entity';
+import { EventRepository } from '@/modules/event/repositories/event.repository';
+import { MeetingInvitee } from '@/modules/meeting/entities/meeting-invitee.entity';
+import { MeetingRepository } from '@/modules/meeting/repositories/meeting.repository';
+import { MeetingHostRepository } from '@/modules/meeting/repositories/meeting-host.repository';
+import { MeetingInviteeRepository } from '@/modules/meeting/repositories/meeting-invitee.repository';
 
-import { CreateBookingDto } from '../dto';
-import { MeetingMapper } from '../mappers';
 import { BookingService } from '../booking.service';
+import { MeetingMapper } from '../mappers/meeting.mapper';
+import { CreateBookingDto } from '../dto/req/create-booking.dto';
 import { BookingCreatedEvent } from '../events/booking-created.event';
 
 @Injectable()
 export class CreateBookingUseCase {
   constructor(
-    private em: EntityManager,
-    private bookingService: BookingService,
-    private eventEmitter: EventEmitter2,
+    private readonly eventEmitter: EventEmitter2,
+    @InjectRepository(Meeting)
+    private readonly meetingRepo: MeetingRepository,
+    @InjectRepository(Event)
+    private readonly eventRepository: EventRepository,
+    @InjectRepository(MeetingHost)
+    private readonly meetingHostRepo: MeetingHostRepository,
+    @InjectRepository(MeetingInvitee)
+    private readonly meetingInviteeRepo: MeetingInviteeRepository,
+    private readonly bookingService: BookingService,
   ) {}
 
-  async execute(dto: CreateBookingDto) {
-    const targetEvent = await this.bookingService.findEventOrThrow(dto.eventId);
-
-    await this.bookingService.validateEventStartTime({
-      startTime: dto.startTime,
-      startDate: dto.startDate,
-      eventId: targetEvent.id,
-      scheduleId: targetEvent.schedule.id,
-      timezone: dto.timezone,
-    });
-    await this.bookingService.validateEventLimit({
-      eventId: targetEvent.id,
-      startTime: dto.startTime,
-      startDate: dto.startDate,
+  async execute({
+    invitees,
+    startDate,
+    startTime,
+    eventId,
+    timezone,
+    note,
+  }: CreateBookingDto) {
+    const event = await this.eventRepository.findOneOrThrow(eventId, {
+      populate: ['schedule', 'schedule.user'],
     });
 
-    const eventRef = this.em.getReference(Event, targetEvent.id);
-    const hostRef = this.em.getReference(User, targetEvent.user.id);
-
-    const meeting = this.em.create(Meeting, { ...dto, event: eventRef });
-
-    const host = this.em.create(MeetingHost, { meeting, host: hostRef });
-    const invitee = this.em.create(MeetingInvitee, { meeting, ...dto });
-
-    dto.guestEmails.forEach((email) => {
-      this.em.create(MeetingGuest, { meeting, email });
+    await this.bookingService.validateEventStartTime(
+      event.user.id,
+      event.id,
+      event.schedule.id,
+      {
+        time: startTime,
+        date: startDate,
+        duration: event.duration,
+      },
+    );
+    await this.bookingService.validateEventLimit(event.id, event.inviteeLimit, {
+      startTime,
+      startDate,
+      invitees: invitees.length,
     });
 
-    await this.em.flush();
-    await host.populate(['host']);
+    const host = event.user;
+    const meeting = await this.meetingRepo.upsertEntity(
+      { event, startDate, startTime },
+      { event, startDate, startTime },
+    );
+    await this.meetingHostRepo.upsertEntity(
+      { meeting, host },
+      { meeting, host },
+    );
+    await Promise.all(
+      invitees.map(({ email, name }) =>
+        this.meetingInviteeRepo.upsertEntity(
+          { meeting, email, name },
+          { name, timezone, email, meeting, note },
+        ),
+      ),
+    );
 
     this.eventEmitter.emit(
       BookingCreatedEvent.name,
       new BookingCreatedEvent({
-        hostName: host.host.name,
-        hostMail: host.host.email,
-        guestMails: dto.guestEmails,
-        inviteeName: invitee.name,
-        inviteeMail: invitee.email,
-        hostTimezone: targetEvent.schedule.timezone,
-        inviteeTimezone: dto.timezone,
-        startDate: dto.startDate,
-        startTime: dto.startTime,
+        host: {
+          email: host.email,
+          name: host.name,
+          timezone: event.schedule.timezone,
+        },
+        invitees,
+        inviteeTimezone: timezone,
+        startDate,
+        startTime,
         event: {
-          id: targetEvent.id,
-          duration: targetEvent.duration,
-          name: targetEvent.name,
-          location: targetEvent.locationDetails,
+          id: event.id,
+          duration: event.duration,
+          name: event.name,
         },
       }),
     );

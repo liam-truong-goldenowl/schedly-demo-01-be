@@ -1,24 +1,20 @@
 import { Injectable } from '@nestjs/common';
-import { EntityManager } from '@mikro-orm/core';
+import { InjectRepository } from '@mikro-orm/nestjs';
 
-import { DateOverride } from '@/database/entities';
+import { DateOverride } from '../entities/date-override.entity';
+import { DateOverrideRepository } from '../repositories/date-override.repository';
 
 @Injectable()
 export class DeleteDateOverrideUseCase {
-  constructor(private em: EntityManager) {}
+  constructor(
+    @InjectRepository(DateOverride)
+    private readonly dateOverrideRepo: DateOverrideRepository,
+  ) {}
 
-  async execute({
-    scheduleId,
-    dateOverrideId,
-  }: {
-    scheduleId: number;
-    dateOverrideId: number;
-  }) {
-    const dateOverride = await this.em.findOneOrFail(DateOverride, {
+  async execute(scheduleId: number, dateOverrideId: number) {
+    await this.dateOverrideRepo.deleteEntity({
       id: dateOverrideId,
       schedule: { id: scheduleId },
     });
-
-    await this.em.removeAndFlush(dateOverride);
   }
 }

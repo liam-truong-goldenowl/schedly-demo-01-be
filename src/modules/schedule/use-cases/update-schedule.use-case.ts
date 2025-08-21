@@ -1,34 +1,34 @@
 import { Injectable } from '@nestjs/common';
-import { EntityManager } from '@mikro-orm/core';
+import { InjectRepository } from '@mikro-orm/nestjs';
 
-import { Schedule } from '@/database/entities';
+import { User } from '@/modules/user/entities/user.entity';
+import { UserRepository } from '@/modules/user/repositories/user.repository';
 
-import { UpdateScheduleDto } from '../dto';
-import { ScheduleMapper } from '../mappers';
+import { Schedule } from '../entities/schedule.entity';
+import { ScheduleMapper } from '../mappers/schedule.mapper';
+import { UpdateScheduleDto } from '../dto/req/update-schedule.dto';
+import { ScheduleRepository } from '../repositories/schedule.repository';
 
 @Injectable()
 export class UpdateScheduleUseCase {
-  constructor(private em: EntityManager) {}
+  constructor(
+    @InjectRepository(Schedule)
+    private readonly scheduleRepo: ScheduleRepository,
+    @InjectRepository(User)
+    private readonly userRepo: UserRepository,
+  ) {}
 
-  async execute(input: {
-    userId: number;
-    scheduleId: number;
-    scheduleData: UpdateScheduleDto;
-  }) {
-    const schedule = await this.em.findOneOrFail(
-      Schedule,
-      {
-        id: input.scheduleId,
-        user: { id: input.userId },
-      },
-      {
-        populate: ['weeklyHours', 'dateOverrides'],
-      },
+  async execute(
+    userId: number,
+    scheduleId: number,
+    scheduleData: UpdateScheduleDto,
+  ) {
+    const user = this.userRepo.getReference(userId);
+    const schedule = await this.scheduleRepo.updateEntity(
+      { id: scheduleId, user },
+      scheduleData,
     );
-
-    schedule.assign(input.scheduleData);
-    await this.em.flush();
-
+    await schedule.populate(['weeklyHours', 'dateOverrides']);
     return ScheduleMapper.toResponse(schedule);
   }
 }
