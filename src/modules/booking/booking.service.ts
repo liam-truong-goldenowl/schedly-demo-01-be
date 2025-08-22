@@ -18,6 +18,7 @@ import { WeeklyHourRepository } from '../schedule/repositories/weekly-hour.repos
 import { DateOverrideRepository } from '../schedule/repositories/date-override.repository';
 
 import { SendReminderJobPayload } from './queue/reminder.job';
+import { SendConfirmationEmailJobPayload } from './queue/confirmation.job';
 
 @Injectable()
 export class BookingService {
@@ -34,6 +35,8 @@ export class BookingService {
     private readonly meetingRepo: MeetingRepository,
     @InjectQueue('reminder')
     private readonly reminderQueue: Queue,
+    @InjectQueue('confirmation')
+    private readonly confirmationQueue: Queue,
   ) {}
 
   async validateEventStartTime(
@@ -226,5 +229,78 @@ export class BookingService {
         this.scheduleReminder(invitee, delayMs),
       ),
     ]);
+  }
+
+  async scheduleMeetingConfirmationEmails(
+    event: { id: number; name: string; timezone: string },
+    meeting: { date: string; time: string },
+    host: { email: string; name: string; timezone: string },
+    invitees: { email: string; name: string; timezone: string }[],
+  ) {
+    const baseDt = DateTime.fromFormat(
+      `${meeting.date} ${meeting.time}`,
+      'yyyy-MM-dd HH:mm',
+      { zone: host.timezone },
+    );
+
+    if (!baseDt.isValid) {
+      throw new Error('Invalid date or time format');
+    }
+
+    const confirmationPayload: SendConfirmationEmailJobPayload = {
+      person: host,
+      event,
+      meeting: {
+        date: baseDt.toFormat('yyyy-MM-dd'),
+        time: baseDt.toFormat('HH:mm'),
+      },
+    };
+
+    await this.scheduleHostConfirmationEmail(confirmationPayload);
+
+    for (const invitee of invitees) {
+      const inviteeDt = baseDt.setZone(invitee.timezone);
+
+      if (!inviteeDt.isValid) {
+        throw new Error('Invalid date or time format');
+      }
+
+      const inviteePayload: SendConfirmationEmailJobPayload = {
+        person: invitee,
+        event,
+        meeting: {
+          date: inviteeDt.toFormat('yyyy-MM-dd'),
+          time: inviteeDt.toFormat('HH:mm'),
+        },
+      };
+
+      await this.scheduleInviteeConfirmationEmail(inviteePayload);
+    }
+  }
+
+  private async scheduleHostConfirmationEmail(
+    payload: SendConfirmationEmailJobPayload,
+  ) {
+    const { person, event, meeting } = payload;
+
+    const jobId = `${person.email}:${event.id}:${meeting.date}:${meeting.time}`;
+
+    await this.confirmationQueue.add('send-host-confirmation', payload, {
+      jobId,
+      removeOnComplete: true,
+    });
+  }
+
+  private async scheduleInviteeConfirmationEmail(
+    payload: SendConfirmationEmailJobPayload,
+  ) {
+    const { person, event, meeting } = payload;
+
+    const jobId = `${person.email}:${event.id}:${meeting.date}:${meeting.time}`;
+
+    await this.confirmationQueue.add('send-invitee-confirmation', payload, {
+      jobId,
+      removeOnComplete: true,
+    });
   }
 }
