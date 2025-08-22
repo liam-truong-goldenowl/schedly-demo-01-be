@@ -1,3 +1,6 @@
+import { Queue } from 'bull';
+import { DateTime } from 'luxon';
+import { InjectQueue } from '@nestjs/bull';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { Injectable, BadRequestException } from '@nestjs/common';
 
@@ -14,6 +17,8 @@ import { ScheduleRepository } from '../schedule/repositories/schedule.repository
 import { WeeklyHourRepository } from '../schedule/repositories/weekly-hour.repository';
 import { DateOverrideRepository } from '../schedule/repositories/date-override.repository';
 
+import { SendReminderJobPayload } from './queue/reminder.job';
+
 @Injectable()
 export class BookingService {
   constructor(
@@ -27,6 +32,8 @@ export class BookingService {
     private readonly eventRepo: EventRepository,
     @InjectRepository(Meeting)
     private readonly meetingRepo: MeetingRepository,
+    @InjectQueue('reminder')
+    private readonly reminderQueue: Queue,
   ) {}
 
   async validateEventStartTime(
@@ -134,5 +141,90 @@ export class BookingService {
     if (meeting && meeting.invitees.length + invitees > inviteeLimit) {
       throw new BadRequestException('Event limit reached');
     }
+  }
+
+  private calculateReminderDelay({
+    date,
+    time,
+  }: {
+    date: string;
+    time: string;
+  }): number {
+    const currentDt = DateTime.now();
+    const minutesBeforeMeetingReminder = 15;
+    const bookingDt = DateTime.fromFormat(
+      `${date} ${time}`,
+      'yyyy-MM-dd HH:mm',
+    ).minus({
+      minutes: minutesBeforeMeetingReminder,
+    });
+
+    const { milliseconds } = bookingDt.diff(currentDt, ['milliseconds']);
+
+    return Math.max(milliseconds, 0);
+  }
+
+  private async scheduleReminder(
+    payload: SendReminderJobPayload,
+    delayMs: number,
+  ): Promise<void> {
+    const { person, event, meeting } = payload;
+
+    const jobId = `${person.email}:${event.id}:${meeting.date}:${meeting.time}`;
+
+    await this.reminderQueue.add('send-reminder', payload, {
+      jobId,
+      delay: delayMs,
+      removeOnComplete: true,
+    });
+  }
+
+  async scheduleMeetingReminders(
+    event: { id: number; name: string; date: string; time: string },
+    host: { email: string; name: string; timezone: string },
+    invitees: { email: string; name: string; timezone: string }[],
+  ) {
+    const baseDt = DateTime.fromFormat(
+      `${event.date} ${event.time}`,
+      'yyyy-MM-dd HH:mm',
+      { zone: host.timezone },
+    );
+
+    if (!baseDt.isValid) {
+      throw new Error('Invalid date or time format');
+    }
+
+    const delayMs = this.calculateReminderDelay(event);
+    const meetingHost = {
+      event,
+      person: host,
+      meeting: {
+        date: baseDt.toFormat('yyyy-MM-dd'),
+        time: baseDt.toFormat('HH:mm'),
+      },
+    };
+    const meetingInvitees = invitees.map((invitee) => {
+      const inviteeDt = baseDt.setZone(invitee.timezone);
+
+      if (!inviteeDt.isValid) {
+        throw new Error('Invalid date or time format');
+      }
+
+      return {
+        event,
+        person: invitee,
+        meeting: {
+          date: inviteeDt.toFormat('yyyy-MM-dd'),
+          time: inviteeDt.toFormat('HH:mm'),
+        },
+      };
+    });
+
+    await Promise.all([
+      this.scheduleReminder(meetingHost, delayMs),
+      ...meetingInvitees.map((invitee) =>
+        this.scheduleReminder(invitee, delayMs),
+      ),
+    ]);
   }
 }

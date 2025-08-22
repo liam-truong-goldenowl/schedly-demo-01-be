@@ -26,6 +26,16 @@ services:
     volumes:
       - redis_data:/data
 
+  redisinsight:
+    image: redislabs/redisinsight:latest
+    container_name: reminder-redisinsight
+    restart: unless-stopped
+    ports:
+      - '5540:5540'
+    volumes:
+      - redisinsight_data:/db
+
 volumes:
   postgres_data:
   redis_data:
+  redisinsight_data:

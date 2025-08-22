@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { BullModule } from '@nestjs/bull';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 
 import { UtilsModule } from '../utils/utils.module';
@@ -12,6 +13,7 @@ import { MeetingInvitee } from '../meeting/entities/meeting-invitee.entity';
 
 import { BookingService } from './booking.service';
 import { BookingController } from './booking.controller';
+import { ReminderProcessor } from './queue/reminder.processor';
 import { CreateBookingUseCase } from './use-cases/create-booking.use-case';
 import { ListTimeSlotsUseCase } from './use-cases/list-time-slots.use-case';
 import { BookingCreatedListener } from './listeners/booking-created.listener';
@@ -29,12 +31,14 @@ import { BookingCreatedListener } from './listeners/booking-created.listener';
       MeetingHost,
       MeetingInvitee,
     ]),
+    BullModule.registerQueue({ name: 'reminder' }),
   ],
   providers: [
     BookingService,
     BookingCreatedListener,
     CreateBookingUseCase,
     ListTimeSlotsUseCase,
+    ReminderProcessor,
   ],
 })
 export class BookingModule {}

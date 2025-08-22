@@ -96,6 +96,24 @@ export class CreateBookingUseCase {
         },
       }),
     );
+    await this.bookingService.scheduleMeetingReminders(
+      {
+        id: event.id,
+        name: event.name,
+        date: startDate,
+        time: startTime,
+      },
+      {
+        name: host.name,
+        email: host.email,
+        timezone: event.schedule.timezone,
+      },
+      invitees.map((i) => ({
+        email: i.email,
+        name: i.name,
+        timezone: timezone,
+      })),
+    );
 
     return MeetingMapper.toResponse(meeting);
   }

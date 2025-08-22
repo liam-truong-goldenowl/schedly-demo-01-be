@@ -66,6 +66,10 @@ export const EnvSchema = {
   MAIL_SENDER: str({
     desc: 'Mail sender address',
   }),
+
+  REDIS_URL: str({
+    desc: 'Redis server URL',
+  }),
 };
 
 export const getEnvOrThrow = () =>

@@ -33,4 +33,23 @@ export class MailService {
       this.logger.error('Send failed:', receipt.errorMessages.join(', '));
     }
   }
+
+  async sendEmail(
+    recipient: string,
+    subject: string,
+    content: { html: string; text: string },
+  ): Promise<void> {
+    const message = createMessage({
+      from: this.sender,
+      to: recipient,
+      subject,
+      content,
+    });
+
+    const receipt = await this.transport.send(message);
+
+    if (!receipt.successful) {
+      this.logger.error('Send failed:', receipt.errorMessages.join(', '));
+    }
+  }
 }
