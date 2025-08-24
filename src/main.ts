@@ -1,5 +1,3 @@
-import './instrument';
-
 import helmet from 'helmet';
 import { NestFactory } from '@nestjs/core';
 import * as compression from 'compression';
