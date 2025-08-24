@@ -1,36 +1,28 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@mikro-orm/nestjs';
-import { EventEmitter2 } from '@nestjs/event-emitter';
-
-import { User } from '@/modules/user/entities/user.entity';
-import { UserRepository } from '@/modules/user/repositories/user.repository';
 
 import { Schedule } from '../entities/schedule.entity';
+import { WeeklyHour } from '../entities/weekly-hour.entity';
 import { ScheduleMapper } from '../mappers/schedule.mapper';
 import { CreateScheduleDto } from '../dto/req/create-schedule.dto';
-import { ScheduleCreatedEvent } from '../events/schedule-created.event';
 import { ScheduleRepository } from '../repositories/schedule.repository';
+import { WeeklyHourRepository } from '../repositories/weekly-hour.repository';
 
 @Injectable()
 export class CreateScheduleUseCase {
   constructor(
-    private readonly eventEmitter: EventEmitter2,
-    @InjectRepository(User)
-    private readonly userRepo: UserRepository,
     @InjectRepository(Schedule)
     private readonly scheduleRepo: ScheduleRepository,
+    @InjectRepository(WeeklyHour)
+    private readonly weeklyHourRepo: WeeklyHourRepository,
   ) {}
 
-  async execute(userId: number, scheduleData: CreateScheduleDto) {
-    const user = this.userRepo.getReference(userId);
+  async execute(userId: number, data: CreateScheduleDto) {
     const schedule = await this.scheduleRepo.createEntity({
-      user,
-      ...scheduleData,
+      user: userId,
+      ...data,
     });
-    await this.eventEmitter.emitAsync(
-      'schedule.created',
-      new ScheduleCreatedEvent({ id: schedule.id }),
-    );
+    await this.weeklyHourRepo.createDefaultEntities(schedule.id);
     return ScheduleMapper.toResponse(schedule);
   }
 }
