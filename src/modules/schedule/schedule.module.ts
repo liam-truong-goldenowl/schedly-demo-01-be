@@ -10,14 +10,12 @@ import { WeeklyHour } from './entities/weekly-hour.entity';
 import { DateOverride } from './entities/date-override.entity';
 import { ScheduleController } from './controllers/schedule.controller';
 import { DateOverrideService } from './services/date-override.service';
-import { UserCreatedListener } from './listeners/user-created.listener';
 import { ListSchedulesUseCase } from './use-cases/list-schedules.use-case';
 import { WeeklyHourController } from './controllers/weekly-hour.controller';
 import { CreateScheduleUseCase } from './use-cases/create-schedule.use-case';
 import { DeleteScheduleUseCase } from './use-cases/delete-schedule.use-case';
 import { UpdateScheduleUseCase } from './use-cases/update-schedule.use-case';
 import { DateOverrideController } from './controllers/date-override.controller';
-import { ScheduleCreatedListener } from './listeners/schedule-created.listener';
 import { CreateWeeklyHourUseCase } from './use-cases/create-weekly-hour.use-case';
 import { DeleteWeeklyHourUseCase } from './use-cases/delete-weekly-hour.use-case';
 import { UpdateWeeklyHourUseCase } from './use-cases/update-weekly-hour.use-case';
@@ -37,8 +35,6 @@ import { UpdateDateOverrideUseCase } from './use-cases/update-date-override.use-
     AuthModule,
   ],
   providers: [
-    UserCreatedListener,
-    ScheduleCreatedListener,
     DateOverrideService,
     ListSchedulesUseCase,
     CreateScheduleUseCase,

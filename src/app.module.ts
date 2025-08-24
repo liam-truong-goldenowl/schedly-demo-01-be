@@ -2,7 +2,6 @@ import { BullModule } from '@nestjs/bull';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { SentryModule } from '@sentry/nestjs/setup';
 import { PostgreSqlDriver } from '@mikro-orm/postgresql';
-import { EventEmitterModule } from '@nestjs/event-emitter';
 import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 
 import { ConfigModule } from './config/config.module';
@@ -15,7 +14,6 @@ import { LoggerMiddleware } from './common/middleware/logger.middleware';
     SentryModule.forRoot(),
     ConfigModule,
     ModuleRegistry,
-    EventEmitterModule.forRoot(),
     MikroOrmModule.forRootAsync({
       inject: [ConfigService],
       driver: PostgreSqlDriver,
