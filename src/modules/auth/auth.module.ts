@@ -18,7 +18,6 @@ import { JwtAccessAuthGuard } from './guards/jwt-access-auth.guard';
 import { JwtAccessStrategy } from './strategies/jwt-access.strategy';
 import { JwtRefreshAuthGuard } from './guards/jwt-refresh-auth.guard';
 import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
-import { UserCreatedListener } from './listeners/user-created.listener';
 import { RefreshTokensUserCase } from './use-cases/refresh-tokens.use-case';
 
 @Module({
@@ -42,7 +41,6 @@ import { RefreshTokensUserCase } from './use-cases/refresh-tokens.use-case';
     LocalAuthGuard,
     JwtAccessAuthGuard,
     JwtRefreshAuthGuard,
-    UserCreatedListener,
   ],
 })
 export class AuthModule {}
