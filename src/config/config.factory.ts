@@ -74,5 +74,9 @@ export const loadConfig: ConfigFactory<Config> = () => {
       accessTokenExpiresIn: 7 * DAY,
       refreshTokenExpiresIn: 30 * DAY,
     },
+
+    bull: {
+      url: env.REDIS_URL,
+    },
   };
 };

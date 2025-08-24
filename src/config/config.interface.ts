@@ -1,4 +1,5 @@
 import { SmtpConfig } from '@upyo/smtp';
+import { BullRootModuleOptions } from '@nestjs/bull';
 import { MikroOrmModuleOptions } from '@mikro-orm/nestjs';
 
 export interface Config {
@@ -8,6 +9,7 @@ export interface Config {
   mikroOrm: MikroOrmConfig;
   mail: MailConfig;
   cookies: CookiesConfig;
+  bull: BullConfig;
 }
 
 export interface AppConfig {
@@ -46,3 +48,5 @@ export interface CookiesConfig {
   accessTokenExpiresIn: number;
   refreshTokenExpiresIn: number;
 }
+
+export type BullConfig = BullRootModuleOptions;

@@ -1,3 +1,4 @@
+import { BullModule } from '@nestjs/bull';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { SentryModule } from '@sentry/nestjs/setup';
 import { PostgreSqlDriver } from '@mikro-orm/postgresql';
@@ -19,6 +20,10 @@ import { LoggerMiddleware } from './common/middleware/logger.middleware';
       inject: [ConfigService],
       driver: PostgreSqlDriver,
       useFactory: (config: ConfigService) => config.getOrThrow('mikroOrm'),
+    }),
+    BullModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => config.getOrThrow('bull'),
     }),
   ],
 })
