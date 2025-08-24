@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@mikro-orm/nestjs';
-import { EventEmitter2 } from '@nestjs/event-emitter';
 
 import { Event } from '@/modules/event/entities/event.entity';
 import { Meeting } from '@/modules/meeting/entities/meeting.entity';
@@ -14,12 +13,11 @@ import { MeetingInviteeRepository } from '@/modules/meeting/repositories/meeting
 import { BookingService } from '../booking.service';
 import { MeetingMapper } from '../mappers/meeting.mapper';
 import { CreateBookingDto } from '../dto/req/create-booking.dto';
-import { BookingCreatedEvent } from '../events/booking-created.event';
 
 @Injectable()
 export class CreateBookingUseCase {
   constructor(
-    private readonly eventEmitter: EventEmitter2,
+    private readonly bookingService: BookingService,
     @InjectRepository(Meeting)
     private readonly meetingRepo: MeetingRepository,
     @InjectRepository(Event)
@@ -28,17 +26,11 @@ export class CreateBookingUseCase {
     private readonly meetingHostRepo: MeetingHostRepository,
     @InjectRepository(MeetingInvitee)
     private readonly meetingInviteeRepo: MeetingInviteeRepository,
-    private readonly bookingService: BookingService,
   ) {}
 
-  async execute({
-    invitees,
-    startDate,
-    startTime,
-    eventId,
-    timezone,
-    note,
-  }: CreateBookingDto) {
+  async execute(dto: CreateBookingDto) {
+    const { invitees, startDate, startTime, eventId, timezone, note } = dto;
+
     const event = await this.eventRepository.findOneOrThrow(eventId, {
       populate: ['schedule', 'schedule.user'],
     });
@@ -77,24 +69,44 @@ export class CreateBookingUseCase {
       ),
     );
 
-    this.eventEmitter.emit(
-      BookingCreatedEvent.name,
-      new BookingCreatedEvent({
-        host: {
-          email: host.email,
-          name: host.name,
-          timezone: event.schedule.timezone,
-        },
-        invitees,
-        inviteeTimezone: timezone,
-        startDate,
-        startTime,
-        event: {
-          id: event.id,
-          duration: event.duration,
-          name: event.name,
-        },
-      }),
+    await this.bookingService.scheduleMeetingReminders(
+      {
+        id: event.id,
+        name: event.name,
+        date: startDate,
+        time: startTime,
+      },
+      {
+        name: host.name,
+        email: host.email,
+        timezone: event.schedule.timezone,
+      },
+      invitees.map((i) => ({
+        email: i.email,
+        name: i.name,
+        timezone: timezone,
+      })),
+    );
+    await this.bookingService.scheduleMeetingConfirmationEmails(
+      {
+        id: event.id,
+        name: event.name,
+        timezone: event.schedule.timezone,
+      },
+      {
+        date: startDate,
+        time: startTime,
+      },
+      {
+        name: host.name,
+        email: host.email,
+        timezone: event.schedule.timezone,
+      },
+      invitees.map((i) => ({
+        email: i.email,
+        name: i.name,
+        timezone: timezone,
+      })),
     );
 
     return MeetingMapper.toResponse(meeting);
