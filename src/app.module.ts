@@ -1,6 +1,5 @@
 import { BullModule } from '@nestjs/bull';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
-import { SentryModule } from '@sentry/nestjs/setup';
 import { PostgreSqlDriver } from '@mikro-orm/postgresql';
 import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 
@@ -11,7 +10,6 @@ import { LoggerMiddleware } from './common/middleware/logger.middleware';
 
 @Module({
   imports: [
-    SentryModule.forRoot(),
     ConfigModule,
     ModuleRegistry,
     MikroOrmModule.forRootAsync({
